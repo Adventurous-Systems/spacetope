@@ -121,7 +121,20 @@ Answered recently: ragged outlines are not a defect (2026-09-21); chained corrid
 
 ---
 
-## 6. Running it
+## 6. Licensing
+
+spacetope is Apache-2.0 and stays that way: topologicpy 0.9.71 is LGPL-3.0-or-later and spacetope imports it
+without copying or modifying it, which is the case the LGPL permits. Reviewed against the installed
+distributions on 2026-09-27; `NOTICE` carries the detail.
+
+One obligation is open. `topologic_core`, the binary geometry kernel, declares no licence in its metadata and
+its upstream source is AGPL-3.0, and it is an in-process C extension. **A Rust core owned by this project is in
+development to replace it.** Meanwhile topologicpy 0.9.71 prefers a PythonOCC backend and falls back to this
+kernel only because `pythonocc-core` (LGPL-3.0) is not installed, so that may be a faster route; it is untested
+and would need the same verify-everything treatment as a version bump. Until one lands, do not distribute a
+build that carries the binary.
+
+## 7. Running it
 
 ```bash
 pytest -m "not slow"                       # fast suite, 63 tests
@@ -140,7 +153,7 @@ is recorded in `docs/experiments/2026-09-20_pip_freeze_before_m14.txt` if a roll
 
 ---
 
-## 7. A note on the documents
+## 8. A note on the documents
 
 `CLAUDE.md` and every dated note under `docs/` are excluded by `.gitignore`, so they are local to this machine
 and not part of the upstream repository. That includes the design and exploration notes this status refers to:
