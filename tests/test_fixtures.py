@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from spacetope.brief import load
+from spacetope.brief import corridor_segments, load
 from spacetope.circulation import prepare
 
 FIXTURES = sorted(Path(__file__).resolve().parent.parent.joinpath("fixtures").glob("*.yaml"))
@@ -17,7 +17,7 @@ def test_fixture_validates(path):
     assert expanded.spaces
     # every room can get a door: it has a required contact with a corridor, or the brief has no corridor at all
     corridors = {s.name for s in expanded.spaces if s.program == "corridor"}
-    if corridors:
+    if corridors and corridor_segments(brief) == 1:      # a chained spine has no one name to point at (PLAN M15b)
         for s in expanded.spaces:
             if s.program == "room":
                 partners = {b if a == s.name else a for a, b in expanded.contacts if s.name in (a, b)}

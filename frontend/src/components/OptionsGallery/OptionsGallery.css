@@ -13,3 +13,6 @@
 .gallery__select { margin-top: 6px; }
 .gallery__exported { font-size: 10px; color: #4ecdc4; word-break: break-all; }
 .card__unmet { color: #fdae6b; font-size: 10px; margin-top: 3px; }
+
+.card__class { font-weight: 600; }
+.card__analysis { font-size: 11px; opacity: 0.75; margin-top: 4px; line-height: 1.3; }

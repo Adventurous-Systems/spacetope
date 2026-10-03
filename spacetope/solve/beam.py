@@ -8,10 +8,10 @@ integer interval test; topologicpy is never called here.
 from __future__ import annotations
 
 import random
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 
 from ..brief import Brief, CIRCULATION, Space
-from ..doors import required_overlap_mm, touch_ok
+from ..doors import corridor_opening_mm, required_overlap_mm, touch_ok
 from .grid import Box, any_intersection, bounds, contact_area, overlap_len, touches
 
 HSIDES = ("+x", "-x", "+y", "-y")
@@ -33,6 +33,10 @@ class BeamParams:
     w_stack: float = 3.0           # bonus for wall planes aligned with the level below
     attach_required_first: bool = True  # a space with placed required partners attaches only to them
     redim: bool = True
+    pair_order: bool = True        # a room with a room partner is placed right after it, while the slot beside it is free (PLAN M15)
+    w_frontage: float = 0.0        # per metre of projected frontage shortfall; measured 2026-09-20: shaping the score this way
+                                   # makes the beam leave rooms off the corridor, so it is off; tight_corridors does the job
+    tight_ratio: float = 0.75      # a corridor is tight when its partners' narrow sides need more than this share of its two sides (PLAN M15)
 
 
 @dataclass
@@ -130,10 +134,10 @@ def extend_state(brief: Brief, parent: State, new: dict[str, Box], name: str, p:
     return State(new, _finish(brief, new, p, hit, area, access, dev_sum, ref_planes), frozenset(key), hit, area, access, dev_sum)
 
 
-def dims(space: Space, rotated: bool, height: int | None = None) -> tuple[int, int, int]:
+def dims(space: Space, rotated: bool, height: int | None = None, length: int | None = None) -> tuple[int, int, int]:
     # the level-height override applies to floor-bound spaces; a shaft keeps its span height (M7)
     h = space.nominal_mm("h") if (space.is_shaft or not height) else height
-    w, l = space.nominal_mm("w"), space.nominal_mm("l")
+    w, l = space.nominal_mm("w"), (length or space.nominal_mm("l"))   # `length`: a tight corridor starts longer (M15)
     return (l, w, h) if rotated else (w, l, h)
 
 
@@ -163,6 +167,104 @@ def order_spaces(brief: Brief, rng: random.Random, spaces: list[Space] | None = 
                 group[i], group[i + 1] = group[i + 1], group[i]
         out.extend(group)
     return out
+
+
+def pair_adjacent(brief: Brief, order: list[Space]) -> list[Space]:
+    """PLAN M15: rooms that must touch each other are placed as one contiguous run, walked from an end of their
+    chain (lab, prep room, lab; imaging, x-ray, control room). Each usually also needs the corridor, and the only
+    position touching both is the slot beside the partner on the corridor's side. Placed apart, other rooms take
+    that slot; placed hub-first, the hub can land at the corridor's end with one free side (both measured)."""
+    import networkx as nx
+    names = [s.name for s in order]
+    g = nx.Graph()
+    g.add_edges_from((a, b) for a, b in brief.contacts if a in names and b in names
+                     and brief.space(a).program == "room" and brief.space(b).program == "room")
+    if g.number_of_edges() == 0:
+        return list(order)
+    by_name = {s.name: s for s in order}
+    out = list(names)
+    for comp in sorted(nx.connected_components(g), key=lambda c: min(names.index(n) for n in c)):
+        sub = g.subgraph(comp)
+        ends = sorted((n for n in comp if sub.degree(n) == 1), key=names.index) or sorted(comp, key=names.index)
+        run = list(nx.dfs_preorder_nodes(sub, ends[0]))
+        at = min(out.index(n) for n in comp)
+        out = [n for n in out if n not in comp]
+        out[at:at] = run
+    return [by_name[n] for n in out]
+
+
+def tight_corridors(brief: Brief, spaces: list[Space], envelope: dict[str, int] | None, p: "BeamParams") -> dict[str, int]:
+    """PLAN M15: corridors whose required partners, narrow side on, need more than `tight_ratio` of the two long sides
+    the corridor can ever offer. Returns {corridor: length to start at in mm}. On these corridors spaces attach narrow
+    side on only, and the corridor starts long enough for them instead of stretching room by room."""
+    out: dict[str, int] = {}
+    names = {s.name for s in spaces}
+    corridors = [c for c in spaces if c.program == "corridor"]
+    # spaces that need a corridor but name no particular one: every room when the brief has circulation (rule D8),
+    # and shafts on a chained spine. They fall to whichever segment takes them, so share them out (M15b).
+    explicit = {a for a, b in brief.contacts for a in (a, b) if brief.space(a).program == "corridor"}
+    shared = [s for s in spaces if (s.program == "room" and brief.circulation) or s.is_vertical]
+    shared = [s for s in shared if not any(frozenset((s.name, c.name)) in {frozenset(q) for q in brief.contacts} for c in corridors)]
+    share = sum(min(s.nominal_mm("w"), s.nominal_mm("l")) for s in shared) // max(1, len(corridors))
+    for c in corridors:
+        partners = [brief.space(b if a == c.name else a) for a, b in brief.contacts if c.name in (a, b)]
+        demand = sum(min(s.nominal_mm("w"), s.nominal_mm("l")) for s in partners
+                     if (s.name in names or s.is_shaft) and s.program != "corridor")
+        demand += share
+        limit = c.band("l")[1]
+        if envelope is not None:
+            limit = min(limit, max(envelope["w"], envelope["l"]))
+        if c.wishes.get("segment"):
+            # a chained spine exists because one straight corridor could not carry the level: frontage is scarce by
+            # construction, so its segments take spaces narrow side on. They keep their nominal length and stretch
+            # as rooms arrive, because an L only fits the envelope if each arm stops where the other begins (M15b).
+            out[c.name] = c.nominal_mm("l")
+            continue
+        if limit <= 0 or demand / (2 * limit) <= p.tight_ratio:
+            continue
+        out[c.name] = max(c.nominal_mm("l"), min(limit, int(demand / 2 * 1.06) // 100 * 100 + 100))
+    return out
+
+
+def frontage_shortfall(brief: Brief, placed: dict[str, Box], remaining: list[Space], envelope: dict[str, int] | None,
+                       reserve: float = 0.08) -> float:
+    """Metres of corridor wall the unplaced spaces will lack. For each placed corridor: the wall still free on its two
+    long sides if it stretched to its limit, less a reserve for alignment gaps, against the narrow nominal side of every
+    unplaced space that must touch it. On a loose brief this is zero throughout; on a tight one it charges every metre
+    a space spends beyond its narrow side, from the first step, which is what turns rooms and stairs narrow side on."""
+    if not remaining:
+        return 0.0
+    short = 0
+    rem = {s.name: s for s in remaining}
+    for cname, cbox in placed.items():
+        cs = brief.space(cname)
+        if cs.program != "corridor":
+            continue
+        demand = 0
+        for a, b in brief.contacts:
+            other = b if a == cname else a if b == cname else None
+            if other is None:
+                continue
+            if other in rem:
+                o = rem[other]
+                demand += min(o.nominal_mm("w"), o.nominal_mm("l"))   # the beam places at nominal size
+            elif other in placed and not any(touches(cbox, placed[other], sd)[0] for sd in HSIDES):
+                o = brief.space(other)                                 # placed off its corridor: the need has not gone away
+                demand += min(o.nominal_mm("w"), o.nominal_mm("l"))
+        if demand == 0:
+            continue
+        along_y = cbox.l >= cbox.w
+        limit = cs.band("l")[1]
+        if envelope is not None:
+            limit = min(limit, envelope["l"] if along_y else envelope["w"])
+        used = 0
+        for n, b in placed.items():
+            if n == cname:
+                continue
+            for side in (("+x", "-x") if along_y else ("+y", "-y")):
+                used += touches(cbox, b, side)[0]
+        short += max(0, demand - (int(2 * limit * (1.0 - reserve)) - used))
+    return short / 1000.0
 
 
 OPPOSITE_H = {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y"}
@@ -216,7 +318,7 @@ def stretch_corridor(cor: Box, axis: str, need: tuple[int, int], band: tuple[int
 
 def moves(brief: Brief, state: State, space: Space, p: BeamParams, height: int | None = None,
           envelope: dict[str, int] | None = None, context: list[Box] | None = None,
-          level_z: int | None = None) -> list[dict[str, Box]]:
+          level_z: int | None = None, tight: dict[str, int] | None = None) -> list[dict[str, Box]]:
     out: list[dict[str, Box]] = []
     placed = state.placed
     orientations = [False, True] if (p.rotate and space.w != space.l) else [False]
@@ -224,17 +326,17 @@ def moves(brief: Brief, state: State, space: Space, p: BeamParams, height: int |
     partners = {b if a == space.name else a for a, b in brief.contacts if space.name in (a, b)}
     restrict = p.attach_required_first and bool(partners & set(placed))
     targets = [n for n in placed if n in partners] if restrict else list(placed)
-    out = _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z)
+    out = _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z, tight=tight)
     if not out and restrict:  # required partner has no free face: fall back to any placed space
-        out = _moves_to(brief, state, space, p, [n for n in placed if n not in partners], others, orientations, height, envelope, context, level_z)
+        out = _moves_to(brief, state, space, p, [n for n in placed if n not in partners], others, orientations, height, envelope, context, level_z, tight=tight)
     if not out:  # last resort: allow a door pair to graze, which door planning will then report
         out = _moves_to(brief, state, space, p, list(placed), others, orientations, height, envelope, context, level_z,
-                        enforce_doors=False)
+                        enforce_doors=False, tight=tight)
     return out
 
 
 def _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z=None,
-              enforce_doors=True) -> list[dict[str, Box]]:
+              enforce_doors=True, tight=None) -> list[dict[str, Box]]:
     out: list[dict[str, Box]] = []
     placed = state.placed
     for pname in targets:
@@ -242,7 +344,11 @@ def _moves_to(brief, state, space, p, targets, others, orientations, height, env
         pspace = brief.space(pname)
         for side in HSIDES:
             for rot in orientations:
-                sw, sl, sh = dims(space, rot, height)
+                sw, sl, sh = dims(space, rot, height, (tight or {}).get(space.name))
+                if tight and pname in tight and space.program != "corridor" and sw != sl:
+                    along = sl if side in ("+x", "-x") else sw          # the side this space would lay along the corridor
+                    if along != min(sw, sl):
+                        continue                                          # tight corridor: narrow side on only (M15)
                 # place on the level being assembled; a tall shaft target starts below it (M7)
                 z = level_z if level_z is not None else pbox.z
                 if side in ("+x", "-x"):
@@ -282,8 +388,17 @@ def _moves_to(brief, state, space, p, targets, others, orientations, height, env
                             continue
                     if any_intersection(box, [b for n, b in new.items() if n != space.name]):
                         continue
-                    if touches(box, new[pname], {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y"}[side])[0] < min_ov:
+                    back = {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y"}[side]
+                    if touches(box, new[pname], back)[0] < min_ov:
                         continue
+                    if corridor_opening_mm(brief, space.name, pname):
+                        # segments of one spine turn a corner: they meet end on (exactly the corridor width) and run
+                        # on different axes. Laid side by side or in line they are walkable but add no frontage,
+                        # which is the only reason to chain a corridor at all (M15b).
+                        if touches(box, new[pname], back)[0] != min_ov:
+                            continue
+                        if (box.w >= box.l) == (new[pname].w >= new[pname].l):
+                            continue
                     if enforce_doors and any(not touch_ok(brief, space.name, box, n, b, p.door_mm)
                                              for n, b in new.items() if n != space.name):
                         continue  # a pair that needs a door would only graze this box
@@ -308,11 +423,19 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
     `trace`, when a list, receives one entry per step: the full candidate pool before truncation.
     `batch_scorer(brief, states, progress, ref_planes) -> list[float]` scores a whole pool in one call (GNN)."""
     p = params or BeamParams()
+    if any(s.program == "corridor" and s.wishes.get("segment") for s in brief.spaces) and p.w_access < p.w_required:
+        # On a chained spine a room names no corridor, so reaching one by a door *is* the requirement and carries
+        # the weight a required contact would. Without this the search prefers a room anywhere (0) over stretching a
+        # segment to take it (a corridor's length deviation costs more than access was worth) — measured (M15b).
+        p = replace(p, w_access=p.w_required)
     rng = random.Random(seed)
     order = order_spaces(brief, rng, spaces)
+    if p.pair_order:
+        order = pair_adjacent(brief, order)
     if not order and not fixed:
         return []  # nothing to place on this level (a stale `expanded: true` file can get here)
     n_steps = max(1, len(order))
+    tight = tight_corridors(brief, order, envelope, p)
     beam: list[State] = []
     if fixed:
         beam.append(state_from_placed(brief, dict(fixed), p, ref_planes))
@@ -320,7 +443,7 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
     else:
         first = order[0]
         for rot in ([False, True] if (p.rotate and first.w != first.l) else [False]):
-            w, l, h = dims(first, rot, height)
+            w, l, h = dims(first, rot, height, tight.get(first.name))
             beam.append(state_from_placed(brief, {first.name: Box(0, 0, z0, w, l, h)}, p, ref_planes))
         rest = order[1:]
     for step, space in enumerate(rest, start=1):
@@ -333,7 +456,7 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
         if batch_scorer is not None:
             cands: dict[frozenset, State] = {}
             for st in beam:
-                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0):
+                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight):
                     ns = extend_state(brief, st, new, space.name, p, ref_planes)
                     if ns.key not in cands or cands[ns.key].score < ns.score:
                         cands[ns.key] = ns   # dedupe on the hand score first; the batch scorer then ranks the survivors
@@ -341,12 +464,16 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
                 states = list(cands.values())
                 for ns, sc in zip(states, batch_scorer(brief, states, progress, ref_planes)):
                     ns.score = float(sc) + rng.uniform(-p.jitter, p.jitter)
+                    if p.w_frontage:
+                        ns.score -= p.w_frontage * frontage_shortfall(brief, ns.placed, rest[step:], envelope)
                     pool[ns.key] = ns
         else:
             for st in beam:
-                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0):
+                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight):
                     ns = extend_state(brief, st, new, space.name, p, ref_planes)
                     ns.score += rng.uniform(-p.jitter, p.jitter)
+                    if p.w_frontage:
+                        ns.score -= p.w_frontage * frontage_shortfall(brief, ns.placed, rest[step:], envelope)
                     if ns.key not in pool or pool[ns.key].score < ns.score:
                         pool[ns.key] = ns
         if not pool:

@@ -88,8 +88,10 @@ def test_search_verifies_the_smallest_count_the_bound_allows(base):
 
 
 def test_search_explains_a_candidate_that_produces_nothing(base):
-    """At 14 x 12 m the bound allows two floors but only three build; the two-floor candidate must say why."""
-    brief = with_envelope(base, 14, 12, 9)
+    """At 20 x 8 m the area bound allows two floors, but 8 m is too shallow for rooms on both sides of the corridor,
+    so only three floors build; the two-floor candidate must say why. (Until 2026-09-20 this used 14 x 12 m; the M15
+    beam now fits two floors there, so that envelope no longer leaves a candidate empty.)"""
+    brief = with_envelope(base, 20, 8, 9)
     b, results = search(brief, GENERATORS["beam"], seed=0, keep=2, most=2)
     assert [r.levels for r in results] == [2, 3] and b.min_levels == 2
     assert any(r.verified for r in results)

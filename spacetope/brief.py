@@ -207,11 +207,32 @@ class Brief:
         return yaml.safe_dump(self.to_dict(), sort_keys=False)
 
 
+def corridor_segments(brief: "Brief") -> int:
+    """How many boxes each level's corridor is made of (M15b). 1 = one straight corridor, the default."""
+    c = (brief.circulation or {}).get("corridor") or {}
+    try:
+        return max(1, int(c.get("segments", 1) or 1))
+    except (TypeError, ValueError):
+        return 1
+
+
+def corridor_names(brief: "Brief", level: int) -> list[str]:
+    """The corridor spaces expansion creates on one level: `corridor_<k>`, or `corridor_<k>_1..N` when chained."""
+    n = corridor_segments(brief)
+    return [f"corridor_{level}"] if n == 1 else [f"corridor_{level}_{i + 1}" for i in range(n)]
+
+
 def generated_names(brief: "Brief") -> list[str]:
-    """Names that expanding `brief.circulation` will create (corridor_<k>, stairs, lifts)."""
+    """Names that expanding `brief.circulation` will create (corridor_<k>, stairs, lifts). With chained corridors
+    the spine name `corridor_<k>` stays accepted as an alias so briefs written for one corridor still load; the
+    contacts that use it are dropped during expansion with a warning (M15b)."""
     circ = brief.circulation or {}
     n = int(brief.levels or 1)
-    out = [f"corridor_{k}" for k in range(n)] if circ.get("corridor") else []
+    out: list[str] = []
+    if circ.get("corridor"):
+        for k in range(n):
+            out.append(f"corridor_{k}")
+            out += [nm for nm in corridor_names(brief, k) if nm != f"corridor_{k}"]
     for key in ("stairs", "lifts"):
         out += [str(item["name"]) for item in (circ.get(key) or []) if "name" in item]
     return out

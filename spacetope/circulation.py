@@ -1,6 +1,7 @@
 """M7: expand a brief's compact circulation section into concrete spaces, and validate briefs before generation.
 
-    corridor:  {w, l}                         -> corridor_<k> on every level
+    corridor:  {w, l, segments?}              -> corridor_<k> on every level, or a chain corridor_<k>_1..N
+                                                 when `segments` > 1 (an L or U spine); `l` is one segment
     stairs:    [{name, w, l, serves?}]        -> one stair space spanning its levels
     lifts:     [{name, w, l, serves?}]        -> one elevator space spanning its levels
     doors:     {room: {w, h}, stair: {w, h}, lift: {w, h}, jamb}
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .brief import Brief, BriefError, Space, generated_names
+from .brief import Brief, BriefError, Space, corridor_names, corridor_segments, generated_names
 
 DEFAULT_DOORS = {"room": {"w": 0.9, "h": 2.1}, "stair": {"w": 1.0, "h": 2.1}, "lift": {"w": 1.1, "h": 2.1}, "jamb": 0.1}
 HEAD_CLEARANCE = 0.3  # metres between the top of a door and the level's ceiling
@@ -121,6 +122,25 @@ def validate_compact(brief: Brief) -> list[Problem]:
         for dim in ("w", "l"):
             if float(c.get(dim, 0)) <= 0:
                 problems.append(Problem("corridor_size", f"circulation.corridor needs a positive {dim}"))
+        raw = c.get("segments", 1)
+        try:
+            segs = int(raw or 1)
+        except (TypeError, ValueError):
+            segs = 0
+        if segs < 1 or segs > 6:
+            problems.append(Problem("corridor_segments",
+                                    f"circulation.corridor.segments must be a whole number from 1 to 6, got {raw!r}"))
+        elif segs > 1:
+            # M15b: a chained corridor has no single name a contact can point at, so access is judged by door
+            spine = {f"corridor_{k}" for k in range(n)}
+            used = sorted({f"{a} – {b}" for a, b in brief.contacts if a in spine or b in spine})
+            if used:
+                problems.append(Problem("corridor_chain",
+                                        f"with {segs} corridor segments a room reaches the corridor by a door to "
+                                        f"whichever segment it touches, so {len(used)} contact"
+                                        f"{'s' if len(used) > 1 else ''} to the spine "
+                                        f"({', '.join(used[:3])}{', …' if len(used) > 3 else ''}) "
+                                        f"{'are' if len(used) > 1 else 'is'} dropped", "warning"))
 
     for s in brief.spaces:
         lv = s.wishes.get("level")
@@ -173,10 +193,22 @@ def expand(brief: Brief) -> Brief:
     contacts = list(brief.contacts)
     doors = list(brief.door_pairs)
     corridor = circ.get("corridor")
+    segments = corridor_segments(brief) if corridor else 1
     if corridor:
         for k in range(n):
-            spaces.append(Space(name=f"corridor_{k}", w=float(corridor["w"]), l=float(corridor["l"]), h=H,
-                                program="corridor", tol=corridor.get("tol"), wishes={"level": k, "generated": True}))
+            names_k = corridor_names(brief, k)
+            for i, nm in enumerate(names_k):
+                spaces.append(Space(name=nm, w=float(corridor["w"]), l=float(corridor["l"]), h=H,
+                                    program="corridor", tol=corridor.get("tol"),
+                                    wishes={"level": k, "generated": True, **({"segment": i + 1} if segments > 1 else {})}))
+            for a, b in zip(names_k, names_k[1:]):
+                contacts.append((a, b))        # consecutive segments meet: an opening the width of the corridor
+    if segments > 1:
+        # a contact to the spine cannot say which segment; the door rule (every room's door opens onto a corridor
+        # on its level) carries the requirement instead, so those contacts and their doors go (M15b, PLAN §6)
+        spine = {f"corridor_{k}" for k in range(n)}
+        contacts = [(a, b) for a, b in contacts if a not in spine and b not in spine]
+        doors = [(a, b) for a, b in doors if a not in spine and b not in spine]
     for key, program in SHAFT_KEYS:
         for item in circ.get(key) or []:
             lo, hi = _span(item, n)
@@ -184,12 +216,14 @@ def expand(brief: Brief) -> Brief:
             spaces.append(Space(name=name, w=float(item["w"]), l=float(item["l"]),
                                 h=round((hi - lo + 1) * round(H * 1000) / 1000, 3),  # exact multiple of the mm level height
                                 program=program, tol=item.get("tol"), wishes={"generated": True}, serves=(lo, hi)))
-            if corridor:
+            if corridor and segments == 1:
                 for k in range(lo, hi + 1):
                     pair = (name, f"corridor_{k}")
                     if frozenset(pair) not in {frozenset(c) for c in contacts}:
                         contacts.append(pair)
                     doors.append(pair)
+            # chained corridors: which segment a shaft lands on is the generator's choice; `doors.door_kind_for`
+            # already requires a door wherever a shaft meets a corridor, and door planning places it (M15b)
     return Brief(name=brief.name, spaces=spaces, contacts=contacts, envelope=brief.envelope, levels=brief.levels,
                  level_height=H, circulation=circ, door_pairs=doors, expanded=True)
 

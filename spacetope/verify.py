@@ -12,6 +12,7 @@ from topologicpy.Vertex import Vertex
 from .brief import Brief
 from .levels import level_height_mm
 from .placement import Placement, diagnose_contact, overlaps
+from .preverify import check_constraints, preverify  # noqa: F401 (pure checks live in preverify.py; re-exported)
 from .realise import Realised, RealiseError, realise
 from .spacegraph import AssemblyGraph, Contact
 from .units import to_m
@@ -51,27 +52,20 @@ def _contact_failures(intent: AssemblyGraph, realised_contacts: set[Contact], pl
     return fails
 
 
-def check_constraints(brief: Brief, placement: Placement) -> tuple[bool, str]:
-    """Envelope (AABB from origin) and level count, when the brief states them (M3)."""
-    problems = []
-    if brief.envelope:
-        env = {k: int(round(v * 1000)) for k, v in brief.envelope.items()}
-        for name, b in placement.items():
-            if b.x < 0 or b.y < 0 or b.z < 0 or b.x1 > env["w"] or b.y1 > env["l"] or b.z1 > env["h"]:
-                problems.append(f"{name} leaves envelope")
-    if brief.levels is not None:
-        zs = sorted({b.z for b in placement.values()})
-        if len(zs) != brief.levels:
-            problems.append(f"{len(zs)} z-bands, brief asks {brief.levels}")
-    H = level_height_mm(brief)
-    for s in brief.spaces:
-        if s.is_shaft and s.name in placement:
-            b = placement[s.name]
-            lo, hi = s.serves
-            if b.z != lo * H or b.h != (hi - lo + 1) * H:
-                problems.append(f"{s.name} should span levels {lo}–{hi} (z {lo * H} mm, height {(hi - lo + 1) * H} mm), "
-                                f"got z {b.z} mm, height {b.h} mm")
-    return (not problems, "; ".join(problems) or "ok")
+def _door_pairs_graph(cc) -> set:
+    """Door pairs through topologicpy.Graph (the pre-M9 path, kept as the fallback)."""
+    from topologicpy.Graph import Graph
+    g = Graph.ByTopology(cc, direct=False, directApertures=True, silent=True)
+    verts = Graph.Vertices(g) or []
+    names = [Dictionary.ValueAtKey(Topology.Dictionary(v), "name") for v in verts]
+    index = {tuple(round(c, 5) for c in Vertex.Coordinates(v)): n for v, n in zip(verts, names)}
+    realised = set()
+    for e in Graph.Edges(g) or []:
+        a = index.get(tuple(round(c, 5) for c in Vertex.Coordinates(Edge.StartVertex(e))))
+        b = index.get(tuple(round(c, 5) for c in Vertex.Coordinates(Edge.EndVertex(e))))
+        if a and b:
+            realised.add(frozenset((a, b)))
+    return realised
 
 
 def check_doors(brief: Brief, r: Realised) -> tuple[bool, str]:
@@ -79,7 +73,6 @@ def check_doors(brief: Brief, r: Realised) -> tuple[bool, str]:
     if not brief.circulation:
         return True, "no doors required"
     from topologicpy.CellComplex import CellComplex
-    from topologicpy.Graph import Graph
     from .doors import access_problems
     issues = [p.message for p in r.door_problems] + [p.message for p in access_problems(brief, r.placement, r.doors)]
     if not Topology.IsInstance(r.cc, "CellComplex"):
@@ -90,16 +83,10 @@ def check_doors(brief: Brief, r: Realised) -> tuple[bool, str]:
     internal = CellComplex.Decompose(r.cc)["internalVerticalApertures"]
     if len(internal) != len(attached):
         issues.append(f"{len(attached) - len(internal)} doors are not on internal walls")
-    g = Graph.ByTopology(r.cc, direct=False, directApertures=True, silent=True)
-    verts = Graph.Vertices(g) or []
-    names = [Dictionary.ValueAtKey(Topology.Dictionary(v), "name") for v in verts]
-    index = {tuple(round(c, 5) for c in Vertex.Coordinates(v)): n for v, n in zip(verts, names)}
-    realised = set()
-    for e in Graph.Edges(g) or []:
-        a = index.get(tuple(round(c, 5) for c in Vertex.Coordinates(Edge.StartVertex(e))))
-        b = index.get(tuple(round(c, 5) for c in Vertex.Coordinates(Edge.EndVertex(e))))
-        if a and b:
-            realised.add(frozenset((a, b)))
+    from .tgraph import door_pairs
+    realised = door_pairs(r.cc)  # TGraph: same graph, ~4x faster (PLAN M9); None -> fall back to Graph
+    if realised is None:
+        realised = _door_pairs_graph(r.cc)
     planned = {d.pair for d in r.doors}
     for pair in sorted(planned - realised, key=sorted):
         issues.append("missing door: " + "–".join(sorted(pair)))

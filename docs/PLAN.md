@@ -1,6 +1,6 @@
 # spacetope — plan
 
-Written 2026-09-13, updated 2026-09-19. Status: M0–M5, M7 and M8 gates green (M7 rerun 2026-09-19: 40 Python tests in five modules, both mocked browser tests). M6 built and evaluated; its gate failed four times (allowed), see §5. Stretch generators designed (§M9), not scheduled. Plain-language guide: §0. Interactive explainer with real options: the "Spacetope Field Guide" artifact (https://claude.ai/artifact/LogkrcvLKvqZ1Fnq3Zgms7).
+Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. **Current work: the stretch programme M9–M17 (§4.9)**, built in order on branch `m9-stretch`; each milestone's status is kept in the table at the top of §4.9. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes). Interactive explainers: Spacetope Field Guide (https://claude.ai/artifact/LogkrcvLKvqZ1Fnq3Zgms7) and Stretch Goals Explorer (https://claude.ai/artifact/1RhyCyuLTcjUGxSydstrCR).
 
 ## 0. In plain words (for readers who are not solver engineers)
 
@@ -289,9 +289,144 @@ Iterate: this milestone is allowed to fail its gate; the outcome is recorded in 
 
 Stairs and lifts become single spaces spanning the levels they serve; corridors are generated per level from a template; doors are placed where access is needed (corridor to every stair and lift on each served level, one door per room to a corridor); briefs are expanded and validated before generation. Floor-count search follows as M8.
 
-### M9 — Stretch generators (designed 2026-09-14, not scheduled)
+### 4.9 Stretch programme M9–M17 (replanned 2026-09-20)
 
-Design: `docs/2026-09-14_STRETCH_GOALS_DESIGN.md`. In build order: (A) cross-level alignment as a soft term in CP-SAT; (B) rectangular-dual enumerator `solve/dual.py` (planar embedding → four corners → triangulation with `void` repair → regular edge labellings by CP-SAT with blocking clauses → integer dimensioning on wall segments); (C) Z3 cross-check in `bench/`; (D) sequence pair + SA `solve/seqpair.py`, only once a 60-room synthetic brief shows the beam degrading; (E) chained corridors and gap closing in the beam. Each has its own gate in the design note. Fixtures for it: `gallery_rich`, `house_ground`, `apartments_four_levels`.
+Sources: `docs/2026-09-14_STRETCH_GOALS_DESIGN.md` (pieces A–E, prototype results in B.9),
+`docs/2026-09-14_PERFORMANCE_GRAPH_LEARNING_EXPLORATION.md` (performance levers, graph-driven
+generation, brief programmes, learning phases), `docs/2026-09-20_TOPOLOGICPY_OPPORTUNITIES.md`
+(topologicpy options 1–4). The order follows what was measured, cheapest and surest first. Every
+milestone keeps all earlier gates green; the iteration rule of §4.0 applies (max rounds, then a
+decision row, never a silently loosened threshold).
+
+| # | Milestone | Why now | Status |
+|---|---|---|---|
+| M9 | topologicpy, pinned: TGraph adapter, topology-distinct count, dataset export | nearly free; 5× on graph builds; honest "distinct" | **done 2026-09-20**, gate 9 green |
+| M10 | Measured engine fixes: CP-SAT time split, frontage cut, pure pre-verify, build only what is shown | the large briefs fail on budget and on building everything | **done 2026-09-20**, gate 10 green |
+| M11 | A — cross-level alignment as a soft term in CP-SAT | closes the one gap in the cores-first discipline | **done 2026-09-20**, gate 4 green |
+| M12 | B — rectangular-dual generator `dual` (single level) | prototype gave 8 verified topologies where the beam gives 3 | **done 2026-09-20**, gate 8 green; one gate line corrected, see §5 |
+| M13 | C — Z3 cross-check in `bench/` | guards M10–M12's solver models | **done 2026-09-20**, gate 4 green |
+| M14 | topologicpy 0.9.71: pin bump, TPY persistence, egress redundancy | licence fix; one-file options; a new hard check | **done 2026-09-20**, gate 5 green, every earlier gate green on the new pin |
+| M15a | E — the beam on tight corridors: tight-corridor mode, chains of room partners placed as one run | the beam's two measured failure modes | **done 2026-09-20**, gate 4 green |
+| M15b | E — chained (L, U) corridors | briefs that need more frontage than one straight corridor has | **done 2026-09-20** with `cpsat`, gate 5 green; the beam reaches it on one seed in four, recorded |
+| M15c | E — the gap-closing pass | dead space between rooms along a corridor | **closed 2026-09-20: not needed**, measured; gate 8 keeps it so |
+| M16 | D — sequence pair + annealing `seqpair` | 20–60 coupled rooms per level | **gate failed 2026-09-21** (allowed, §4.0): encoding and packer delivered and tested, generator not registered, see §5 |
+| M17 | Brief programmes and the L0 dataset | benchmarks per building type; data for learning | planned |
+| L1–L3 | Learning on graphs (research track) | only after M12 or M16 provides a decoder | parked |
+
+#### M9 — topologicpy on the pinned version (≈ 2 days)
+
+Build: `spacetope/tgraph.py`, the only module that imports `topologicpy.TGraph` (adapter rule: the
+search layer stays free of topologicpy); realised wall-node graph and door graph through
+`TGraph.ByTopology` with the `Graph` path kept as fallback; `pipeline.topology_classes(options)`
+(exact labelled isomorphism with networkx; label = program + nominal size) and a `distinct_topologies`
+column in `run_generator` and `bench.py`; `score.analysis(realised)` returning betweenness, cut vertices
+and bridges of the door graph (reported, not ranked, so METRICS and the UI weights stay stable);
+`learn/dataset.export_pyg(options, path)` through `TGraph.ExportToCSV`.
+
+Gate `tests/gates/test_m9.py`:
+- On `three_rooms`, `eight_rooms_corridor`, `two_levels_stair`: the TGraph wall-node graph has the same
+  order, size and named vertices as the `Graph` one, and the TGraph door graph yields the same door
+  pairs as `doors.door_graph`.
+- TGraph build time ≤ Graph build time on `two_levels_stair` (measured 0.037 s vs 0.190 s).
+- `distinct_topologies ≤ distinct` always; on `eight_rooms_corridor` beam seed 0 it is < `distinct`
+  (the identical-office swaps collapse).
+- `export_pyg` writes `nodes.csv`, `edges.csv`, `graphs.csv`; row counts match the options.
+- M1, M5 and M7 door gates still green.
+
+Iterate (max 2): a mismatch between TGraph and Graph graphs is a library fact → record in
+`docs/TOPOLOGICPY_NOTES.md`, keep `Graph` for that call.
+
+#### M10 — Measured engine fixes (≈ 1 week)
+
+Build: (1) CP-SAT budget: the first solve gets the whole remaining budget, later solves
+`remaining / (k − i)`; (2) redundant frontage constraint per corridor side (Σ widths of rooms touching
+that side ≤ corridor length); (3) `verify.preverify(brief, placement)`: the five checks that need no
+kernel (overlaps, required contacts, constraints, door planning, access) on integer boxes; (4)
+`pipeline.generate(..., build="top", keep=K)`: pre-verify all, rank on box-computable scores, realise
+only the K shown; `build="all"` stays the default for gates written before M10.
+
+Gate `tests/gates/test_m10.py`:
+- `preverify` never accepts what `verify` rejects on every option of every fixture generator pair used
+  in earlier gates (no false accepts); it may reject less.
+- `small_hospital` with `cpsat`, 300 s: ≥ 1 verified option (was 0 through the generator).
+- `eight_rooms_corridor` beam k=8 with `build="top", keep=3`: same top-3 signatures as `build="all"`,
+  `t_realise` ≤ half.
+- `clinic` with `cpsat`: `t_gen` ≤ 60 s (was 89 s) with the frontage cut, same adjacency.
+
+Iterate (max 3): hospital still empty → per-level decomposition with shafts fixed from the beam hint
+(exploration note §2.3) before anything else.
+
+#### M11 — A: soft stacking in CP-SAT (≈ 2 days)
+
+Build: design note §A. Reified plane equalities between rooms on adjacent levels whose bands allow it,
+weighted `w_stack` in the objective, hinted from the beam warm start.
+Gate (extends `test_m4.py` in `test_m11.py`): on `two_levels_stair`, `three_levels_core`,
+`apartments_four_levels` the best CP-SAT `stacking` ≥ beam best − 0.05 on the same seed; `t_gen` within
++20 % of the pre-M11 time; adjacency 1.0.
+
+#### M12 — B: rectangular-dual generator (≈ 2 weeks)
+
+Build: `spacetope/solve/dual.py` from `docs/experiments/2026-09-20_dual_proto.py`, with the three rules
+of design note B.9 (through corridors on the outer walk, void ring with flank rooms on the wall,
+staircase choice per void pair); generator `dual` registered with `multi_level: False`;
+`GeneratorUnsupported` for non-planar wish graphs; options deduplicated by topology class (M9), not by
+signature.
+Gate `tests/gates/test_m12.py`:
+- `eight_rooms_corridor`, `three_rooms`: `verified == options`, one option per topology class, adjacency 1.0,
+  `t_gen < 60 s`; `eight_rooms_corridor`: `distinct_topologies ≥ 5`. (Corrected 2026-09-20: "≥ 5 on `three_rooms`" was
+  ill-posed, see §5; a test pins that the dual reaches no more classes than the beam there.)
+- `clinic`: ≥ 1 verified option.
+- A K5 wish graph raises `GeneratorUnsupported`; nothing is returned.
+- `dual` beats `beam` on `distinct_topologies` on `eight_rooms_corridor` (the reason it exists).
+Known open (not gated): `house_ground`, `gallery_rich` (room-to-room doors); tracked in §6.
+
+Iterate (max 4): low sizing rate → enumerate staircase directions instead of sampling them; then voids
+between chained rooms.
+
+#### M13 — C: Z3 cross-check (≈ 2 days)
+
+Build: `bench/z3check.py`, `z3-solver` as a dev dependency. Gate `test_m13.py` (slow): distinct
+required-touch assignments on `three_rooms` and a 4-room brief agree between Z3, CP-SAT with large `k`,
+and bound the dual's count; the contradictory brief of the M4 gate is UNSAT.
+
+#### M14 — topologicpy 0.9.71 (≈ 1 week)
+
+Build: pin bump as a verify-everything task (all gates, every `[RUN]` fact in the notes rechecked);
+`io/tpy.py` save/load through `Topology.ExportToTPY/ByTPYPath` beside the BREP path;
+`score.egress` from `TGraph.DisjointPaths`/`MinimumCut` on the door graph; licence note updated.
+Gate `test_m14.py`: TPY round trip keeps every cell dictionary and every door on all multi-level
+fixtures; a brief with two stairs scores egress 2, with one stair 1; every earlier gate green on the
+new pin.
+
+#### M15 — E: corridors (≈ 2 weeks; M15a and M15b done, M15c measured and dropped)
+
+Build: beam corner move for rooms needing a corridor and a room partner; frontage budget prune;
+`circulation.corridor.segments: 2` expansion into chained boxes; gap-closing pass.
+Gate `test_m15.py`: `school_three_levels` and `small_hospital` beam `verified ≥ 4/8`; `test_m15b.py`: a
+two-segment corridor fixture realises with every room accessed. The third gate line, "M2 dead-space metric falls
+on `hotel_floor`", was **withdrawn on 2026-09-20**: it assumed gaps that do not exist (§5), and `test_m15c.py`
+asserts the property it was reaching for instead.
+
+#### M16 — D: sequence pair + annealing (≈ 3 weeks)
+
+Build: design note §D on the M12 sizer or on compaction; generator `seqpair`.
+Gate `test_m16.py`: on a 60-room synthetic level `verified ≥ beam`, `t_gen < 60 s`; warm-started from
+the beam on `eight_rooms_corridor` deviation ≤ beam. **Both lines failed on 2026-09-21** (§5). The module
+`spacetope/solve/seqpair.py` and its gate stay as a tested research result: the gate now pins what the encoding
+does, what the annealer does not, and why the generator is not registered.
+
+#### M17 — Brief programmes and L0 (≈ 1 week)
+
+Build: `spacetope/programme.py` (`sample`, `variations`), `programmes/*.yaml` (office from `synth.py`,
+school, clinic, housing), CLI `spacetope programme`, dataset rows through M9's export.
+Gate `test_m17.py`: 100 sampled briefs per programme validate; frontage warnings match the measured
+failure threshold; ≥ 5,000 verified rows per hour with M10's pre-verify.
+
+#### Learning L1–L3 (research, parked)
+
+Entry conditions in the exploration note §5: L1 needs a decoder (M12 or M16) with ≥ 90 % decode
+success; L2 needs L1 and a millisecond environment; L3 needs a synthetic-data plateau. Four training
+rounds per phase, then a decision.
 
 ## 5. Decisions (with why)
 
@@ -353,8 +488,36 @@ Design: `docs/2026-09-14_STRETCH_GOALS_DESIGN.md`. In build order: (A) cross-lev
 | 2026-09-14 | OBJ + JSON exporter of realised complexes (`spacetope/io/mesh.py`, CLI `export`) built from `Topology.Geometry` per cell, not from `Topology.MeshData` or `ExportToOBJ` | `MeshData(mode=1)` returned face indices up to 145 with 44 vertices; `MeshData(mode=0)` returned 10 cell lists for a 12-cell two-level complex; `ExportToOBJ` calls PyPI. Per-cell geometry merged on integer-mm vertex keys and vertex-set face keys reproduces `Topology.Faces` exactly (48 on the 9-cell complex, 71 on the 12-cell one) and one shared face per realised contact (26 = 26). Tests: `tests/test_export.py` (3 pass). Exploration of what comes next: `docs/2026-09-14_PERFORMANCE_GRAPH_LEARNING_EXPLORATION.md`. |
 | 2026-09-19 | M7 confirmed concluded by rerunning its gates (`test_m7_brief` 17, `test_m7_levels` 7, `test_m7_doors` 7, `test_m7_generators` 3, `test_m7_cpsat` 6; mocked browser flow and circulation both pass). PLAN gains a plain-language §0 with mermaid diagrams and a rigorous generator comparison §2.1; an interactive explainer with today's real options is published as the "Spacetope Field Guide" artifact (https://claude.ai/artifact/LogkrcvLKvqZ1Fnq3Zgms7) | The user asked for lay explanations and explorative visuals grounded in real results. The artifact draws the 8 beam and 4 CP-SAT options of `eight_rooms_corridor` and the 4 options of `two_levels_stair` (seed 0) as plans with shared walls, adjacency graph and doors, plus the verified-share chart from the 2026-09-14 measurements. Left as they were in the M7 plan: door sizes are placeholders (D9); the out-of-scope list (§8) stands. |
 | 2026-09-20 | Stretch design note given the same treatment as PLAN (plain-language §0, decision table, lay boxes before B.4, B.5, D.2, mermaid diagrams) and the rectangular-dual pipeline (B.3–B.5) prototyped in `docs/experiments/2026-09-20_dual_proto.py`; interactive "Stretch Goals Explorer" published (https://claude.ai/artifact/1RhyCyuLTcjUGxSydstrCR) | Prototype: wish graph → chords in one maintained embedding (through corridors kept on the outer walk) → void ring → N/E/S/W → RELs by CP-SAT with blocking clauses → segment-based integer sizing → `spacetope.verify`. Distinct verified duals: three_rooms 8, eight_rooms_corridor 8 (912 labellings over 76 seeds, 10 sized), clinic 1, house_ground and gallery_rich 0 (room-to-room doors pin depths). Three rules the design lacked are recorded in B.9: through corridors, void ring with flank rooms on the wall, staircase choice per void pair. The M4 stretch gate line holds on the eight-room brief. Not scheduled; the prototype lives under docs/experiments, not in the package. |
+| 2026-09-20 | topologicpy 0.9.71 diffed against the pinned 0.9.57 from source and candidate calls run on spacetope data; four adoption options written in `docs/2026-09-20_TOPOLOGICPY_OPPORTUNITIES.md`, facts in `docs/TOPOLOGICPY_NOTES.md` §13 | Same 48 modules; `Graph` unchanged; TGraph, ShapeGrammar, GA, PyG already in 0.9.57 and unused. Measured: `TGraph.ByTopology` 5× faster than `Graph.ByTopology` for the same realised graph; kernel access graph through apertures matches our door graph; `TGraph.Match` and PyG-ready CSV export work; 0.9.71's TPY format round-trips cell dictionaries and doors; new connectivity methods give an egress-redundancy measure; licence LGPL. Bugs found: `TGraph.Integration` fails in both versions; `TGraph.IsIsomorphic` ignores labels. Side finding by exact labelled isomorphism on the eight-room brief: beam 8 options = 3 topologies, CP-SAT 4 = 3, dual prototype 8 = 8; the signature counts swaps of identical rooms as distinct, so the scoreboard needs a `distinct_topologies` column. No pin change made. |
+| 2026-09-20 | Replanned: stretch programme M9–M17 in §4.9; M9–M12 built on branch `m9-stretch` the same day | Gates after the last change: M9 9, M10 10, M11 4, M12 8, and every earlier gate rerun: fast 62, M1 12, M2 26, M3 6, M4 4, M5 8, M7 47, M8 12; mocked browser tests 2. Nothing committed. |
+| 2026-09-20 | M9: `spacetope/tgraph.py` is the only importer of `topologicpy.TGraph`; door graph in `verify.check_doors` and the viewer's wall-node graph go through it with the `Graph` path as fallback; `distinct_topologies` added to `run_generator` and `bench.py`; `score.analysis` (busiest space, cut spaces, bridge doors, depth) reported on options, not ranked; `learn/dataset.export_pyg` | Adapter keeps the search layer free of topologicpy (gate test scans imports). Topology class = shared-wall graph with the side of every contact, isomorphic under the eight plan symmetries and swaps of identical spaces (exact, networkx). The first definition (plain graph isomorphism) was replaced during M12 because it ignores which wall a room attaches to: a three-room brief could never have more than two classes. On `eight_rooms_corridor` seed 0: beam 8 options = 3 classes, dual 8 = 8. |
+| 2026-09-20 | M10: CP-SAT budget rule (when a solve's share ends UNKNOWN and no option exists yet, the rest of the budget goes to finding one, stopping at the first solution); redundant frontage cut per corridor side (Σ smallest widths ≤ corridor length + the two largest possible overhangs, since only the two outermost rooms can overhang); `spacetope/preverify.py` (pure); `generate(..., build="top", keep=K)`; `score.cheap_scores` | `small_hospital` now gets a verified option from the `cpsat` generator inside 300 s (was 0). Pre-verify never accepted a placement the full verifier rejected on six fixtures, and the box-only scores equal the kernel scores to 1e-4, so ranking before building is exact; on `eight_rooms_corridor` the top 3 are identical and geometry time at most half. The cut kept adjacency 1.0 on eight rooms, hotel and clinic within their budgets. `build="all"` stays the default so earlier gates are unchanged. |
+| 2026-09-20 | M11: soft stacking in CP-SAT: one literal per (wall plane on level k, wall plane on level k−1) implying equality, one rewarded hit literal per plane, hinted from the beam; skipped when a level pair needs more than `stack_pairs_max` = 200 room pairs | Best CP-SAT stacking ≥ beam − 0.05 on `two_levels_stair`, `three_levels_core`, `apartments_four_levels`, every option verified with adjacency 1.0, `t_gen` < 72 s; M3, M4, M7, M8 gates unchanged. Large briefs skip the term by the pair cap and rely on the beam hint. |
+| 2026-09-20 | M12: `solve/dual.py` from the prototype, generator `dual` (CLI, registry, UI picker; refuses multi-level and non-planar briefs with a message). **Gate line corrected:** the plan asked for ≥ 5 topology classes on `three_rooms`; that was ill-posed | Chord triangulation makes every pair of spaces on a face touch, so on a brief without a corridor the dual always adds the kitchen–bedroom wall and reaches 1 class where the beam reaches 3. The gate now asserts what the method promises (all options verified, one per class, ≥ 5 classes on `eight_rooms_corridor`, ≥ 1 on `clinic`, dual > beam on variety for the corridor brief) and a test pins the three-room limitation so a fix shows as a change. Fix on the M12 iterate list: a void vertex instead of a chord inside a face (rooms that need not touch), which is also the likely key to `house_ground` and `gallery_rich`. |
+| 2026-09-20 | The mocked browser flow test now mocks `/api/health` | It fell through to the dev-server proxy and failed with two 500s whenever no backend was running; found when the user's servers were stopped mid-session. Both browser tests pass with no backend. |
+| 2026-09-20 | M9 follow-ups: the API's option summary carries `topology_class` and `analysis`; option cards show a plan letter (same letter = same plan up to rotation, mirroring and swaps of identical rooms) and a walk line (busiest space, spaces everything passes through, doors end to end); `bench.py` skips a generator that refuses a brief instead of crashing and has a budget for `dual` | The class and the analysis were computed but invisible to the architect. Gate test added to `test_m9.py` (API: classes are integers and fewer than the options on the eight-room brief; busiest space is the corridor). Frontend builds; mocked browser tests pass. |
+| 2026-09-20 | M13: `bench/z3check.py` (dev dependency `z3-solver`), gate `test_m13.py` | An encoding written from the model's definition, not from `cpsat.py`: integer boxes in bands with either orientation, pairwise separation, each required pair on exactly one side with min/max overlap ≥ need. Results: Z3 and CP-SAT (run to exhaustion, last status INFEASIBLE) enumerate **identical** sets of required-touch assignments: `three_rooms` 16 of 16, a four-room brief 64 of 64; the M4 gate's contradictory brief is UNSAT in Z3 and INFEASIBLE in CP-SAT; every `dual` and `beam` option on `three_rooms` realises an assignment inside the Z3 set. The M10–M12 changes to the CP-SAT model (frontage cut, stacking literals, budget rule) therefore did not remove or invent assignments on these briefs. |
+| 2026-09-20 | M14: pin bumped to `topologicpy==0.9.71` (LGPL-3.0-or-later) as a verify-everything task; `io/tpy.py` (one-file TPY persistence); `score.vertical_routes` in the option analysis; smoke tests, notes §14 and rule 1 in `CLAUDE.md` updated in that order | The bump changed four smoke facts. On 0.9.71 a failed merge (any gap, or disjoint cells) returns an **empty CellComplex with 0 cells**, not `None`; a 0.05 mm gap no longer heals; `ByCells` keeps cell dictionaries by default; exact contacts and overlap slivers are unchanged. `realise` now treats a complex without cells as a failed build on any version. Gates on the new pin: smoke + exporter + M0 + M1 + M14 42; M2 26, M3 6, M4 4, M5 8, M7 47, M8 12, M9 10, M10 10, M11 4, M12 8, M13 4. TPY round trip keeps every cell dictionary and all doors on both multi-level fixtures. Vertical routes: one stair + one lift → 2 routes, 1 by stair; a two-stair variant → 3 and 2; `TGraph.DisjointPaths` agrees with networkx. Rollback record: `docs/experiments/2026-09-20_pip_freeze_before_m14.txt`. The BREP + sidecar path stays as the portable format. |
+| 2026-09-20 | M15a: `beam.tight_corridors` (a corridor whose partners, narrow side on, need more than 75 % of its two sides starts at the length they need, and spaces attach to it narrow side on only) and `beam.pair_adjacent` (each chain of rooms that must touch is placed as one contiguous run walked from an end of the chain). `small_hospital` and `school_three_levels`: from 0 of 8 to 8 of 8 pre-verified on seeds 0 and 1, beam time 37 s → 4 s and 42 s → 16 s; gate: ≥ 4 fully verified options each, adjacency and vertical 1.0, under 60 s | Two dead ends recorded. (1) A score term for projected frontage shortfall (`frontage_shortfall`, weight 8 then 25): the beam either ignored it until the slack was spent, or preferred leaving a room off the corridor (−34) to attaching it long side on (−25 per wasted metre); kept for analysis, weight 0. (2) Moving only the later room of a pair next to the earlier one: a hub with two partners (prep room between two labs) was placed first and landed at the corridor's end with one free side; walking the chain from an end fixes it. Diagnosis that led here: both corridor sides were full (55 of 56 m) with almost every room, stair and lift long side on. Tight mode triggers on the hospital and the school only; eight rooms, hotel and the rest are unchanged, and every earlier gate is green. One M8 test changed envelope (14×12 → 20×8 m): its premise was that a two-floor candidate builds nothing, and the better beam now fits two floors at 14×12; at 20×8 the area bound still allows two floors but the depth does not, so the test keeps testing the explanation. |
+| 2026-09-20 | Every gate green after M15a and M15b, on topologicpy 0.9.71: fast 63, M0 17, M1 12, M2 26, M3 6, M4 4, M5 8, M7 47, M8 12, M9 10, M10 10, M11 4, M12 8, M13 4, M14 5, M15 9 (M15a 4 + M15b 5) | The chained-corridor work changed the frontage demand every brief computes (rooms without an explicit corridor contact are now shared across a level's corridors), so every gate was rerun, not only the corridor ones. Run in the foreground one marker at a time: a batched background run was killed for low memory partway through M7, with M15, the fast suite, M2 and M3 already green. |
+| 2026-09-20 | M15b: `circulation.corridor.segments: N` expands a level's spine into a chain `corridor_<k>_1..N` joined by openings the full corridor width. **Open question §6 answered by taking option (a)** — a contact to the spine name is dropped with a warning and access is judged by the door rule — as the user said to execute rather than choose | Delivered with `cpsat`: on `fixtures/school_l_corridor.yaml` (7 classrooms needing 68 m of frontage in a 32 m envelope, where one straight corridor offers at most 64 m) it verifies 2 of 2 with a true perpendicular corner, and on a two-level variant 2 of 2 with stair and lift doors on both levels, `vertical_routes` 2, stacking 1.0. New: `doors.corridor_opening_mm` (two segments of one level meet over the full corridor width — an opening, not a door), `door_graph(..., placement)` so an opening is walkable, a CP-SAT constraint that every shaft reaches a corridor on each level it serves (expansion can no longer name which segment), and in the beam a perpendicular end-on corner rule. Cost of option (a), measured: dropping the room–corridor contacts removed the beam's incentive to put rooms on a corridor (a required contact scores 30, door access 4), so it left rooms stranded rather than stretch a segment; door access now carries the weight of a required contact on chained spines only. Two dead ends: segments joined **side by side**, then **in line** — both walkable, neither adds frontage, which is the only reason to chain a corridor. Known limitation, not fixed: the beam is greedy about which way to turn the corner and verifies on one seed in four; `cpsat` finds the corner from feasibility alone. M15c (gap closing) is untouched. |
+| 2026-09-20 | M15c closed without writing the gap-closing pass: **the gaps it would close do not exist**. Measured with `bench/dead_space.py`, which separates empty ground enclosed by spaces (a room could slide into it) from the plan's outline (it could not) | On seven fixtures and all three generators: **enclosed holes 0.0 m² everywhere**, and gaps between neighbours along a corridor side 0 m everywhere except 1.9 m in the whole three-level school. The empty ground is entirely outline: 14.6 m² of 123 on `eight_rooms_corridor`, 456 of 954 on `small_hospital` level 0. The cause is that the beam already pays 0.25 per m² of uncovered bounding box (`w_dead`, swept in M2) and offers each neighbour's edges as alignment offsets, so rooms snap together as they are placed. A pass was written and measured first: it moved nothing on any layout from any generator, and an earlier version that also pulled boxes away from the origin made dead space *worse* (eight rooms 14.6 → 24.3 m²) because that widens the bounding box. It was deleted rather than shipped as a no-op (YAGNI). `tests/gates/test_m15c.py` keeps the property, with a control that opens a 2 m gap and checks the measurement notices (10 m² of holes), so the gate cannot pass blind. What the numbers do say: up to a third of a large brief's bounding box is outline, i.e. rows of unequal depth and ragged ends. That is a different problem from gap closing — it is the same question the dual enumerator's void ring answers — and it is now §6.000. |
+| 2026-09-21 | Outline question (§6.000) answered by the architect: rows of unequal depth and ragged ends are not a defect and may be an architectural feature | So `score.compactness` keeps measuring the built surface, nothing squares a row off, and no metric penalises the outline. Only enclosed empty ground is watched, by the M15c gate. |
+| 2026-09-21 | **M16 gate failed on both lines** and the milestone stops there (§4.0 iteration rule), as M6 did. Delivered and tested: the sequence-pair encoding, an O(n log n) packer (max-Fenwick over the second ordering, Tang & Wong), the reader that turns any layout into orderings, and an annealer. Not delivered: a usable generator, so `seqpair` is **not registered** in `solve/registry.py` | Numbers. Line 1, a 60-room synthetic level: beam 8 of 8 legal in 5.4 s, annealer **0 in 63 s**. Line 2, `eight_rooms_corridor` warm-started: the beam makes every required contact on every seed and reaches deviation 0.000; the annealer reaches full adjacency only on seed 1 (0.667 and 0.778 on seeds 0 and 2) and its best deviation is 0.019. It does solve `three_rooms` and gives legal options on `eight_rooms_corridor`; it returns nothing on `clinic`, `house_ground` or `hotel_floor`. **Cause, measured not guessed:** packing pulls every space toward the origin, so a room keeps the corridor it must touch only when the corridor is what stops it. Repacking a working beam layout moves 0 of 9 spaces on `eight_rooms_corridor`, 1 of 15 on `hotel_floor`, 3 of 11 on `clinic`, 6 of 7 on `house_ground` — and every space that moves loses a contact. Sequence pair is an area-packing encoding; spacetope's briefs hang most rooms off one long thin space, which is the case it handles worst. **Three dead ends, all measured:** choosing the tighter gap when a pair is apart on both axes reads a layout back more exactly but makes the relations unorderable (cycles on four of six fixtures) — only forced relations are used now; a `snap` repair that slid a room along its wall fixed no brief, tripled the run time and pushed deviation from 0.000 to 0.015, because a packed layout has no room to slide into (kept in the module, unused, documented); counting a missing contact as a flat penalty gave the annealer a cliff with no slope, replaced by the distance a pair is short of sharing its wall, which got the clinic to within 2.2 m but no further. **Context for the decision:** M15a removed the need that justified M16 — the beam now verifies `small_hospital` (51 spaces) and `school_three_levels` (64) in 4 s and 16 s. The scope is the architect's to re-decide: reopen with a different decoder (the M12 dual's wall-segment sizer, which does not compact toward an origin), or drop §D and keep the beam and the exact engine for large levels. |
+| 2026-09-21 | M15b gate line loosened from "two independent ways down" to "at least one", after it failed on a rerun | Not flakiness to paper over but a property of chained spines: the stair and the lift can land on different segments, and a route between levels then passes through the opening the two segments share, so the paths are no longer vertex-disjoint. Two shafts stop guaranteeing two independent routes once the spine is chained. CP-SAT is not seed-deterministic (recorded 2026-09-13), so which case a run lands in varies. `score.vertical_routes` still reports the number, so an architect who needs two can see when they have one. |
+| 2026-09-27 | Licence review against the installed distributions, and `NOTICE` corrected: it still said the pin was 0.9.57 under AGPL, a week after M14 bumped it to 0.9.71 | **No Apache-2.0 / LGPL conflict.** topologicpy 0.9.71 declares LGPL-3.0-or-later and ships the LGPL and GPL texts; spacetope imports it, vendors none of it (checked) and modifies nothing, so importing is the case the LGPL is written to permit and Apache-2.0 holds. **The unsettled obligation is `topologic_core`**: no licence in its package metadata at all, AGPL-3.0 upstream, and an in-process C extension, so the strongest form of linking under the strongest copyleft here — and §13 of the AGPL reaches users of a network service, which the FastAPI backend could become. Decision: a **Rust core owned by this project** is in development to replace that kernel, so the exposure is temporary by plan rather than by argument. A second route exists meanwhile: 0.9.71 makes the kernel pluggable and prefers a PythonOCC backend, falling back to `topologic_core` only because `pythonocc-core` (LGPL-3.0) is not installed; untested, and it would need the same verify-everything treatment as a version bump. Until one lands, do not distribute a build carrying the binary. Not legal advice. |
+| 2026-10-03 | Finished the dual enumerator's blind spot (§6.0). **The planned fix was wrong and is reverted; the generator now explains its failures instead** | The theory was that triangulating by chords invents contacts that over-constrain sparse briefs. Built it: fill an inner face with a void cell rather than a chord. It **never fired once** — not on any fixture, nor on a deliberately sparse chain or star — because the outer-walk chording leaves every inner face a triangle before that branch runs. Reverted (the M15c precedent). What actually blocks `house_ground` and `gallery_rich` is arithmetic: a rectangular dual is a perfect tiling, so every room's size is fixed by the walls it shares, and these rooms cannot tile within ±10 %. Measured by widening the bands uniformly: house_ground needs about ±50 %, gallery_rich about ±30 %; at ±35 % and below neither sizes at all. So `dual` now raises `WillNotTile` with that number, what it means, and which engines can do the brief instead, in about 2 s. Two gate tests keep it honest: the message must name a tolerance of at least 20 %, and following its advice (house_ground at ±50 %) must really produce verified plans — it gives 2. **A bug found on the way:** `insert_vertex` was never ported into `solve/dual.py`, and the seed loop's blanket `except Exception` swallowed the `NameError` as "this drawing did not work", so the change appeared to run and do nothing. The except is now narrowed to the geometric failures, and a programming error surfaces. |
 
 ## 6. Open questions (answer as they become blocking)
+
+00000. (2026-09-27, licensing) Does `topologic_core` go before the first distributed build? It declares no licence and is AGPL-3.0 upstream. The plan is the project's own Rust core; the stopgap is `pythonocc-core`, which 0.9.71 already prefers. Whichever lands, the switch is a verify-everything task: the kernel is what `realise` and `verify` stand on.
+
+0000. (2026-09-21, from the failed M16) Does §D get another decoder or get dropped? Sequence pair plus bottom-left packing is wrong for corridor-served briefs, measured. The alternative that fits is the M12 dual's sizer: walls are variables and nothing compacts toward an origin, so a contact holds because a constraint says so. That would be "sequence pair for the search space, dual dimensioning for the decoder". Against doing anything: the beam already solves the 51- and 64-space briefs in seconds since M15a, so there is no brief in the repository that needs §D.
+
+000. **Answered 2026-09-21 by the architect: not an issue.** Rows of unequal depth and ragged ends "might actually turn into an architectural feature depending on the building", so the outline is left alone: no squaring-off term, no penalty. `tests/gates/test_m15c.py` keeps watching what does matter, empty ground *enclosed* by spaces. Original note: the outline, not gaps, is where a plan's empty ground goes: up to a third of a large brief's bounding box, from rows of unequal depth and ragged ends. Is that worth acting on? It is partly real (an awkward building shape) and partly an artefact of measuring against a rectangle a building need not fill. Options: score the outline separately from holes so an architect can see which they have; let the beam trade room depth within tolerance to square a row off (the dual enumerator's void ring is the same idea from the other direction); or accept it and measure compactness only against the realised envelope.
+
+00. **Answered 2026-09-20 by taking option (a)** (see §5). Chained corridors: a room's required contact becomes "touches either segment". Options: (a) drop explicit room–corridor contacts when `segments > 1` and rely on the access rule (every room's door opens onto some corridor on its level), scoring adjacency on room–room wishes only; (b) add a disjunctive contact form `[[corridor_0a, corridor_0b], room]` to the brief. (a) is smaller and matches rule D8; (b) keeps adjacency meaningful. Taken: (a). Revisit (b) if an architect needs to say *which* segment a room belongs to, or if the beam's unreliability on chained spines has to be fixed by scoring rather than by search.
+0. **Answered 2026-10-03: the premise was wrong, and the generator now explains itself instead.** The blind spot is not the triangulation. Voids instead of chords inside faces was built and never fired (§5), and the sizing is what fails: a rectangular plan leaves no slack, so a brief whose rooms chain to each other cannot tile within ±10 %. `dual` now raises with the tolerance that would clear it. Still open if anyone wants it: enumerating staircase directions instead of sampling them, and interior filler cells, which are blocked by the separating-triangle rule.
 
 1. Is the tolerance band symmetric and per-side, or should area be preserved (aspect free within a range)? Default per-side; revisit in M2 with real briefs.
 2. Minimum contact overlap for "adjacent but no door" vs "access": propose 0.5 m vs 1.0 m (door 0.9 m + clearance).

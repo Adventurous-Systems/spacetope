@@ -176,8 +176,9 @@ def realise(brief: Brief, placement: Placement, intent: AssemblyGraph | None = N
         cc = cells[0]
     else:
         cc = CellComplex.ByCells(cells, silent=True)
-    if cc is None:
-        raise RealiseError("CellComplex.ByCells returned None (gaps or disjoint cells)")
+    # 0.9.57 returns None when the cells do not merge, 0.9.71 an empty CellComplex (docs/TOPOLOGICPY_NOTES.md §14)
+    if cc is None or (len(cells) > 1 and not (Topology.Cells(cc) or [])):
+        raise RealiseError("CellComplex.ByCells built nothing (gaps or disjoint cells)")
     if Topology.IsInstance(cc, "CellComplex"):
         cc = Topology.TransferDictionariesBySelectors(cc, selectors, tranCells=True, numWorkers=1)
     built = Topology.Cells(cc) if Topology.IsInstance(cc, "CellComplex") else [cc]

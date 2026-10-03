@@ -14,6 +14,9 @@ async function mockBackend(page) {
   const read = (f) => fs.readFileSync(path.join(FIX, f));
   const json = (f) => JSON.parse(read(f).toString());
   const rec = json('recording.json');
+  // the mocked run must not need a live backend (found 2026-09-20: the health check fell through to the proxy)
+  await page.route('**/api/health', (r) => r.fulfill({ json: { ok: true, generators: ['treemap', 'beam', 'cpsat', 'dual'],
+    capabilities: { treemap: { multi_level: false }, beam: { multi_level: true }, cpsat: { multi_level: true }, dual: { multi_level: false } } } }));
   await page.route('**/api/fixtures', (r) => r.fulfill({ json: rec.fixtures }));
   await page.route('**/api/fixtures/*', (r) => r.fulfill({ json: rec.brief }));
   await page.route('**/api/brief', (r) => r.fulfill({ json: { brief_id: 'mock', brief: rec.brief } }));

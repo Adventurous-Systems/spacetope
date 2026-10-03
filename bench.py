@@ -10,7 +10,7 @@ import csv
 import time
 from pathlib import Path
 
-COLUMNS = ["generator", "fixture", "seed", "options", "verified", "distinct", "adjacency", "deviation",
+COLUMNS = ["generator", "fixture", "seed", "options", "verified", "distinct", "distinct_topologies", "adjacency", "deviation",
            "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight", "t_gen", "t_realise"]
 SEEDS = (0, 1, 2, 3, 4)
 FIXTURES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair")
@@ -25,7 +25,7 @@ def registry() -> dict:
 
 
 # Fixed budgets so the scoreboard compares quality at equal cost; gates use their own budgets.
-BENCH_PARAMS = {"cpsat": {"time_limit": 20.0, "per_solve_max": 5.0}}
+BENCH_PARAMS = {"cpsat": {"time_limit": 20.0, "per_solve_max": 5.0}, "dual": {"time_limit": 20.0}}
 
 
 def run(out: Path, fixtures: tuple[str, ...], generators: dict, seeds=SEEDS) -> list[dict]:
@@ -37,7 +37,11 @@ def run(out: Path, fixtures: tuple[str, ...], generators: dict, seeds=SEEDS) -> 
         for fx in fixtures:
             brief = load(Path("fixtures") / f"{fx}.yaml")
             for seed in seeds:
-                row = run_generator(gen, brief, seed, BENCH_PARAMS.get(gname), gname)
+                try:
+                    row = run_generator(gen, brief, seed, BENCH_PARAMS.get(gname), gname)
+                except Exception as e:  # noqa: BLE001  (e.g. GeneratorUnsupported: single-level generator, multi-level brief)
+                    print(f"  {gname:8s} {fx:22s} seed {seed}: skipped ({type(e).__name__}: {str(e)[:60]})", flush=True)
+                    continue
                 rows.append({"generator": gname, "fixture": fx, "seed": seed, **row})
                 print(f"  {gname:8s} {fx:22s} seed {seed}: verified {row['verified']}/{row['options']} distinct {row['distinct']} adj {row['adjacency']} dev {row['deviation']} t {row['t_gen']}+{row['t_realise']}s", flush=True)
     return rows

@@ -137,7 +137,7 @@ def main(argv=None) -> int:
     r.set_defaults(fn=cmd_realise)
     g = sub.add_parser("generate", help="generate, verify, score and rank options for a brief")
     g.add_argument("brief")
-    g.add_argument("--generator", default="beam", choices=["beam", "cpsat", "treemap"])
+    g.add_argument("--generator", default="beam", choices=["beam", "cpsat", "treemap", "dual"])
     g.add_argument("--seed", type=int, default=0)
     g.add_argument("--params", help="JSON dict of generator params, e.g. '{\"k\": 4}'")
     g.add_argument("--out", help="directory for options.json and per-option files")

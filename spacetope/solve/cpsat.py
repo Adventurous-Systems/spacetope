@@ -36,6 +36,9 @@ class CpsatParams:
     w_perim: int = 20               # per mm of W + L
     rotate: bool = True
     symmetry_breaking: bool = True
+    frontage_cut: bool = True       # redundant cut: rooms on one corridor side must fit along it (PLAN M10)
+    w_stack: int = 3000             # reward per wall plane of level k that lands on a plane of level k-1 (PLAN M11)
+    stack_pairs_max: int = 200      # skip the stacking term when a level pair would need more pair literals than this
 
 
 @dataclass
@@ -76,6 +79,11 @@ class _Vars:
             m.Add(dr >= var - nom_rot).OnlyEnforceIf(self.rot); m.Add(dr >= nom_rot - var).OnlyEnforceIf(self.rot)
             m.Add(dr == 0).OnlyEnforceIf(self.rot.Not())
             self.dev_terms.append(dp * (1_000_000 // nom_plain) + dr * (1_000_000 // nom_rot))
+
+
+class _StopAtFirst(cp_model.CpSolverSolutionCallback):
+    def on_solution_callback(self) -> None:
+        self.StopSearch()
 
 
 def _touch_literal(m: cp_model.CpModel, a: _Vars, b: _Vars, side: str, need: int, name: str):
@@ -168,6 +176,49 @@ def solve_cpsat(brief: Brief, params: CpsatParams | None = None, seed: int = 0,
                     opts.extend(_touch_literal(m, V[r.name], V[c.name], side, need, f"acc_{r.name}_{c.name}_{side}") for side in HSIDES)
             if opts:
                 m.AddBoolOr(opts)
+    # a shaft reaches a corridor on every level it serves. With one corridor per level expansion makes this a
+    # required contact; on a chained spine it is a choice of segment, so it is stated here (PLAN M15b).
+    for s in brief.spaces:
+        if not s.is_shaft:
+            continue
+        for k in range(s.serves[0], s.serves[1] + 1):
+            opts = []
+            for c in brief.spaces:
+                if c.program != "corridor" or not on_level(c.name, k) or not can_touch(c.name, s.name):
+                    continue
+                key = frozenset((s.name, c.name))
+                if key in lits_by_pair:
+                    opts.extend(lits_by_pair[key])
+                else:
+                    need = required_overlap_mm(brief, s.name, c.name, p.door_mm)
+                    opts.extend(_touch_literal(m, V[s.name], V[c.name], side, need, f"sh_{s.name}_{c.name}_{k}_{side}") for side in HSIDES)
+            if opts:
+                m.AddBoolOr(opts)
+    # PLAN M10, redundant frontage cut. Spaces touching one side of a corridor do not overlap each other and each
+    # overlaps the corridor's extent, so all but the two outermost lie inside it: the sum of their smallest widths
+    # is at most the corridor's length on that side plus the two largest possible overhangs.
+    if p.frontage_cut:
+        OPP = {"+x": "-x", "-x": "+x", "+y": "-y", "-y": "+y"}
+        per_side: dict[tuple[str, str], list] = {}
+        for a, b in brief.contacts:
+            key = frozenset((a, b))
+            if key not in lits_by_pair or len(lits_by_pair[key]) != 4:
+                continue
+            for c, other, flip in ((a, b, False), (b, a, True)):
+                if brief.space(c).program != "corridor":
+                    continue
+                so = brief.space(other)
+                lo_w = min(so.band("w")[0], so.band("l")[0]); hi_w = max(so.band("w")[1], so.band("l")[1])
+                need = required_overlap_mm(brief, a, b, p.door_mm)
+                for side, lit in zip(HSIDES, lits_by_pair[key]):      # literals are from a's point of view
+                    c_side = OPP[side] if flip else side
+                    per_side.setdefault((c, c_side), []).append((lit, lo_w, max(0, hi_w - need)))
+        for (c, c_side), terms in per_side.items():
+            if len(terms) < 3:
+                continue
+            over = sorted((o for _, _, o in terms), reverse=True)[:2]
+            length = V[c].l if c_side in ("+x", "-x") else V[c].w
+            m.Add(sum(lit * lo_w for lit, lo_w, _ in terms) <= length + sum(over))
     # symmetry breaking among identical spaces
     if p.symmetry_breaking:
         groups: dict[tuple, list[str]] = {}
@@ -185,7 +236,31 @@ def solve_cpsat(brief: Brief, params: CpsatParams | None = None, seed: int = 0,
     for v in V.values():
         m.Add(W >= v.x1); m.Add(L >= v.y1)
     dev_terms = [t for v in V.values() for t in v.dev_terms]
-    m.Minimize(p.w_dev * sum(dev_terms) + p.w_perim * (W + L))
+    # PLAN M11: cross-level alignment as a soft term. A wall plane of a space on level k "hits" when it equals a wall
+    # plane of some space present on level k-1 (shafts count on every level they cover), which is how
+    # score.stacking reads a placement. One literal per (plane, plane below) implies the equality; one hit literal
+    # per plane is rewarded. Shafts already share their planes across levels and need no literals of their own.
+    stack_hits: list = []
+    stack_eq: list = []            # (literal, var_upper, var_lower) for hinting
+    if p.w_stack > 0 and n_levels > 1:
+        for k in range(1, n_levels):
+            upper = [s.name for s in brief.spaces if not s.is_shaft and levels.get(s.name) == k]
+            lower = [s.name for s in brief.spaces if on_level(s.name, k - 1)]
+            if not upper or not lower or len(upper) * len(lower) > p.stack_pairs_max:
+                continue
+            for r in upper:
+                for axis, ends in (("x", (V[r].x, V[r].x1)), ("y", (V[r].y, V[r].y1))):
+                    for e_i, end in enumerate(ends):
+                        eqs = []
+                        for q in lower:
+                            for q_end in ((V[q].x, V[q].x1) if axis == "x" else (V[q].y, V[q].y1)):
+                                lit = m.NewBoolVar(f"st_{r}_{axis}{e_i}_{q}_{q_end.Name()}")
+                                m.Add(end == q_end).OnlyEnforceIf(lit)
+                                eqs.append(lit); stack_eq.append((lit, end, q_end))
+                        hit = m.NewBoolVar(f"hit_{r}_{axis}{e_i}")
+                        m.AddBoolOr(eqs + [hit.Not()])      # hit -> some equality holds
+                        stack_hits.append(hit)
+    m.Minimize(p.w_dev * sum(dev_terms) + p.w_perim * (W + L) - p.w_stack * sum(stack_hits))
 
     if hint:
         for n, b in hint.items():
@@ -195,6 +270,14 @@ def solve_cpsat(brief: Brief, params: CpsatParams | None = None, seed: int = 0,
             rot = int((b.w, b.l) == (sp.nominal_mm("l"), sp.nominal_mm("w")) and sp.w != sp.l)
             m.AddHint(V[n].x, b.x); m.AddHint(V[n].y, b.y); m.AddHint(V[n].w, b.w); m.AddHint(V[n].l, b.l)
             m.AddHint(V[n].rot, rot)
+        if stack_eq:                                   # the beam's aligned planes become hinted equalities
+            val = {}
+            for n, b in hint.items():
+                if n in V:
+                    val[V[n].x.Name()] = b.x; val[V[n].x1.Name()] = b.x1; val[V[n].y.Name()] = b.y; val[V[n].y1.Name()] = b.y1
+            for lit, up, lo in stack_eq:
+                if up.Name() in val and lo.Name() in val:
+                    m.AddHint(lit, int(val[up.Name()] == val[lo.Name()]))
     placements: list[dict[str, Box]] = []
     statuses: list[str] = []
     seen: set = set()
@@ -209,6 +292,17 @@ def solve_cpsat(brief: Brief, params: CpsatParams | None = None, seed: int = 0,
         solver.parameters.random_seed = seed + i
         st = solver.Solve(m)
         status_name = solver.StatusName(st)
+        if st == cp_model.UNKNOWN and not placements:
+            # PLAN M10: no option yet and this share ran out. Splitting the budget k ways must not cost the first
+            # option: spend what is left on finding one, and stop at the first solution so later solves keep time.
+            remaining = p.time_limit - (time.perf_counter() - t_start)
+            if remaining > p.per_solve_min:
+                solver = cp_model.CpSolver()
+                solver.parameters.max_time_in_seconds = remaining
+                solver.parameters.num_workers = p.workers
+                solver.parameters.random_seed = seed + i
+                st = solver.Solve(m, _StopAtFirst())
+                status_name = solver.StatusName(st)
         statuses.append(status_name)
         if st not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             break

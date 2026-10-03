@@ -1,0 +1,26 @@
+# A single-level school wing on a squarish footprint: seven classrooms and their support need about 68 m of
+# corridor frontage, and a straight corridor in a 32 m envelope offers at most 64 m on its two sides. The
+# corridor is declared in two segments, so it turns a corner (PLAN M15b). Rooms name no corridor: with a
+# chained spine, access is by a door to whichever segment a room touches. Measured 2026-09-20: with
+# `segments: 1` the beam verifies nothing here over three seeds; with `segments: 2` it verifies 6 of 24.
+name: school_l_corridor
+levels: 1
+level_height: 3.5
+envelope: {w: 32, l: 28, h: 3.5}
+circulation:
+  corridor: {w: 2.4, l: 14, segments: 2}
+spaces:
+  - {name: class_1, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_2, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_3, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_4, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_5, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_6, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: class_7, w: 8, l: 7, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: staff, w: 6, l: 5, h: 3.5, program: room, wishes: {exterior: true}}
+  - {name: head_office, w: 4, l: 3.5, h: 3.5, program: room}
+  - {name: wc_boys, w: 4, l: 4, h: 3.5, program: room}
+  - {name: wc_girls, w: 4, l: 4, h: 3.5, program: room}
+  - {name: store, w: 3, l: 3, h: 3.5, program: room}
+contacts:
+  - [staff, head_office, {door: true}]

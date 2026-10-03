@@ -60,3 +60,81 @@ def diagnose_contact(c: Contact, placement: Placement, gap_limit_mm: int = 100) 
 def overlaps(placement: Placement) -> list[tuple[str, str]]:
     names = list(placement)
     return [(a, b) for i, a in enumerate(names) for b in names[i + 1:] if intersects(placement[a], placement[b])]
+
+
+def space_graph(brief: Brief, placement: Placement):
+    """Room-adjacency graph of a placement with a label per space = program + nominal size (orientation-free).
+    Pure networkx + integer boxes; used to tell real topological variety from swaps of identical rooms (PLAN M9)."""
+    import networkx as nx
+    g = nx.Graph()
+    for s in brief.spaces:
+        if s.name in placement:
+            g.add_node(s.name, kind=f"{s.program}:{min(s.w, s.l):g}x{max(s.w, s.l):g}x{s.h:g}")
+    names = list(g.nodes)
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            if any(contact_area(placement[a], placement[b], side) > 0 for side in ("+x", "-x", "+y", "-y", "ceiling", "floor")):
+                g.add_edge(a, b)
+    return g
+
+
+_ROT = {"+x": "+y", "+y": "-x", "-x": "-y", "-y": "+x", "ceiling": "ceiling", "floor": "floor"}
+_MIR = {"+x": "-x", "-x": "+x", "+y": "+y", "-y": "-y", "ceiling": "ceiling", "floor": "floor"}
+
+
+def _symmetries() -> list[dict[str, str]]:
+    """The eight symmetries of a plan (four rotations, each with or without a mirror) as side relabellings."""
+    out = []
+    for mirror in (False, True):
+        cur = {s: (_MIR[s] if mirror else s) for s in _ROT}
+        for _ in range(4):
+            out.append(dict(cur))
+            cur = {s: _ROT[v] for s, v in cur.items()}
+    return out
+
+
+def side_graph(brief: Brief, placement: Placement):
+    """Directed graph of shared walls: a -> b carries the side of a that touches b. Node label = program + size."""
+    import networkx as nx
+    g = nx.DiGraph()
+    for s in brief.spaces:
+        if s.name in placement:
+            g.add_node(s.name, kind=f"{s.program}:{min(s.w, s.l):g}x{max(s.w, s.l):g}x{s.h:g}")
+    names = list(g.nodes)
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            for side in SIDES:
+                if contact_area(placement[a], placement[b], side) > 0:
+                    g.add_edge(a, b, side=side); g.add_edge(b, a, side=OPPOSITE[side])
+    return g
+
+
+def topology_classes(brief: Brief, placements: list[Placement]) -> list[int]:
+    """Class index per placement. Two placements are in one class when their shared-wall graphs, with the side of
+    every contact, are isomorphic under some symmetry of the plan (rotation, mirror) and any swap of identical
+    spaces. So "kitchen on the long wall of the living room" and "kitchen on its short wall" differ, while a mirrored
+    plan or two identical offices trading places do not (PLAN M9, refined in M12)."""
+    import networkx as nx
+    from networkx.algorithms.isomorphism import categorical_edge_match, categorical_node_match
+    nm, em = categorical_node_match("kind", None), categorical_edge_match("side", None)
+    syms = _symmetries()
+    reps: list = []
+    out: list[int] = []
+    for pl in placements:
+        g = side_graph(brief, pl)
+        found = None
+        for k, r in enumerate(reps):
+            if g.number_of_edges() != r.number_of_edges():
+                continue
+            for T in syms:
+                gt = g.copy()
+                for _a, _b, d in gt.edges(data=True):
+                    d["side"] = T[d["side"]]
+                if nx.is_isomorphic(gt, r, node_match=nm, edge_match=em):
+                    found = k; break
+            if found is not None:
+                break
+        if found is None:
+            reps.append(g); found = len(reps) - 1
+        out.append(found)
+    return out

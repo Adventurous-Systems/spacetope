@@ -6,13 +6,27 @@ Apache License, Version 2.0 (see LICENSE).
 
 Third-party components used at runtime, with their own licences:
 
-  topologicpy            LGPL-3.0-or-later (0.9.68 and later, per PyPI metadata).
-                         NOTE: the version currently pinned in pyproject.toml, 0.9.57,
-                         declares "AGPL v3" in its metadata with a GPLv3 classifier.
-                         Bump the pin to >= 0.9.68 to run under LGPL terms, and treat
-                         that bump as a verify-everything change (docs/TOPOLOGICPY_NOTES.md).
-  topologic_core         binary kernel behind topologicpy; licence unstated in package
-                         metadata — confirm with the author before redistribution.
+  topologicpy            LGPL-3.0-or-later. The pinned 0.9.71 declares "GNU LESSER GENERAL
+                         PUBLIC LICENSE Version 3" and ships the LGPL and GPL texts in its
+                         wheel (verified 2026-09-27). spacetope imports it and neither copies
+                         nor modifies it, so spacetope stays Apache-2.0; see the note below
+                         before bundling it into a distributed artifact.
+  topologic_core         The binary geometry kernel topologicpy falls back to. Its package
+                         metadata declares NO licence at all, and its upstream source
+                         (github.com/wassimj/Topologic) is AGPL-3.0 (checked 2026-09-27).
+                         This is the one copyleft obligation in this project that is not
+                         settled, and it is the strongest: an in-process C extension under a
+                         licence whose §13 reaches users of a network service, which the
+                         FastAPI backend could become.
+                         Two routes out, neither taken yet:
+                           * topologicpy 0.9.71 prefers a PythonOCC backend and uses this
+                             kernel only as the fallback, so installing pythonocc-core
+                             (LGPL-3.0) may remove the dependency — untested here, and it
+                             needs the same verify-everything treatment as a version bump.
+                           * a Rust core for Topologic, owned by this project, is in
+                             development and is intended to replace this kernel.
+                         Until one lands, do not distribute a build that carries this binary
+                         without deciding the AGPL question first.
   OR-Tools (ortools)     Apache-2.0
   trimesh                MIT
   NetworkX               BSD-3-Clause
@@ -25,6 +39,8 @@ Third-party components used at runtime, with their own licences:
   Uvicorn                BSD-3-Clause
   PyTorch (torch)        BSD-3-Clause (optional, M6 learning only)
   PyTorch Geometric      MIT (optional, M6 learning only)
+  z3-solver              MIT (development only, the M13 cross-check)
+  squarify               Apache-2.0 (development only)
 
 Frontend components (frontend/package.json):
 
@@ -35,5 +51,7 @@ Frontend components (frontend/package.json):
   Vite                   MIT
   @playwright/test       Apache-2.0 (browser tests only)
 
-Licences marked above are as declared by each package. Verify before redistributing a
-binary or hosted product, especially the copyleft entries.
+Licences marked above are as declared by each package, checked against the installed
+distributions on 2026-09-27. Verify again before redistributing a binary or hosted product,
+especially the copyleft entries — and note that importing a library from PyPI, as spacetope
+does, is a weaker act than bundling one into something you ship.
