@@ -93,8 +93,9 @@ These are measured and gated, not suspicions.
 - **The beam on chained corridors** reaches a verified layout on one seed in four. `cpsat` finds the corner from
   feasibility alone. Use `cpsat` for briefs with `segments: N`.
 - **The dual enumerator** reaches fewer topologies than the beam on briefs without a corridor, and none at all on
-  `house_ground` or `gallery_rich`, where rooms chain to each other. Chord triangulation forces every pair on a
-  face to touch; voids instead of chords is the likely fix.
+  `house_ground` or `gallery_rich`. The cause was measured on 2026-10-03: a rectangular plan is a perfect tiling,
+  so those rooms cannot tile within ±10 % (they need about ±50 % and ±30 %). It is a property of the method, not a
+  defect, and the generator now says so with the tolerance that would clear it instead of returning nothing.
 - **CP-SAT is not seed-deterministic.** Speed was kept over reproducibility. Two runs of the same brief can give
   different plans, so gate assertions must hold for any valid solution.
 - **Two shafts no longer guarantee two ways down** once a spine is chained: the stair and the lift can land on

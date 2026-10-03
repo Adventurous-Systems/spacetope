@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import random
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 import networkx as nx
 from ortools.sat.python import cp_model
@@ -39,6 +39,13 @@ VOID_MAX = 200_000
 
 class NotPlanar(ValueError):
     """The wish graph cannot be drawn without crossings, so no rectangular dual exists."""
+
+
+class WillNotTile(ValueError):
+    """The wishes can be drawn, but the rooms cannot tile a rectangle inside their tolerance bands."""
+
+
+TOLERANCE_PROBE = (0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75)
 
 
 @dataclass
@@ -104,7 +111,7 @@ def ptp_graph(G: nx.Graph, seed: int, through: set[str]):
                 if v in kept and (pair in kept[v] or pair[::-1] in kept[v]):
                     continue
                 if pair[0] != pair[1] and not G.has_edge(*pair):
-                    action = (pair[0], v, pair[1]); break
+                    action = ("chord", pair[0], v, pair[1]); break
             if action:
                 break
         if not action:
@@ -113,15 +120,18 @@ def ptp_graph(G: nx.Graph, seed: int, through: set[str]):
                 for i, v in enumerate(f):
                     occ.setdefault(v, []).append(i)
                 rep = [i for idx in occ.values() if len(idx) > 1 for i in idx]
+                # Filling a face with a void instead of chording it was tried on 2026-10-03 and reverted: by the
+                # time this runs the outer-walk chording has already left every inner face a triangle, so the
+                # branch never fired on any fixture, nor on a deliberately sparse chain or star (PLAN §5).
                 for i in (rep if rep else (range(len(f)) if len(f) > 3 else ())):
                     a, b = f[i - 1], f[(i + 1) % len(f)]
                     if a != b and not G.has_edge(a, b):
-                        action = (a, f[i], b); break
+                        action = ("chord", a, f[i], b); break
                 if action:
                     break
         if not action:
             break
-        a, v, b = action
+        _, a, v, b = action
         emb = insert_chord(emb, a, v, b); G.add_edge(a, b); added.append((a, b))
     fs = faces_of(emb); fs.sort(key=len, reverse=True)
     outer = fs[0]; n = len(outer)
@@ -140,7 +150,7 @@ def ptp_graph(G: nx.Graph, seed: int, through: set[str]):
             entries.append(("void", i, void))
     if not thr_pos and n == 3:
         entries.insert(1, ("void", 0, f"void_0b_{outer[0]}"))    # a ring of three voids would be a separating triangle
-    Ga = nx.Graph(G); voids = []
+    Ga = nx.Graph(G); voids: list[str] = []
     for kind, i, name in entries:
         if kind == "void":
             voids.append(name); Ga.add_edge(name, outer[i])
@@ -345,6 +355,31 @@ def dimension(G, emb, rel, ccw, bands, nominal, need, p: DualParams, envelope: d
 
 # ----------------------------------------------------------------------------- generator
 
+def _widen(nominal: dict[str, tuple[int, int]], names, tol: float) -> dict:
+    """Bands at a uniform ±tol around each nominal, for asking how much give the brief would need."""
+    return {n: ((max(1, int(nominal[n][0] * (1 - tol))), int(nominal[n][0] * (1 + tol))),
+                (max(1, int(nominal[n][1] * (1 - tol))), int(nominal[n][1] * (1 + tol)))) for n in names}
+
+
+def tolerance_needed(probes, nominal, p: DualParams, env, deadline: float) -> float | None:
+    """The smallest uniform tolerance from `TOLERANCE_PROBE` at which any kept drawing sizes, or None if none does
+    by the deadline. Used only to explain a failure, never to loosen what the architect asked for."""
+    quick = replace(p, size_seconds=min(p.size_seconds, 1.0))
+    for tol in TOLERANCE_PROBE:
+        for Ga, emb, rels, ccw, bands, need, voids in probes:
+            wide = dict(bands)
+            wide.update(_widen(nominal, [n for n in bands if n not in voids and n in nominal], tol))
+            for rel in rels[:2]:
+                if time.perf_counter() > deadline:
+                    return None
+                try:
+                    if dimension(Ga, emb, rel, ccw, wide, nominal, need, quick, env):
+                        return tol
+                except (RuntimeError, KeyError, StopIteration):
+                    continue
+    return None
+
+
 def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> list[dict[str, Box]]:
     p = DualParams(**(params or {}))
     G = nx.Graph(); G.add_nodes_from(s.name for s in brief.spaces); G.add_edges_from(brief.contacts)
@@ -356,15 +391,16 @@ def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> l
     nominal = {s.name: (s.nominal_mm("w"), s.nominal_mm("l")) for s in brief.spaces}
     t0 = time.perf_counter()
     out: list[dict[str, Box]] = []
+    graphs = labellings_found = 0
+    probes: list[tuple] = []            # drawings kept aside, to explain a failure with
     for i in range(p.max_seeds):
         if len(out) >= p.k or time.perf_counter() - t0 > p.time_limit:
             break
         try:
             built = ptp_graph(G, seed * 7919 + i, through)
-        except NotPlanar:
-            raise
-        except Exception:  # noqa: BLE001  (an embedding this construction cannot triangulate: try the next seed)
-            continue
+        except (nx.NetworkXException, RuntimeError, AssertionError, StopIteration, KeyError, IndexError):
+            continue        # an embedding this construction cannot triangulate; a NameError or the like must not
+                            # be caught here — a blanket except once hid a missing helper as "this seed failed"
         if built is None:
             continue
         Ga, emb, voids, _added = built
@@ -373,7 +409,11 @@ def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> l
             b2[v] = ((1, VOID_MAX), (1, VOID_MAX))
         need = {frozenset((a, b)): (1 if (a in voids or b in voids) else required_overlap_mm(brief, a, b, p.door_mm))
                 for a, b in Ga.edges() if a not in OUTER and b not in OUTER}
+        graphs += 1
         rels, ccw = labellings(Ga, emb, p.rel_cap, seed + i)
+        labellings_found += len(rels)
+        if rels and len(probes) < 3:
+            probes.append((Ga, emb, rels, ccw, b2, need, voids))
         for rel in rels:
             if len(out) >= p.k or time.perf_counter() - t0 > p.time_limit:
                 break
@@ -391,4 +431,22 @@ def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> l
             if out and len(set(topology_classes(brief, out + [pl]))) == len(out):
                 continue                                   # same topology class as one already kept (out holds one per class)
             out.append(pl)
-    return out
+    if out:
+        return out
+    # Nothing came back. Say which wall it hit, rather than hand the architect an empty gallery (PLAN M12, §6.0).
+    if graphs == 0:
+        raise WillNotTile("the wished contacts leave a room enclosed by three others that all touch each other, "
+                          "which no arrangement of rectangles can satisfy; relax one of those contacts")
+    if labellings_found == 0:
+        raise WillNotTile(f"the wishes were drawn {graphs} ways and none admits a rectangular plan")
+    if probes:
+        tol = tolerance_needed(probes, nominal, p, env, time.perf_counter() + max(5.0, p.time_limit / 3))
+        if tol is not None:
+            raise WillNotTile(
+                f"these rooms cannot tile a rectangle within their tolerance: {labellings_found} arrangements were "
+                f"found over {graphs} drawings and none could be sized. A rectangular plan leaves no slack, so every "
+                f"room's size is fixed by the walls it shares. About ±{int(tol * 100)} % would be needed, against the "
+                f"±10 % the brief allows. Widen the tolerance of the rooms that must touch each other, or use `beam` "
+                f"or `cpsat`, which may leave space between rooms.")
+    raise WillNotTile(f"{labellings_found} arrangements over {graphs} drawings, none of which could be sized within "
+                      f"the tolerance bands, at any tolerance tried")

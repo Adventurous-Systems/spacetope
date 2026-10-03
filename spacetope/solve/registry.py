@@ -3,7 +3,7 @@ from .beam import BeamParams, beam_search
 from .multilevel import beam_multilevel
 from .treemap import treemap
 from .cpsat import cpsat_generator
-from .dual import NotPlanar, dual_generator
+from .dual import NotPlanar, WillNotTile, dual_generator
 
 
 def _beam(brief, params, seed):
@@ -46,7 +46,7 @@ def _dual(brief, params, seed):
         raise GeneratorUnsupported(reason)
     try:
         return dual_generator(brief, params, seed)
-    except NotPlanar as e:
+    except (NotPlanar, WillNotTile) as e:
         raise GeneratorUnsupported(f"dual: {e}") from e
 
 

@@ -1,7 +1,12 @@
 """M12 gate: rectangular-dual generator (design note B)."""
+import re
+
 import pytest
 
+import yaml
+
 from spacetope.brief import Brief, load
+from spacetope.circulation import prepare
 from spacetope.pipeline import run_generator
 from spacetope.solve.registry import GENERATORS, GeneratorUnsupported
 
@@ -59,3 +64,33 @@ def test_non_planar_wishes_are_refused():
 def test_multi_level_is_refused(fixtures_dir):
     with pytest.raises(GeneratorUnsupported):
         GENERATORS["dual"](load(fixtures_dir / "two_levels_stair.yaml"), None, 0)
+
+
+def test_it_says_why_when_it_cannot_tile(fixtures_dir):
+    """A brief whose rooms chain to each other has no rectangular plan inside a ±10 % tolerance. Rather than hand
+    the architect an empty gallery, the generator names the wall it hit and what would clear it (PLAN §6.0,
+    answered 2026-10-03)."""
+    for fx, least in (("house_ground", 20), ("gallery_rich", 20)):
+        brief, _ = prepare(load(fixtures_dir / f"{fx}.yaml"))
+        with pytest.raises(GeneratorUnsupported) as e:
+            GENERATORS["dual"](brief, {"k": 4, "time_limit": 45.0}, 0)
+        msg = str(e.value)
+        assert "cannot tile" in msg and "tolerance" in msg
+        pct = int(re.search(r"±(\d+) %", msg).group(1))
+        assert pct >= least, msg                       # it asks for real extra room, not a rounding
+        assert "beam" in msg and "cpsat" in msg        # and points at the engines that can do it
+
+
+def test_the_advice_it_gives_is_true(fixtures_dir):
+    """Widen the tolerance as the message asks and the same brief does produce plans. Without this the message
+    could be a comfortable fiction."""
+    raw = yaml.safe_load((fixtures_dir / "house_ground.yaml").read_text())
+    wide = Brief.from_dict({**raw, "name": "house_wide", "spaces": [{**s, "tol": 0.5} for s in raw["spaces"]]})
+    row = run_generator(GENERATORS["dual"], wide, 0, {"k": 4, "time_limit": 90.0}, "dual")
+    assert row["verified"] >= 1 and row["verified"] == row["options"], row
+    assert row["adjacency"] == 1.0, row
+
+
+def test_a_brief_it_can_do_is_unaffected(fixtures_dir):
+    brief, _ = prepare(load(fixtures_dir / "eight_rooms_corridor.yaml"))
+    assert len(GENERATORS["dual"](brief, {"k": 4, "time_limit": 45.0}, 0)) >= 4
