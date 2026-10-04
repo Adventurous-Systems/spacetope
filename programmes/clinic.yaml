@@ -1,0 +1,17 @@
+# One level: consulting rooms off a corridor, with reception chained to waiting and treatment to imaging.
+name: clinic
+levels: 1
+level_height: 3.2
+envelope: {area_factor: [2.0, 2.8], aspect: [1.5, 2.6]}
+circulation:
+  corridor: {w: 2.0, l: from_frontage}
+rooms:
+  - {type: consult, w: 3.5, l: 3, count: [3, 7], exterior: 1.0}
+  - {type: waiting, w: 6, l: 5, count: 1, exterior: 1.0,
+     attach: {type: reception, w: 3, l: 3, door: true}}
+  - {type: imaging, w: 7, l: 6, count: [0, 1],
+     attach: {type: treatment, w: 4, l: 3.5, door: true}}
+  - {type: laboratory, w: 7, l: 5, count: [0, 1]}
+  - {type: wc, w: 2, l: 2.5, count: [1, 2]}
+  - {type: store, w: 2, l: 2, count: 1}
+tolerance: {room: 0.10, corridor: {l: [-0.5, 2.0]}}

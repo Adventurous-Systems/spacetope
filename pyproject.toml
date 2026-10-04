@@ -36,7 +36,7 @@ testpaths = ["tests"]
 markers = [
   "gate_m0: M0 gate", "gate_m1: M1 gate", "gate_m2: M2 gate", "gate_m3: M3 gate",
   "gate_m4: M4 gate", "gate_m5: M5 gate", "gate_m6: M6 gate", "gate_m7: M7 gate", "gate_m8: M8 gate",
-  "gate_m9: M9 gate", "gate_m10: M10 gate", "gate_m11: M11 gate", "gate_m12: M12 gate", "gate_m13: M13 gate", "gate_m14: M14 gate", "gate_m15: M15 gate", "gate_m16: M16 gate",
+  "gate_m9: M9 gate", "gate_m10: M10 gate", "gate_m11: M11 gate", "gate_m12: M12 gate", "gate_m13: M13 gate", "gate_m14: M14 gate", "gate_m15: M15 gate", "gate_m16: M16 gate", "gate_m17: M17 gate",
   "slow: builds topologic geometry",
 ]
 addopts = "-q"

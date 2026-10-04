@@ -35,9 +35,9 @@ the engine.
 | M15b | Chained (L, U) corridors | done with `cpsat` | ” |
 | M15c | Gap-closing pass | **measured and dropped**: nothing to close | ” |
 | M16 | Sequence pair + annealing | **gate failed**, not registered | 14 |
-| M17 | Brief programmes and dataset L0 | planned | — |
+| M17 | Brief programmes and dataset L0 | done | 14 |
 
-**225 tests** collected in total, 63 of them fast. All green as of 2026-09-22 on topologicpy 0.9.71.
+**250 tests** collected in total, 63 of them fast. All green as of 2026-10-04 on topologicpy 0.9.71.
 
 ---
 
@@ -60,7 +60,12 @@ turns that into concrete spaces; validation reports problems in plain sentences 
 verification checks, scores, and a ranking. Options are exported as GLB, BREP with a selector sidecar, OBJ,
 JSON, and (since M14) a single TPY archive that keeps dictionaries and doors.
 
-**Interfaces**: `spacetope generate|realise|floors|export`, a FastAPI backend, and a React canvas.
+**Interfaces**: `spacetope generate|realise|floors|export|programme`, a FastAPI backend, and a React canvas.
+
+**Programmes** (`docs/PROGRAMMES.md`) describe a *kind* of building rather than one building: office, secondary
+school, clinic and housing ship with the project. `spacetope programme clinic --seeds 0-99 --out dir` draws a
+hundred briefs; `--dataset rows.jsonl` turns them into training rows instead, at about 5,500 an hour across the
+four families. `variations` perturbs a brief seven ways for robustness sweeps.
 
 ---
 

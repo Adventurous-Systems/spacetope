@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator
 
 from ..brief import Brief
 from ..pipeline import Option
@@ -83,3 +83,48 @@ def export_pyg(brief: Brief, options: list[Option], path: str | Path) -> dict:
         graphs.append(t); n_nodes += g.number_of_nodes(); n_edges += g.number_of_edges()
     done = tgraph.export_csv(graphs, str(path), node_features=NODE_FEATURES)
     return {"graphs": len(graphs), "nodes": n_nodes, "edges": n_edges, "classes": len(set(classes)), "written": done}
+
+
+def placement_row(brief: Brief, placement: dict, generator: str = "", seed: int = 0, programme: str = "") -> dict:
+    """One dataset row from a placement that passed the kernel-free checks (PLAN M17). Everything here is pure, so
+    rows can be made by the thousand; `check_row` re-realises and re-verifies a sample against the kernel."""
+    from ..score import cheap_scores
+    intent = assembly_from_placement(brief, placement)
+    return {
+        "brief": brief.to_dict(),
+        "brief_graph": {"nodes": [{"name": s.name, "program": s.program, "w": s.w, "l": s.l, "h": s.h} for s in brief.spaces],
+                        "required": [list(c) for c in brief.contacts]},
+        "programme": programme,
+        "generator": generator,
+        "seed": seed,
+        "signature": [list(s) for s in intent.signature()],
+        "placement": {n: b.to_dict() for n, b in placement.items()},
+        "scores": cheap_scores(brief, placement),
+        "preverified": True,
+    }
+
+
+def rows_from_programme(programme: str, seeds, generator, gen_name: str = "beam", params: dict | None = None,
+                        per_brief: int | None = None) -> "Iterator[dict]":
+    """Draw briefs from a programme, generate placements, keep the ones the kernel-free checks accept, and yield a
+    row for each. Briefs the programme cannot draw, or that do not validate, are skipped rather than raised."""
+    from ..circulation import BriefInvalid, prepare
+    from ..preverify import preverify
+    from ..programme import ProgrammeError, sample
+    for seed in seeds:
+        try:
+            brief, _front = sample(programme, seed)
+            expanded, _warn = prepare(brief)
+        except (ProgrammeError, BriefInvalid):
+            continue
+        try:
+            placements = generator(expanded, params, seed)
+        except Exception:  # noqa: BLE001  (a generator that refuses this brief: the next seed may suit it)
+            continue
+        kept = 0
+        for pl in placements:
+            if per_brief is not None and kept >= per_brief:
+                break
+            if preverify(expanded, pl)[0]:
+                kept += 1
+                yield placement_row(expanded, pl, gen_name, seed, programme)

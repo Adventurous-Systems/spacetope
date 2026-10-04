@@ -128,6 +128,62 @@ def cmd_export(args) -> int:
     return 0
 
 
+def _seed_range(spec: str) -> list[int]:
+    """`7`, `0-99`, or `1,4,9`."""
+    out: list[int] = []
+    for part in str(spec).split(","):
+        if "-" in part:
+            lo, hi = part.split("-", 1)
+            out.extend(range(int(lo), int(hi) + 1))
+        else:
+            out.append(int(part))
+    return out
+
+
+def cmd_programme(args) -> int:
+    """Draw briefs from a programme: write them out, perturb them, or turn them into dataset rows (M17)."""
+    from pathlib import Path
+    from .circulation import BriefInvalid, prepare
+    from .programme import ProgrammeError, names, sample, variations
+    if args.list or not args.name:
+        print(json.dumps({"programmes": names()}, indent=1))
+        return 0
+    seeds = _seed_range(args.seeds)
+    out_dir = Path(args.out) if args.out else None
+    if out_dir:
+        out_dir.mkdir(parents=True, exist_ok=True)
+    written, tight, invalid, rows = [], 0, [], 0
+    if args.dataset:
+        from .learn.dataset import rows_from_programme, write_rows
+        from .solve.registry import GENERATORS
+        rows = write_rows(rows_from_programme(args.name, seeds, GENERATORS[args.generator], args.generator,
+                                              json.loads(args.params) if args.params else None, args.per_brief),
+                          args.dataset)
+    else:
+        for seed in seeds:
+            try:
+                brief, front = sample(args.name, seed)
+                expanded, _ = prepare(brief)
+            except (ProgrammeError, BriefInvalid) as e:
+                invalid.append({"seed": seed, "why": str(e)[:160]})
+                continue
+            tight += front.tight
+            entry = {"seed": seed, "name": brief.name, "spaces": len(expanded.spaces), "levels": brief.levels,
+                     "frontage": round(front.ratio, 3), "tight": front.tight}
+            if out_dir:
+                (out_dir / f"{brief.name}.yaml").write_text(brief.to_yaml())
+                entry["path"] = str(out_dir / f"{brief.name}.yaml")
+                if args.variations:
+                    for kind, v in variations(brief, seed).items():
+                        (out_dir / f"{brief.name}__{kind}.yaml").write_text(v.to_yaml())
+                    entry["variations"] = len(variations(brief, seed))
+            written.append(entry)
+    print(json.dumps({"programme": args.name, "seeds": len(seeds), "briefs": len(written),
+                      "tight_frontage": tight, "invalid": invalid[:5], "rows": rows,
+                      "out": str(out_dir) if out_dir else None, "dataset": args.dataset}, indent=1))
+    return 0 if (rows or written) else 1
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="spacetope")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -157,6 +213,17 @@ def main(argv=None) -> int:
     x.add_argument("--obj", help="output .obj path (a .mtl is written next to it)")
     x.add_argument("--json", help="output .json path")
     x.set_defaults(fn=cmd_export)
+    pr = sub.add_parser("programme", help="draw briefs from a programme, or dataset rows from one (M17)")
+    pr.add_argument("name", nargs="?", help="programme name, e.g. office; omit with --list")
+    pr.add_argument("--list", action="store_true", help="list the programmes that exist")
+    pr.add_argument("--seeds", default="0-9", help="7, 0-99 or 1,4,9")
+    pr.add_argument("--out", help="directory to write one brief YAML per seed")
+    pr.add_argument("--variations", action="store_true", help="also write each brief's variations (needs --out)")
+    pr.add_argument("--dataset", help="write JSONL dataset rows here instead of briefs")
+    pr.add_argument("--generator", default="beam", choices=["beam", "cpsat", "treemap", "dual"])
+    pr.add_argument("--params", help="JSON dict of generator params")
+    pr.add_argument("--per-brief", type=int, default=None, help="cap the rows kept per brief")
+    pr.set_defaults(fn=cmd_programme)
     args = ap.parse_args(argv)
     return args.fn(args)
 
