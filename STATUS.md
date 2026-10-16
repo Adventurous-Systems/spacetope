@@ -1,6 +1,6 @@
 # spacetope — status
 
-**Date:** 2026-09-22 · **Branch:** `m9-stretch` (2 commits ahead of `main`) · **Working tree:** clean
+**Date:** 2026-10-16 · **Branch:** `m9-stretch` (7 commits ahead of `main`) · **Working tree:** clean
 
 Turn an architect's list of spaces into candidate non-manifold cell complexes, verify them, score them, and
 offer the architect a choice. Full context in `docs/PLAN.md`; that file's §0 explains the idea in plain words
@@ -38,6 +38,10 @@ the engine.
 | M17 | Brief programmes and dataset L0 | done | 14 |
 
 **250 tests** collected in total, 63 of them fast. All green as of 2026-10-04 on topologicpy 0.9.71.
+
+2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
+drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is
+applied; `ComplexScene.jsx` now recompiles a material when it switches between opaque and translucent.
 
 ---
 
