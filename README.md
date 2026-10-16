@@ -118,6 +118,9 @@ multilevel, cpsat, redim, treemap) · `realise.py` / `verify.py` / `score.py` ·
 
 ## Licence
 
-Apache-2.0 (`LICENSE`), with third-party terms in `NOTICE`. Contributions need a DCO sign-off and the CLA
-in `CONTRIBUTING.md`, which keeps relicensing possible. topologicpy is LGPL-3.0-or-later from 0.9.68; the
-version pinned here, 0.9.57, declares AGPL v3, so plan the bump before shipping a hosted product.
+Dual-licensed: **AGPL-3.0-or-later** (`LICENSE`), or a **commercial licence** from Adventurous Systems for
+use without the AGPL's obligations (`COMMERCIAL.md`). Versions up to commit `c419c33` (2026-10-16) were
+released under Apache-2.0 and stay so for whoever has them. Third-party terms are in `NOTICE`: topologicpy
+0.9.71 is LGPL-3.0-or-later; the `topologic_core` kernel it falls back to is AGPL-3.0 upstream and is not
+covered by a commercial licence. Contributions need a DCO sign-off and the CLA in `CONTRIBUTING.md`, which is
+what makes the commercial licence possible.

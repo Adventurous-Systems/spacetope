@@ -1,16 +1,24 @@
 spacetope
-Copyright 2026 Arlav
+Copyright 2026 Adventurous Systems
 
-This product includes software developed for spacetope, licensed under the
-Apache License, Version 2.0 (see LICENSE).
+spacetope is dual-licensed:
+
+  * under the GNU Affero General Public License, version 3 or (at your option) any
+    later version (AGPL-3.0-or-later, see LICENSE); or
+  * under a commercial licence from Adventurous Systems, for use without the AGPL's
+    obligations (see COMMERCIAL.md).
+
+Versions published before 2026-10-16 (up to and including commit c419c33) were released
+under the Apache License, Version 2.0; anyone who received those versions keeps those
+rights for them.
 
 Third-party components used at runtime, with their own licences:
 
   topologicpy            LGPL-3.0-or-later. The pinned 0.9.71 declares "GNU LESSER GENERAL
                          PUBLIC LICENSE Version 3" and ships the LGPL and GPL texts in its
                          wheel (verified 2026-09-27). spacetope imports it and neither copies
-                         nor modifies it, so spacetope stays Apache-2.0; see the note below
-                         before bundling it into a distributed artifact.
+                         nor modifies it; LGPL is compatible with both the AGPL release and
+                         a commercial licence, provided topologicpy stays replaceable.
   topologic_core         The binary geometry kernel topologicpy falls back to. Its package
                          metadata declares NO licence at all, and its upstream source
                          (github.com/wassimj/Topologic) is AGPL-3.0 (checked 2026-09-27).
@@ -25,8 +33,9 @@ Third-party components used at runtime, with their own licences:
                              needs the same verify-everything treatment as a version bump.
                            * a Rust core for Topologic, owned by this project, is in
                              development and is intended to replace this kernel.
-                         Until one lands, do not distribute a build that carries this binary
-                         without deciding the AGPL question first.
+                         The AGPL release of spacetope may be combined with it. A commercial
+                         licence of spacetope does NOT cover this binary: a closed build, or a
+                         commercial licensee, must use a kernel without it.
   OR-Tools (ortools)     Apache-2.0
   trimesh                MIT
   NetworkX               BSD-3-Clause

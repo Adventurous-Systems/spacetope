@@ -133,16 +133,19 @@ Answered recently: ragged outlines are not a defect (2026-09-21); chained corrid
 
 ## 6. Licensing
 
-spacetope is Apache-2.0 and stays that way: topologicpy 0.9.71 is LGPL-3.0-or-later and spacetope imports it
-without copying or modifying it, which is the case the LGPL permits. Reviewed against the installed
-distributions on 2026-09-27; `NOTICE` carries the detail.
+Since 2026-10-16 spacetope is **dual-licensed: AGPL-3.0-or-later, or a commercial licence** from
+**Adventurous Systems** (`COMMERCIAL.md`). Versions up to `c419c33` were Apache-2.0 and stay so for whoever has
+them. Adventurous Systems holds the copyright (by written assignment from the author, who held it personally
+until then) and the CLA lets contributions be relicensed, so Adventurous Systems can use spacetope in a closed
+product (AFlow) regardless of the public licence. topologicpy 0.9.71 is LGPL-3.0-or-later and is imported, not copied or modified, which suits
+both licences. `NOTICE` carries the detail.
 
-One obligation is open. `topologic_core`, the binary geometry kernel, declares no licence in its metadata and
+One obligation is open, and it now limits the commercial side only. `topologic_core`, the binary geometry kernel, declares no licence in its metadata and
 its upstream source is AGPL-3.0, and it is an in-process C extension. **A Rust core owned by this project is in
 development to replace it.** Meanwhile topologicpy 0.9.71 prefers a PythonOCC backend and falls back to this
 kernel only because `pythonocc-core` (LGPL-3.0) is not installed, so that may be a faster route; it is untested
-and would need the same verify-everything treatment as a version bump. Until one lands, do not distribute a
-build that carries the binary.
+and would need the same verify-everything treatment as a version bump. The AGPL release may carry the binary;
+a closed build or a commercial licensee may not, until one of the two lands.
 
 ## 7. Running it
 
