@@ -67,8 +67,9 @@ def _graph(entry: dict) -> dict | None:
     return cached
 
 
-def _option_summary(job_id: str, i: int, o: Option) -> dict:
-    d = {"index": i, "ok": o.ok, "scores": o.scores, "signature": [list(s) for s in o.signature],
+def _option_summary(job_id: str, i: int, o: Option, topology_class: int | None = None) -> dict:
+    d = {"index": i, "ok": o.ok, "scores": o.scores, "analysis": o.analysis, "topology_class": topology_class,
+         "signature": [list(s) for s in o.signature],
          "placement": {n: b.to_dict() for n, b in o.placement.items()}, "verify": o.report.to_dict(),
          "generator": o.generator, "seed": o.seed}
     if o.ok:
@@ -86,8 +87,12 @@ def _run_job(job_id: str) -> None:
         ranked = rank(options)
         out_dir = OUT / job_id
         results = []
+        # PLAN M9: which options are the same plan up to symmetry and swaps of identical rooms
+        from spacetope.placement import topology_classes
+        ok_idx = [i for i, o in enumerate(ranked) if o.ok and o.realised is not None]
+        classes = dict(zip(ok_idx, topology_classes(ranked[ok_idx[0]].realised.brief, [ranked[i].placement for i in ok_idx]))) if ok_idx else {}
         for i, o in enumerate(ranked):
-            entry = {"option": o, "summary": _option_summary(job_id, i, o)}
+            entry = {"option": o, "summary": _option_summary(job_id, i, o, classes.get(i))}
             if o.ok and o.realised is not None:
                 write_glb(o.realised, out_dir / f"option_{i:02d}.glb")
                 entry["cells"] = cell_catalogue(o.realised)

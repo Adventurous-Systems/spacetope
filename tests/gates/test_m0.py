@@ -14,7 +14,7 @@ FIXTURE_NAMES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair")
 
 
 def test_pins():
-    assert version("topologicpy") == "0.9.57"
+    assert version("topologicpy") == "0.9.71"
     assert version("topologic_core") == "8.0.0"
 
 

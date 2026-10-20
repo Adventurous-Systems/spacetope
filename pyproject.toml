@@ -7,10 +7,10 @@ name = "spacetope"
 version = "0.0.1"
 description = "Assemble a list of spaces into verified topologicpy cell complexes with circulation"
 requires-python = ">=3.11,<3.12"
-license = "Apache-2.0"
-license-files = ["LICENSE", "NOTICE"]
+license = "AGPL-3.0-or-later"
+license-files = ["LICENSE", "NOTICE", "COMMERCIAL.md"]
 dependencies = [
-  "topologicpy==0.9.57",
+  "topologicpy==0.9.71",
   "topologic_core==8.0.0",
   "networkx>=3.3",
   "ortools>=9.10",
@@ -23,7 +23,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "squarify"]
+web = ["fastapi>=0.110", "uvicorn>=0.29"]
+dev = ["spacetope[web]", "pytest>=8", "httpx>=0.27", "squarify", "z3-solver>=4.12"]
 
 [project.scripts]
 spacetope = "spacetope.cli:main"
@@ -36,6 +37,7 @@ testpaths = ["tests"]
 markers = [
   "gate_m0: M0 gate", "gate_m1: M1 gate", "gate_m2: M2 gate", "gate_m3: M3 gate",
   "gate_m4: M4 gate", "gate_m5: M5 gate", "gate_m6: M6 gate", "gate_m7: M7 gate", "gate_m8: M8 gate",
+  "gate_m9: M9 gate", "gate_m10: M10 gate", "gate_m11: M11 gate", "gate_m12: M12 gate", "gate_m13: M13 gate", "gate_m14: M14 gate", "gate_m15: M15 gate", "gate_m16: M16 gate", "gate_m17: M17 gate",
   "slow: builds topologic geometry",
 ]
 addopts = "-q"

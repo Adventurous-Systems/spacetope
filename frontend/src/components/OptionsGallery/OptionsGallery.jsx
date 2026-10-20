@@ -36,9 +36,21 @@ export default function OptionsGallery() {
              onClick={() => viewOption(o.index)} data-testid="option-card">
           <div className="card__head">
             <span>#{o.index} {o.ok ? '' : '✗ unverified'}</span>
-            <span className="card__sig">{o.signature.length} contacts{o.doors ? ` · ${o.doors} doors` : ''}</span>
+            <span className="card__sig">
+              {o.topology_class !== undefined && o.topology_class !== null && (
+                <span className="card__class" data-testid="topology-class" title="Options with the same letter are the same plan up to rotation, mirroring and swaps of identical rooms">plan {String.fromCharCode(65 + (o.topology_class % 26))} · </span>
+              )}
+              {o.signature.length} contacts{o.doors ? ` · ${o.doors} doors` : ''}
+            </span>
           </div>
           {o.ok && METRICS.map((m) => <Bar key={m} metric={m} value={o.scores[m]} />)}
+          {o.ok && o.analysis && o.analysis.busiest && (
+            <div className="card__analysis" data-testid="walk-analysis">
+              busiest: {o.analysis.busiest}
+              {o.analysis.cut_spaces && o.analysis.cut_spaces.length > 0 ? ` · everything passes through: ${o.analysis.cut_spaces.join(', ')}` : ''}
+              {o.analysis.diameter !== undefined ? ` · ${o.analysis.diameter} doors end to end` : ''}
+            </div>
+          )}
           {o.ok && unmet(o).length > 0 && (
             <div className="card__unmet" data-testid="unmet-contacts">unmet: {unmet(o).map((r) => r.replace('|', ' – ')).join(', ')}</div>
           )}

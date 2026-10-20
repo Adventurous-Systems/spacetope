@@ -56,14 +56,18 @@ export function ComplexModel({ glbUrl, cellColours, opacity = 1, onCounts }) {
   }, [scene, cellColours, onCounts]);
 
   // the opacity slider edits materials in place: no re-clone, and translucent cells stop writing depth
-  // so the graph behind them stays readable
+  // so the graph behind them stays readable. Flipping `transparent` needs a recompile: a material first
+  // drawn opaque bakes OPAQUE into its shader (alpha forced to 1), and on a large GLB that first frame
+  // can come before this effect runs.
   useEffect(() => {
     model.traverse((mesh) => {
       if (!mesh.isMesh) return;
       const value = (mesh.userData.fade ?? 1) * opacity;
+      const transparent = value < 1;
+      if (mesh.material.transparent !== transparent) mesh.material.needsUpdate = true;
       mesh.material.opacity = value;
-      mesh.material.transparent = value < 1;
-      mesh.material.depthWrite = value >= 1;
+      mesh.material.transparent = transparent;
+      mesh.material.depthWrite = !transparent;
     });
     invalidate();
   }, [model, opacity, invalidate]);

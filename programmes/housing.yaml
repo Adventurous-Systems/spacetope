@@ -1,0 +1,14 @@
+# Two to five residential levels, a few flats per level off a short landing, one stair and one lift through
+# every level. The family that exercises stacking and the floor-count search.
+name: housing
+levels: {min: 2, max: 5}
+level_height: 3.0
+envelope: {area_factor: [1.5, 2.0], aspect: [1.1, 1.8]}
+circulation:
+  corridor: {w: 1.8, l: from_frontage}
+  stairs: {count: 1, w: 3, l: 5.5}
+  lifts: {count: 1, w: 2.4, l: 2.4}
+rooms:
+  - {type: flat, w: 7, l: 6, count_per_level: [2, 3], exterior: 1.0}
+  - {type: store, w: 2, l: 2, count_per_level: 1}
+tolerance: {room: 0.10, corridor: {l: [-0.5, 2.0]}}

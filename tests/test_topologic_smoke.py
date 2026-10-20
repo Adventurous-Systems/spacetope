@@ -34,15 +34,21 @@ def test_exact_touch_shares_one_face():
     assert len(Graph.Vertices(g)) == 2 and len(Graph.Edges(g)) == 1
 
 
-def test_gap_below_tolerance_merges():
+def built_nothing(cc) -> bool:
+    """A failed merge: None on 0.9.57, an empty CellComplex on 0.9.71 (notes §14)."""
+    return cc is None or not (Topology.Cells(cc) or [])
+
+
+def test_gap_below_tolerance_never_makes_a_sliver():
+    # 0.9.57 healed a 0.05 mm gap into 2 cells; 0.9.71 builds nothing. Either way: two cells or none, never three.
     cc = build([box(0, 0, 0, 4, 4, 3), box(4 + 5e-5, 0, 0, 4, 4, 3)])
-    assert cc is not None and len(Topology.Cells(cc)) == 2
+    assert built_nothing(cc) or len(Topology.Cells(cc)) == 2
 
 
-def test_gap_above_tolerance_returns_none():
+def test_gap_above_tolerance_builds_nothing():
     # 0.5 mm gap: tolerance is a coincidence epsilon, not a healing distance.
     for tol in (0.0001, 0.001, 0.01):
-        assert build([box(0, 0, 0, 4, 4, 3), box(4.0005, 0, 0, 4, 4, 3)], tolerance=tol) is None
+        assert built_nothing(build([box(0, 0, 0, 4, 4, 3), box(4.0005, 0, 0, 4, 4, 3)], tolerance=tol))
 
 
 def test_overlap_creates_sliver_cell():
@@ -70,18 +76,18 @@ def test_stacked_shares_horizontal_face():
 
 def test_disjoint_cells_form_cluster_with_disconnected_graph():
     a, b = box(0, 0, 0, 4, 4, 3), box(10, 0, 0, 4, 4, 3)
-    assert build([a, b]) is None
+    assert built_nothing(build([a, b]))
     cl = Cluster.ByTopologies([a, b])
     assert len(Topology.Cells(cl)) == 2
     g = Graph.ByTopology(cl, direct=True, silent=True)
     assert len(Graph.Vertices(g)) == 2 and len(Graph.Edges(g)) == 0
 
 
-def test_dictionaries_dropped_by_default_and_recovered_by_selectors():
+def test_dictionaries_are_recovered_by_selectors_whatever_the_default():
     cells = [box(0, 0, 0, 4, 4, 3, "A"), box(4, 0, 0, 4, 4, 3, "B")]
     cc = build(cells)
     names = [Dictionary.ValueAtKey(Topology.Dictionary(c), "name") for c in Topology.Cells(cc)]
-    assert names == [None, None]
+    assert names in ([None, None], ["A", "B"], ["B", "A"])   # dropped on 0.9.57, kept on 0.9.71; selectors work on both
     selectors = []
     for c in cells:
         v = Topology.InternalVertex(c)

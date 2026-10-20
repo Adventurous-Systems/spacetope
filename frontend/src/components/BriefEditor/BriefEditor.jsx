@@ -41,6 +41,7 @@ export default function BriefEditor() {
   const levelOptions = Array.from({ length: levels }, (_, k) => <option key={k} value={k}>{k}</option>);
   const busy = status.startsWith('generating') || status.startsWith('checking');
   const treemapBlocked = levels > 1 && capabilities.treemap && capabilities.treemap.multi_level === false;
+  const dualBlocked = levels > 1 && (!capabilities.dual || capabilities.dual.multi_level === false);
 
   const patch = (p) => setBrief({ ...brief, ...p });
   const setCirc = (c) => patch({ circulation: c });
@@ -232,6 +233,7 @@ export default function BriefEditor() {
               <option value="beam">beam (fast)</option>
               <option value="cpsat">cpsat (exact)</option>
               <option value="treemap" disabled={treemapBlocked}>treemap (baseline{treemapBlocked ? ', single level only' : ''})</option>
+              <option value="dual" disabled={dualBlocked}>dual (all plan topologies{dualBlocked ? ', single level only' : ''})</option>
             </select>
             <label>seed <input type="number" style={{ width: 50 }} value={seed} onChange={(e) => setSeed(parseInt(e.target.value || '0', 10))} /></label>
             <button className="primary" onClick={generate} disabled={busy} data-testid="generate-button">{busy ? 'working…' : 'Generate'}</button>

@@ -107,9 +107,10 @@ Multi-objective ranking: Pareto front (pymoo/DEAP) or architect-weighted sum (Ba
 7. **Magnetizing corridor spine** (C9) — **Selected as the corridor heuristic inside beam search (M2).**
 8. **Z3 feasibility enumeration** (G6) — cross-check only; not scheduled.
 
-Status 2026-09-14 (checked against `spacetope/solve/`): 1, 4, 5 and 6 are implemented; 7 exists as
-corridor-first placement plus corridor stretch, without the post-placement attraction; 2, 3 and 8 are not
-implemented. Designs for the missing pieces and the two small upgrades: `docs/2026-09-14_STRETCH_GOALS_DESIGN.md`.
+Status 2026-09-20 (checked against `spacetope/solve/`): 1, 4, 5 and 6 are implemented; 2 is implemented as the
+single-level generator `dual` (`solve/dual.py`, PLAN M12); 7 exists as corridor-first placement plus corridor
+stretch, without the post-placement attraction; 3 and 8 are not implemented (PLAN M16, M13). Designs:
+`docs/2026-09-14_STRETCH_GOALS_DESIGN.md`; programme: `docs/PLAN.md` §4.9.
 
 Rejected for now: QAP grids (A1), packing heuristics (E1), 2D residential generative models (D2) as generators, WFC (G4) except possibly for core placement on a structural grid, true 3D cube packing.
 

@@ -43,8 +43,24 @@ def touch_ok(brief: Brief, a: str, box_a, b: str, box_b, legacy_door_mm: int = L
     return best == 0 or best >= need
 
 
+def corridor_opening_mm(brief: Brief, a: str, b: str) -> int:
+    """Two corridor segments of one level's spine meet over the full corridor width: an opening, not a door (M15b).
+    0 when the pair is not two corridors on the same level."""
+    sa, sb = brief.space(a), brief.space(b)
+    if sa.program != "corridor" or sb.program != "corridor":
+        return 0
+    la, lb = sa.wishes.get("level"), sb.wishes.get("level")
+    if la is None or lb is None or int(la) != int(lb):
+        return 0
+    return min(to_mm(sa.w), to_mm(sb.w))
+
+
 def required_overlap_mm(brief: Brief, a: str, b: str, legacy_door_mm: int = LEGACY_DOOR_MM) -> int:
-    """Shared wall a pair must have when it touches: door width + 2 jambs for door pairs, 1 mm otherwise."""
+    """Shared wall a pair must have when it touches: the corridor width for two segments of one spine, door width
+    + 2 jambs for door pairs, 1 mm otherwise."""
+    opening = corridor_opening_mm(brief, a, b)
+    if opening:
+        return opening
     if not brief.circulation:
         sa, sb = brief.space(a), brief.space(b)
         legacy = (sa.program == "room" and sb.is_circulation) or (sb.program == "room" and sa.is_circulation)
@@ -208,12 +224,20 @@ def plan_doors(brief: Brief, placement: dict[str, Box]) -> tuple[list[Door], lis
     return doors, problems
 
 
-def door_graph(brief: Brief, doors: list[Door]) -> nx.Graph:
-    """Walkable graph: every space is a node; each door is an edge carrying its kind and level."""
+def door_graph(brief: Brief, doors: list[Door], placement: dict[str, Box] | None = None) -> nx.Graph:
+    """Walkable graph: every space is a node; each door is an edge carrying its kind and level. With `placement`,
+    two corridor segments that share the full corridor width are walkable too, through an opening (M15b)."""
     g = nx.Graph()
     g.add_nodes_from(s.name for s in brief.spaces)
     for d in doors:
         g.add_edge(d.a, d.b, kind=d.kind, level=d.level)
+    if placement is not None:
+        corridors = [s for s in brief.spaces if s.program == "corridor" and s.name in placement]
+        for i, ca in enumerate(corridors):
+            for cb in corridors[i + 1:]:
+                need = corridor_opening_mm(brief, ca.name, cb.name)
+                if need and max(touches(placement[ca.name], placement[cb.name], sd)[0] for sd in HSIDES) >= need:
+                    g.add_edge(ca.name, cb.name, kind="opening", level=int(ca.wishes.get("level", 0)))
     return g
 
 
@@ -223,7 +247,7 @@ def access_problems(brief: Brief, placement: dict[str, Box], doors: list[Door]) 
     if not brief.circulation:
         return []
     H = level_height_mm(brief)
-    g = door_graph(brief, doors)
+    g = door_graph(brief, doors, placement)
     stairs = [s.name for s in brief.spaces if s.program == "stair"]
     targets = set(stairs) if stairs else {s.name for s in brief.spaces if s.program == "corridor"}
     problems = []

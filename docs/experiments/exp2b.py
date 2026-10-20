@@ -1,4 +1,4 @@
-import json
+import json, os, tempfile
 from topologicpy.Vertex import Vertex
 from topologicpy.Cell import Cell
 from topologicpy.CellComplex import CellComplex
@@ -87,8 +87,8 @@ def main():
     print("vertices sample:", json.dumps(gd["vertices"][list(gd["vertices"].keys())[0]] if isinstance(gd["vertices"], dict) else gd["vertices"][0])[:400])
     print("edges sample:", json.dumps(gd["edges"][list(gd["edges"].keys())[0]] if isinstance(gd["edges"], dict) else gd["edges"][0])[:400])
     jd = Graph.JSONData(g); print("JSONData keys:", list(jd.keys()), "vertices type:", type(jd["vertices"]).__name__)
-    Graph.ExportToJSON(g, "/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/g.json", overwrite=True)
-    g2 = Graph.ByJSONPath("/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/g.json")
+    Graph.ExportToJSON(g, os.path.join(tempfile.gettempdir(), "g.json"), overwrite=True)
+    g2 = Graph.ByJSONPath(os.path.join(tempfile.gettempdir(), "g.json"))
     print("ByJSONPath roundtrip v/e:", len(Graph.Vertices(g2)), len(Graph.Edges(g2)))
 
 if __name__ == '__main__':
