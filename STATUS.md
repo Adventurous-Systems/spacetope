@@ -168,11 +168,7 @@ is recorded in `docs/experiments/2026-09-20_pip_freeze_before_m14.txt` if a roll
 
 ## 8. A note on the documents
 
-`CLAUDE.md` and every dated note under `docs/` are excluded by `.gitignore`, so they are local to this machine
-and not part of the upstream repository. That includes the design and exploration notes this status refers to:
+Every dated note under `docs/` is excluded by `.gitignore`, so the notes are local working documents and not
+part of the upstream repository. That includes the design and exploration notes this status refers to:
 the stretch-goal design, the performance and learning exploration, and the topologicpy options note. `docs/PLAN.md`,
 `docs/TOPOLOGICPY_NOTES.md`, `docs/ALGORITHM_SURVEY.md` and this file are tracked.
-
-Two interactive explainers were published as private pages:
-[Spacetope Field Guide](https://claude.ai/artifact/LogkrcvLKvqZ1Fnq3Zgms7) and
-[Stretch Goals Explorer](https://claude.ai/artifact/1RhyCyuLTcjUGxSydstrCR).

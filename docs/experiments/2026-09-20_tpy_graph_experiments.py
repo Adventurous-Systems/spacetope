@@ -1,7 +1,8 @@
 """[RUN] experiments: which topologicpy 0.9.57 graph algorithms work on spacetope's realised complexes and graphs."""
 import json, time, sys, os, traceback
 import networkx as nx
-S = "/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/0f6934eb-8b32-4d75-9f92-754cbdad4672/scratchpad"
+import tempfile
+S = tempfile.gettempdir()
 from topologicpy.Graph import Graph
 from topologicpy.TGraph import TGraph
 from topologicpy.Topology import Topology

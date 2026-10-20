@@ -72,8 +72,8 @@ cannot be merged.
 
 ## 4. Working agreements
 
-Read `CLAUDE.md` first: vocabulary, the integer-millimetre rule, and the topologicpy gotchas. Then
-`docs/PLAN.md` for the milestones and their gates. A change is ready when:
+Read `README.md` first (vocabulary and the engineering rules, including the integer-millimetre rule), then
+`docs/TOPOLOGICPY_NOTES.md` for the topologicpy gotchas and `docs/PLAN.md` for the milestones and their gates. A change is ready when:
 
 - the gate for the milestone it touches passes, and earlier gates still pass:
   `.venv/bin/python -m pytest -m "gate_m0 or gate_m1 or gate_m2 or gate_m3 or gate_m4 or gate_m5 or gate_m7"`;

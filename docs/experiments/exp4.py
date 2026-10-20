@@ -1,4 +1,4 @@
-import json
+import json, os, tempfile
 from topologicpy.Vertex import Vertex
 from topologicpy.Cell import Cell
 from topologicpy.CellComplex import CellComplex
@@ -70,8 +70,8 @@ def main():
     print("ByJSONString ->", type(back).__name__, [Topology.TypeAsString(b) for b in back] if isinstance(back, list) else Topology.TypeAsString(back))
     b = back[0] if isinstance(back, list) else back
     print("  cells", len(Topology.Cells(b)), "names", [Dictionary.ValueAtKey(Topology.Dictionary(c),"name") for c in Topology.Cells(b)], "face apertures", len(Topology.Apertures(b, subTopologyType="face")))
-    ok = Topology.ExportToJSON(cc2, "/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/cc.json", overwrite=True); print("ExportToJSON ->", ok)
-    b2 = Topology.ByJSONPath("/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/cc.json"); print("ByJSONPath ->", type(b2).__name__)
+    ok = Topology.ExportToJSON(cc2, os.path.join(tempfile.gettempdir(), "cc.json"), overwrite=True); print("ExportToJSON ->", ok)
+    b2 = Topology.ByJSONPath(os.path.join(tempfile.gettempdir(), "cc.json")); print("ByJSONPath ->", type(b2).__name__)
 
     print("=== Graph JSON")
     g = Graph.ByTopology(cc2, direct=True, viaSharedApertures=True)
@@ -81,8 +81,8 @@ def main():
     e0 = gd["edges"][next(iter(gd["edges"]))] if isinstance(gd["edges"], dict) else gd["edges"][0]
     print("vertex sample:", json.dumps(v0)[:500]); print("edge sample:", json.dumps(e0)[:500])
     jd = Graph.JSONData(g); print("JSONData keys:", list(jd.keys()), "vertices:", type(jd["vertices"]).__name__, "sample:", json.dumps(jd["vertices"][0] if isinstance(jd["vertices"], list) else jd["vertices"][next(iter(jd["vertices"]))])[:300])
-    Graph.ExportToJSON(g, "/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/g.json", overwrite=True)
-    g2 = Graph.ByJSONPath("/private/tmp/claude-501/-Users-arlav-GitHub-spacetope/1bb82d31-af7f-468b-9988-073d46d74d93/scratchpad/g.json")
+    Graph.ExportToJSON(g, os.path.join(tempfile.gettempdir(), "g.json"), overwrite=True)
+    g2 = Graph.ByJSONPath(os.path.join(tempfile.gettempdir(), "g.json"))
     print("ByJSONPath roundtrip v/e:", len(Graph.Vertices(g2)), len(Graph.Edges(g2)), "names:", [Dictionary.ValueAtKey(Topology.Dictionary(v),"name") for v in Graph.Vertices(g2)])
     nx = Graph.NetworkXGraph(g); print("networkx node attrs sample:", list(nx.nodes(data=True))[0])
     print("Graph.Topology(g) ->", Topology.TypeAsString(Graph.Topology(g)))
