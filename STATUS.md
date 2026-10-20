@@ -1,6 +1,6 @@
 # spacetope — status
 
-**Date:** 2026-09-22 · **Branch:** `m9-stretch` (2 commits ahead of `main`) · **Working tree:** clean
+**Date:** 2026-10-16 · **Branch:** `m9-stretch` (7 commits ahead of `main`) · **Working tree:** clean
 
 Turn an architect's list of spaces into candidate non-manifold cell complexes, verify them, score them, and
 offer the architect a choice. Full context in `docs/PLAN.md`; that file's §0 explains the idea in plain words
@@ -38,6 +38,10 @@ the engine.
 | M17 | Brief programmes and dataset L0 | done | 14 |
 
 **250 tests** collected in total, 63 of them fast. All green as of 2026-10-04 on topologicpy 0.9.71.
+
+2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
+drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is
+applied; `ComplexScene.jsx` now recompiles a material when it switches between opaque and translucent.
 
 ---
 
@@ -129,16 +133,19 @@ Answered recently: ragged outlines are not a defect (2026-09-21); chained corrid
 
 ## 6. Licensing
 
-spacetope is Apache-2.0 and stays that way: topologicpy 0.9.71 is LGPL-3.0-or-later and spacetope imports it
-without copying or modifying it, which is the case the LGPL permits. Reviewed against the installed
-distributions on 2026-09-27; `NOTICE` carries the detail.
+Since 2026-10-16 spacetope is **dual-licensed: AGPL-3.0-or-later, or a commercial licence** from
+**Adventurous Systems** (`COMMERCIAL.md`). Versions up to `c419c33` were Apache-2.0 and stay so for whoever has
+them. Adventurous Systems holds the copyright (by written assignment from the author, who held it personally
+until then) and the CLA lets contributions be relicensed, so Adventurous Systems can use spacetope in a closed
+product (AFlow) regardless of the public licence. topologicpy 0.9.71 is LGPL-3.0-or-later and is imported, not copied or modified, which suits
+both licences. `NOTICE` carries the detail.
 
-One obligation is open. `topologic_core`, the binary geometry kernel, declares no licence in its metadata and
+One obligation is open, and it now limits the commercial side only. `topologic_core`, the binary geometry kernel, declares no licence in its metadata and
 its upstream source is AGPL-3.0, and it is an in-process C extension. **A Rust core owned by this project is in
 development to replace it.** Meanwhile topologicpy 0.9.71 prefers a PythonOCC backend and falls back to this
 kernel only because `pythonocc-core` (LGPL-3.0) is not installed, so that may be a faster route; it is untested
-and would need the same verify-everything treatment as a version bump. Until one lands, do not distribute a
-build that carries the binary.
+and would need the same verify-everything treatment as a version bump. The AGPL release may carry the binary;
+a closed build or a commercial licensee may not, until one of the two lands.
 
 ## 7. Running it
 
@@ -161,11 +168,7 @@ is recorded in `docs/experiments/2026-09-20_pip_freeze_before_m14.txt` if a roll
 
 ## 8. A note on the documents
 
-`CLAUDE.md` and every dated note under `docs/` are excluded by `.gitignore`, so they are local to this machine
-and not part of the upstream repository. That includes the design and exploration notes this status refers to:
+Every dated note under `docs/` is excluded by `.gitignore`, so the notes are local working documents and not
+part of the upstream repository. That includes the design and exploration notes this status refers to:
 the stretch-goal design, the performance and learning exploration, and the topologicpy options note. `docs/PLAN.md`,
 `docs/TOPOLOGICPY_NOTES.md`, `docs/ALGORITHM_SURVEY.md` and this file are tracked.
-
-Two interactive explainers were published as private pages:
-[Spacetope Field Guide](https://claude.ai/artifact/LogkrcvLKvqZ1Fnq3Zgms7) and
-[Stretch Goals Explorer](https://claude.ai/artifact/1RhyCyuLTcjUGxSydstrCR).

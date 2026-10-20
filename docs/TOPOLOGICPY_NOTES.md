@@ -130,7 +130,7 @@ Topology.TransferDictionariesBySelectors(t, selectors, tranVertices=False, tranE
 
 - `notebooks/Building_Tower.ipynb` (upstream): prisms + core cut via `Topology.Difference`, `CellComplex.ByCells`, selectors, `Graph.ByTopology`, `Graph.ExportToCSV`.
 - Upstream `tests/test_CellComplex.py`, `test_Graph.py`, `test_Aperture.py`, `test_Dictionary.py`, `test_Topology_BREPString.py`.
-- Session experiment scripts (scratchpad, not in repo): `exp.py … exp5.py` — port the two-box cases into `tests/test_topologic_smoke.py` in M0.
+- Experiment scripts (`docs/experiments/`): `exp.py … exp5.py` — port the two-box cases into `tests/test_topologic_smoke.py` in M0.
 
 ## 12. Intermittent kernel failures in long-lived processes `[RUN]`
 

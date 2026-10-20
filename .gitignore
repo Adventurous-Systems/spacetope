@@ -16,7 +16,5 @@ e2e/test-results/
 e2e/playwright-report/
 out/
 
-# AI-written working documents stay local; they are not part of the upstream repo
-CLAUDE.md
+# Local working notes; not part of the upstream repo
 docs/2026-*_*.md
-.claude/
