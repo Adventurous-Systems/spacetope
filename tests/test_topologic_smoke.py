@@ -35,8 +35,21 @@ def test_exact_touch_shares_one_face():
 
 
 def built_nothing(cc) -> bool:
-    """A failed merge: None on 0.9.57, an empty CellComplex on 0.9.71 (notes §14)."""
-    return cc is None or not (Topology.Cells(cc) or [])
+    """A failed merge: None on 0.9.57, an empty CellComplex on topologic_core 0.9.71, and on PythonOCC every cell
+    with no shared face across the gap (notes §14). One test covers all three: the cells are not one group joined
+    through shared faces. realise() raises on the same condition."""
+    import networkx as nx
+    cells = (Topology.Cells(cc) or []) if cc is not None else []
+    if not cells:
+        return True
+    key = lambda c: tuple(round(v, 6) for v in Vertex.Coordinates(Topology.Centroid(c)))
+    g = nx.Graph()
+    g.add_nodes_from(key(c) for c in cells)
+    for f in CellComplex.InternalFaces(cc) or []:
+        pair = Topology.SuperTopologies(f, cc, topologyType="cell") or []
+        if len(pair) == 2:
+            g.add_edge(key(pair[0]), key(pair[1]))
+    return not nx.is_connected(g)
 
 
 def test_gap_below_tolerance_never_makes_a_sliver():
@@ -46,9 +59,19 @@ def test_gap_below_tolerance_never_makes_a_sliver():
 
 
 def test_gap_above_tolerance_builds_nothing():
-    # 0.5 mm gap: tolerance is a coincidence epsilon, not a healing distance.
-    for tol in (0.0001, 0.001, 0.01):
-        assert built_nothing(build([box(0, 0, 0, 4, 4, 3), box(4.0005, 0, 0, 4, 4, 3)], tolerance=tol))
+    # 0.5 mm gap at the default tolerance (0.1 mm, the only one spacetope merges with): nothing merges, on every backend.
+    assert built_nothing(build([box(0, 0, 0, 4, 4, 3), box(4.0005, 0, 0, 4, 4, 3)], tolerance=0.0001))
+    # A tolerance wider than the gap: topologic_core 0.9.71 still builds nothing; PythonOCC heals it by stretching a
+    # cell (notes §14), which is a nudge and why rule 1 keeps the tolerance a coincidence epsilon. Never a sliver.
+    for tol in (0.001, 0.01):
+        cc = build([box(0, 0, 0, 4, 4, 3), box(4.0005, 0, 0, 4, 4, 3)], tolerance=tol)
+        assert built_nothing(cc) or len(Topology.Cells(cc)) == 2
+
+
+def test_gap_between_two_of_three_cells_is_a_failed_merge():
+    # measured 2026-10-25: topologic_core builds nothing; PythonOCC keeps all three cells and one shared face
+    assert not built_nothing(build([box(0, 0, 0, 4, 4, 3), box(4, 0, 0, 4, 4, 3), box(8, 0, 0, 4, 4, 3)]))
+    assert built_nothing(build([box(0, 0, 0, 4, 4, 3), box(4, 0, 0, 4, 4, 3), box(8.0005, 0, 0, 4, 4, 3)]))
 
 
 def test_overlap_creates_sliver_cell():

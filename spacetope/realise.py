@@ -77,6 +77,7 @@ class Realised:
     build_seconds: float = 0.0
     doors: list = field(default_factory=list)          # planned doors (spacetope.doors.Door), M7
     door_problems: list = field(default_factory=list)  # planning problems (spacetope.circulation.Problem)
+    _contacts: list | None = field(default=None, repr=False)  # realised_contacts(), read once (doors do not change it)
 
     @property
     def n_cells(self) -> int:
@@ -109,6 +110,8 @@ class Realised:
 
     def realised_contacts(self) -> list[Contact]:
         """Contacts read back from the built complex: one per shared face (cells named)."""
+        if self._contacts is not None:
+            return list(self._contacts)
         out: list[Contact] = []
         for f in self.shared_faces():
             cells = Topology.SuperTopologies(f, self.cc, topologyType="cell") or []
@@ -129,7 +132,8 @@ class Realised:
                     return "ceiling" if abs(hi - plane) < 1e-4 else "floor"
                 return f"+{axname}" if abs(hi - plane) < 1e-4 else f"-{axname}"
             out.append(Contact(na, side_for(ba), nb, side_for(bb)).canonical())
-        return sorted(set(out))
+        self._contacts = sorted(set(out))
+        return list(self._contacts)
 
     def realised_assembly(self) -> AssemblyGraph:
         ag = AssemblyGraph(self.brief)
@@ -160,6 +164,15 @@ def attach_doors(cc, doors: list):
     return Topology.AddApertures(cc, faces, exclusive=False, subTopologyType="face", tolerance=0.001)
 
 
+def _groups(names: list[str], contacts: list[Contact]) -> int:
+    """How many groups the cells form when joined through their shared faces (1 = one connected complex)."""
+    import networkx as nx
+    g = nx.Graph()
+    g.add_nodes_from(names)
+    g.add_edges_from((c.a, c.b) for c in contacts)
+    return nx.number_connected_components(g)
+
+
 def realise(brief: Brief, placement: Placement, intent: AssemblyGraph | None = None, with_doors: bool = True) -> Realised:
     """Build the complex. Raises RealiseError when the kernel cannot form a complex.
     Circulation briefs (M7) also get their doors planned and, unless with_doors=False, attached."""
@@ -176,7 +189,8 @@ def realise(brief: Brief, placement: Placement, intent: AssemblyGraph | None = N
         cc = cells[0]
     else:
         cc = CellComplex.ByCells(cells, silent=True)
-    # 0.9.57 returns None when the cells do not merge, 0.9.71 an empty CellComplex (docs/TOPOLOGICPY_NOTES.md §14)
+    # A failed merge: None on 0.9.57, an empty CellComplex on topologic_core 0.9.71, and on PythonOCC every cell
+    # with no shared face across the gap (docs/TOPOLOGICPY_NOTES.md §14). The connectivity test below covers the last.
     if cc is None or (len(cells) > 1 and not (Topology.Cells(cc) or [])):
         raise RealiseError("CellComplex.ByCells built nothing (gaps or disjoint cells)")
     if Topology.IsInstance(cc, "CellComplex"):
@@ -185,6 +199,10 @@ def realise(brief: Brief, placement: Placement, intent: AssemblyGraph | None = N
     r = Realised(brief=brief, placement=placement, intent=intent, cc=cc, cells=built, selectors=selectors,
                  build_seconds=time.perf_counter() - t0)
     r.names = [r.name_of(c) or "?" for c in built]
+    if len(cells) > 1:
+        groups = _groups(r.names, r.realised_contacts())
+        if groups > 1:
+            raise RealiseError(f"CellComplex.ByCells built {groups} disconnected groups of cells (gaps or disjoint cells)")
     if brief.circulation:
         from .doors import plan_doors
         r.doors, r.door_problems = plan_doors(brief, placement)

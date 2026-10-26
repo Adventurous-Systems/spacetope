@@ -186,3 +186,24 @@ Consequences. A failed merge is now an object, so "`ByCells` is not `None`" is n
 `realise` treats a complex without cells as a failed build on every version. Sub-tolerance gaps no longer heal,
 which only tightens rule 1 (exact integer-mm coordinates). Selectors are still applied after `ByCells`; with 0.9.71
 they are redundant for cells but harmless, and they remain the path for older pins. Licence: LGPL-3.0-or-later.
+
+**On the PythonOCC backend (topologicpy 0.9.71, `pythonocc-core` 7.9.3, OCC 7.9; 2026-10-25, all `[RUN]`).**
+A failed merge looks different again, so the test for it changed (see "Consequences" below).
+
+| Case | topologic_core 8.0.0 | PythonOCC |
+|---|---|---|
+| exact contact, 2 boxes | 2 cells, 1 shared face | same |
+| gap 0.05 mm | empty CellComplex | **2 cells, 1 shared face** (heals, as 0.9.57 did) |
+| gap 0.5 mm | empty CellComplex | **2 cells, 0 shared faces** |
+| gap 0.5 mm, `tolerance` 1 or 10 mm | empty CellComplex | **healed: 2 cells, 1 shared face, one cell 0.004 m³ larger** |
+| disjoint (6 m apart) | empty CellComplex | **2 cells, 0 shared faces** |
+| 3 boxes, 0.5 mm gap between the 2nd and 3rd | empty CellComplex | **3 cells, 1 shared face** |
+| overlap 50 mm | 3 cells, one a 0.6 m³ sliver | same |
+| BREP written on topologic_core, read on PythonOCC | — | every cell, names restored by selectors |
+
+Consequences. "No cells" no longer catches a failed merge, because on PythonOCC the cells come back unjoined. The
+test on every backend is now: **the built cells form one group joined through shared faces.** On topologic_core
+that is exactly what an empty complex meant: every partial gap measured gives 0 cells. `realise` raises on it, and
+`built_nothing` in the smoke tests uses the same definition. Also on PythonOCC: `CellComplex.ExternalFaces` prints
+`Topology.Shells - Warning` lines to stdout, so the CLI keeps library output on stderr. Building is about 2×
+slower in kernel-heavy gates.
