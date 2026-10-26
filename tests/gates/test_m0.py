@@ -14,8 +14,12 @@ FIXTURE_NAMES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair")
 
 
 def test_pins():
+    from spacetope import kernel
     assert version("topologicpy") == "0.9.71"
-    assert version("topologic_core") == "8.0.0"
+    k = kernel.active()
+    assert k["version"].startswith(kernel.PINS[k["backend"]]), k
+    if kernel.requested():
+        assert k["backend"] == kernel.requested(), k
 
 
 @pytest.mark.parametrize("name", FIXTURE_NAMES)

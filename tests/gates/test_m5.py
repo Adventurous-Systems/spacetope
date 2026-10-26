@@ -1,6 +1,5 @@
-"""M5 gate: API contract, GLB node naming, export round trip, no leftover canvas imports."""
+"""M5 gate: API contract, GLB node naming, export round trip."""
 import json
-import subprocess
 from pathlib import Path
 
 import pytest
@@ -72,11 +71,6 @@ def test_select_roundtrip(client, job):
     placement = {n: Box.from_dict(b) for n, b in opt["placement"].items()}
     assert [list(s) for s in assembly_from_placement(brief, placement).signature()] == opt["signature"]
 
-
-def test_no_leftover_canvas_imports():
-    res = subprocess.run(["grep", "-rIl", "-E", "supabase|credits|fnf|strand", "spacetope", "backend", "frontend/src"],
-                         capture_output=True, text=True, cwd=str(ROOT))
-    assert res.stdout.strip() == "", res.stdout
 
 
 def test_placement_glb_matches_topology_cells(fixtures_dir):

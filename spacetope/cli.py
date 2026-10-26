@@ -2,11 +2,20 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import json
 import sys
 
 from .brief import load
 from .placement import load_placement
+
+_stdout = sys.stdout  # the real stdout; while a command runs, library messages go to stderr instead
+
+
+def emit(obj) -> None:
+    """Write a command's JSON result: the only thing a command puts on stdout (STATUS §2.6, fix 2)."""
+    _stdout.write(json.dumps(obj, indent=1) + "\n")
+    _stdout.flush()
 
 
 def cmd_realise(args) -> int:
@@ -16,7 +25,7 @@ def cmd_realise(args) -> int:
     try:
         brief, _ = prepare(load(args.brief))  # the placement names the expanded spaces (review 2026-09-13, #10)
     except BriefInvalid as e:
-        print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1))
+        emit({"invalid_brief": [p.to_dict() for p in e.problems]})
         return 2
     placement = load_placement(args.placement)
     rep = verify(brief, placement)
@@ -32,7 +41,7 @@ def cmd_realise(args) -> int:
             paths = save(rep.realised, args.save)
             save_graph(graph_payload(rep.realised), str(args.save) + ".graph.json")
             out["saved"] = {k: str(v) for k, v in paths.items()}
-    print(json.dumps(out, indent=1))
+    emit(out)
     return 0 if rep.ok else 1
 
 
@@ -43,17 +52,18 @@ def cmd_generate(args) -> int:
     from .solve.registry import GENERATORS
     from .circulation import BriefInvalid
     from .solve.registry import GeneratorUnsupported
+    from . import kernel
     brief = load(args.brief)
     params = json.loads(args.params) if args.params else None
     try:
         options, t_gen, t_real = generate(GENERATORS[args.generator], brief, args.seed, params, args.generator)
     except (GeneratorUnsupported, BriefInvalid) as e:
-        print(json.dumps({"error": str(e)}, indent=1))
+        emit({"error": str(e)})
         return 2
     ranked = rank(options)
     out_dir = Path(args.out) if args.out else None
     index = {"brief": brief.name, "generator": args.generator, "seed": args.seed, "t_gen": round(t_gen, 3),
-             "t_realise": round(t_real, 3), "options": []}
+             "t_realise": round(t_real, 3), "kernel": kernel.active(), "options": []}
     for i, o in enumerate(ranked):
         entry = o.to_dict()
         entry["rank"] = i
@@ -74,8 +84,8 @@ def cmd_generate(args) -> int:
         out_dir.mkdir(parents=True, exist_ok=True)
         (out_dir / "options.json").write_text(text)
     summary = [{k: e[k] for k in ("rank", "ok", "scores")} for e in index["options"]]
-    print(json.dumps({"brief": brief.name, "generator": args.generator, "seed": args.seed, "t_gen": index["t_gen"],
-                      "t_realise": index["t_realise"], "options": summary, "out": str(out_dir) if out_dir else None}, indent=1))
+    emit({"brief": brief.name, "generator": args.generator, "seed": args.seed, "t_gen": index["t_gen"],
+          "t_realise": index["t_realise"], "options": summary, "out": str(out_dir) if out_dir else None})
     return 0 if any(o.ok for o in options) else 1
 
 
@@ -97,7 +107,7 @@ def cmd_floors(args) -> int:
             "t_gen": round(r.t_gen, 2), "t_build": round(r.t_build, 2),
             "best_scores": best[0].scores if best else None,
         })
-    print(json.dumps(out, indent=1))
+    emit(out)
     return 0 if b.feasible and any(c["verified"] for c in out["candidates"]) else 1
 
 
@@ -109,12 +119,12 @@ def cmd_export(args) -> int:
         r = load_realised(args.stem)
     else:
         if not (args.brief and args.placement):
-            print(json.dumps({"error": "give --stem, or --brief and --placement"})); return 2
+            emit({"error": "give --stem, or --brief and --placement"}); return 2
         from .circulation import BriefInvalid, prepare
         try:
             brief, _ = prepare(load(args.brief))
         except BriefInvalid as e:
-            print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1)); return 2
+            emit({"invalid_brief": [p.to_dict() for p in e.problems]}); return 2
         from .realise import realise
         r = realise(brief, load_placement(args.placement))
     out = {}
@@ -123,8 +133,8 @@ def cmd_export(args) -> int:
     if args.json:
         out["json"] = str(write_json(r, args.json))
     if not out:
-        print(json.dumps({"error": "give --obj and/or --json"})); return 2
-    print(json.dumps({"brief": r.brief.name, "cells": r.n_cells, "doors": len(r.doors), **out}, indent=1))
+        emit({"error": "give --obj and/or --json"}); return 2
+    emit({"brief": r.brief.name, "cells": r.n_cells, "doors": len(r.doors), **out})
     return 0
 
 
@@ -146,7 +156,7 @@ def cmd_programme(args) -> int:
     from .circulation import BriefInvalid, prepare
     from .programme import ProgrammeError, names, sample, variations
     if args.list or not args.name:
-        print(json.dumps({"programmes": names()}, indent=1))
+        emit({"programmes": names()})
         return 0
     seeds = _seed_range(args.seeds)
     out_dir = Path(args.out) if args.out else None
@@ -178,9 +188,9 @@ def cmd_programme(args) -> int:
                         (out_dir / f"{brief.name}__{kind}.yaml").write_text(v.to_yaml())
                     entry["variations"] = len(variations(brief, seed))
             written.append(entry)
-    print(json.dumps({"programme": args.name, "seeds": len(seeds), "briefs": len(written),
-                      "tight_frontage": tight, "invalid": invalid[:5], "rows": rows,
-                      "out": str(out_dir) if out_dir else None, "dataset": args.dataset}, indent=1))
+    emit({"programme": args.name, "seeds": len(seeds), "briefs": len(written),
+          "tight_frontage": tight, "invalid": invalid[:5], "rows": rows,
+          "out": str(out_dir) if out_dir else None, "dataset": args.dataset})
     return 0 if (rows or written) else 1
 
 
@@ -225,7 +235,10 @@ def main(argv=None) -> int:
     pr.add_argument("--per-brief", type=int, default=None, help="cap the rows kept per brief")
     pr.set_defaults(fn=cmd_programme)
     args = ap.parse_args(argv)
-    return args.fn(args)
+    global _stdout
+    _stdout = sys.stdout
+    with contextlib.redirect_stdout(sys.stderr):
+        return args.fn(args)
 
 
 if __name__ == "__main__":

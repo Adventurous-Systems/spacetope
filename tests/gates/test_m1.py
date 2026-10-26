@@ -138,7 +138,7 @@ def test_cli(tmp_path, fixtures_dir):
            str(fixtures_dir / "placed" / "three_rooms.json"), "--html", str(tmp_path / "o.html"), "--save", str(tmp_path / "o")]
     res = subprocess.run(cmd, capture_output=True, text=True, cwd=str(fixtures_dir.parent))
     assert res.returncode == 0, res.stderr
-    out = json.loads(res.stdout[res.stdout.index("{"):])
+    out = json.loads(res.stdout)  # stdout is the JSON alone; library messages go to stderr (STATUS §2.6, fix 2)
     assert out["verify"]["ok"] and out["scores"]["adjacency"] == 1.0
     assert (tmp_path / "o.graph.json").exists()
 
@@ -159,8 +159,11 @@ def test_cli_realise_accepts_a_circulation_brief(tmp_path, fixtures_dir):
                           "--params", '{"k": 1}', "--out", str(tmp_path / "g"), "--save"],
                          capture_output=True, text=True, cwd=str(fixtures_dir.parent))
     assert gen.returncode == 0, gen.stderr[-500:]
+    assert json.loads(gen.stdout)["options"]
+    index = json.loads((tmp_path / "g" / "options.json").read_text())
+    assert index["kernel"]["backend"] in ("topologic_core", "pythonocc")
     res = subprocess.run([sys.executable, "-m", "spacetope.cli", "realise", str(fixtures_dir / "two_levels_stair.yaml"),
                           str(tmp_path / "g" / "option_00.placement.json")], capture_output=True, text=True,
                          cwd=str(fixtures_dir.parent))
     assert res.returncode == 0, res.stderr[-500:]
-    assert json.loads(res.stdout[res.stdout.index("{"):])["verify"]["ok"]
+    assert json.loads(res.stdout)["verify"]["ok"]
