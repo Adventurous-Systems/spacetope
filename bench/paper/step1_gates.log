@@ -1,0 +1,36 @@
+=== gate_m0 ===
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT_gate_m0=0
+=== gate_m1 ===
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT_gate_m1=0
+=== gate_m2 ===
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/gates/test_m2.py::test_treemap_baseline_verified - AssertionErro...
+EXIT_gate_m2=0
+=== gate_m3 ===
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT_gate_m3=0
+=== gate_m4 ===
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT_gate_m4=0
+=== gate_m5 ===
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+EXIT_gate_m5=0
+=== gate_m6 ===
+=========================== short test summary info ============================
+ERROR tests/gates/test_m6.py::test_learned_matches_heuristic_at_lower_cost - ...
+ERROR tests/gates/test_m6.py::test_gnn_matches_heuristic_at_lower_cost - Type...
+EXIT_gate_m6=0
+=== gate_m7 ===

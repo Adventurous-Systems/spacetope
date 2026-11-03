@@ -1,0 +1,18 @@
+gate_m0    rc=0  3s  
+gate_m1    rc=0  8s  
+gate_m2    rc=1  27s  
+gate_m3    rc=0  28s  
+gate_m4    rc=0  348s  
+gate_m5    rc=0  9s  
+gate_m7    rc=0  297s  
+gate_m8    rc=0  13s  
+gate_m9    rc=0  16s  
+gate_m10   rc=0  382s  
+gate_m11   rc=0  50s  
+gate_m12   rc=0  162s  
+gate_m13   rc=0  23s  
+gate_m14   rc=0  10s  
+gate_m15   rc=0  233s  
+gate_m17   rc=0  216s  
+gate_m18   rc=0  5s  
+SWEEP_DONE

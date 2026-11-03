@@ -1,0 +1,13 @@
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.111s
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.406s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.03+0.55s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.353+3.695s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 16.431+66.286s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.149+0.545s
+  cpsat    clinic                 seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.219+3.305s
+  cpsat    school_three_levels    seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0022 t 20.278+53.822s
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 18.17+0.07s
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 4.5+0.469s
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 10 rows to bench/paper/dryrun_scoreboard.csv in 211.8s

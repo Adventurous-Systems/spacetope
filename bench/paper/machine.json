@@ -1,0 +1,24 @@
+{
+  "machine": "OnoSendai.local",
+  "cpu": "Apple M3 Pro",
+  "cores_physical": 11,
+  "cores_logical": 11,
+  "ram_gb": 18.0,
+  "os": "macOS 14.1",
+  "python": "3.11.9",
+  "packages": {
+    "topologicpy": "0.9.71",
+    "topologic_core": "8.0.0",
+    "ortools": "9.15.6755",
+    "networkx": "3.6.1",
+    "z3-solver": "5.1.0.0",
+    "shapely": "2.1.2",
+    "scipy": "1.17.1",
+    "numpy": "2.4.6",
+    "pyyaml": "6.0.3",
+    "pytest": "9.1.1"
+  },
+  "cpsat_workers": 8,
+  "git_commit": "f6bc234",
+  "note": "code frozen at f6bc234, tagged paper-v1; this file and the dry-run artefacts are committed one commit later, so the tag holds only code. Every CSV row carries its own commit column."
+}

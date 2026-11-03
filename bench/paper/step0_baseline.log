@@ -1,0 +1,88 @@
++(eval):1> .venv/bin/python -m pytest -m 'not slow' -q
+...............................................................          [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/gates/test_m7_brief.py::test_fractional_level_height_stays_consistent_in_millimetres
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/topologicpy/Ontology.py:183: DeprecationWarning: path is deprecated. Use files() instead. Refer to https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy for migration advice.
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++(eval):1> echo 'EXIT_FAST=0'
+EXIT_FAST=0
++(eval):1> .venv/bin/python -m pytest -m gate_m0 -q
+..................                                                       [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/test_topologic_smoke.py::test_exact_touch_shares_one_face
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/topologicpy/Ontology.py:183: DeprecationWarning: path is deprecated. Use files() instead. Refer to https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy for migration advice.
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++(eval):1> echo 'EXIT_M0=0'
+EXIT_M0=0
++(eval):1> .venv/bin/python -m pytest -m gate_m1 -q
+............                                                             [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/gates/test_m1.py::test_graph_payload
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/topologicpy/Ontology.py:183: DeprecationWarning: path is deprecated. Use files() instead. Refer to https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy for migration advice.
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++(eval):1> echo 'EXIT_M1=0'
+EXIT_M1=0
++(eval):1> .venv/bin/python -m pytest -m gate_m10 -q
+..........                                                               [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.11/site-packages/fastapi/testclient.py:1
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+.venv/lib/python3.11/site-packages/starlette/testclient.py:53
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/starlette/testclient.py:53: DeprecationWarning: The anyio.abc.BlockingPortal alias is deprecated, use anyio.from_thread.BlockingPortal instead.
+    _PortalFactoryType = Callable[[], AbstractContextManager[anyio.abc.BlockingPortal]]
+
+.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+    warnings.warn(
+
+tests/gates/test_m10.py::test_preverify_never_accepts_what_verify_rejects[two_levels_stair]
+  /Users/arlav/GitHub/spacetope/.venv/lib/python3.11/site-packages/topologicpy/Ontology.py:183: DeprecationWarning: path is deprecated. Use files() instead. Refer to https://importlib-resources.readthedocs.io/en/latest/using.html#migrating-from-legacy for migration advice.
+    with resources.path("topologicpy", "ontology") as ontology_dir:
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
++(eval):1> echo 'EXIT_M10=0'
+EXIT_M10=0
