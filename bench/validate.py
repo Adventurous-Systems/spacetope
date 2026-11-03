@@ -259,6 +259,16 @@ def record(brief, pl, ref=None) -> dict:
     return row
 
 
+def _rec(brief, pl, ref=None) -> dict:
+    """record() retried once: NOTES §12 kernel faults are transient, and one must not kill the run."""
+    for last in (False, True):
+        try:
+            return record(brief, pl, ref=ref)
+        except Exception as e:
+            if last:
+                return {"failed": f"crash {type(e).__name__}: {e}"[:160]}
+
+
 def work(fixture: str, meta: dict, path: str) -> list[dict]:
     """All transforms of one saved placement; returns plain rows only."""
     from spacetope.placement import load_placement
@@ -271,19 +281,19 @@ def work(fixture: str, meta: dict, path: str) -> list[dict]:
     ref_ok = verify(brief, pl).ok
     ref_scores = cheap_scores(brief, pl)
     rows = [{**base, "kind": "original", "transform": "none", "detail": "",
-             **record(brief, pl)}]
+             **_rec(brief, pl)}]
     for name, fn in METAMORPHIC.items():
         new, why = fn(brief, pl, random.Random((path, name).__str__()))
         if new is None:
             continue
         rows.append({**base, "kind": "metamorphic", "transform": name, "detail": why,
-                     **record(brief, new, ref=(pl, ref_ok, ref_scores))})
+                     **_rec(brief, new, ref=(pl, ref_ok, ref_scores))})
     for name, fn in FAULTS.items():
         new, why = fn(brief, pl, random.Random((path, name).__str__()))
         if new is None:
             continue
         rows.append({**base, "kind": FAULT_KIND[name], "transform": name, "detail": why,
-                     **record(brief, new)})
+                     **_rec(brief, new)})
     return rows
 
 
@@ -326,10 +336,18 @@ def main() -> None:
             mw.writeheader()
         t0 = time.time()
         n = 0
-        with ProcessPoolExecutor(max_workers=args.workers) as ex:
+        # max_tasks_per_child: NOTES §12 — the kernel degrades after hundreds of builds in one process
+        with ProcessPoolExecutor(max_workers=args.workers, max_tasks_per_child=8) as ex:
             futs = {ex.submit(work, fx, meta, path): path for fx, meta, path in jobs}
             for fut in as_completed(futs):
-                for row in fut.result():
+                try:
+                    rows = fut.result()
+                except Exception as e:
+                    n += 1
+                    print(f"{n}/{len(jobs)} {futs[fut]} WORKER FAILED, not recorded, "
+                          f"a later --resume retries it: {type(e).__name__}: {e}", flush=True)
+                    continue
+                for row in rows:
                     if row["kind"] == "metamorphic":
                         mw.writerow({k: row.get(k, "") for k in cols_m})
                     else:

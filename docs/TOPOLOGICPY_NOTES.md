@@ -169,7 +169,15 @@ it on the wrong face, and `Topology.Apertures` would then read back a name that 
 since the count still matches. Not yet reproduced deliberately; recorded so the next occurrence is recognised
 rather than re-diagnosed. A centroid check per aperture would close it the same way.
 
-## 13. Unused graph machinery and the 0.9.71 differential (2026-09-20)
+**2026-11-03 `[RUN]`: the same fault reaches cell dictionaries.** During the E1/E1b validation run
+(`bench/validate.py`, 6 workers, ~40 placements × ~13 verifies each per worker), one worker crashed after
+~500 realisations: `Dictionary.ValueAtKey(Topology.Dictionary(cell), "name")` returned a **list** instead of
+the stored string, and `realise.realised_contacts` then raised `TypeError: unhashable type: 'list'` using it
+as a placement key. All six candidate placements pass in a fresh process (13 and 11 rows each), as with the
+two faces above. Mitigations in the harness, not the package: `max_tasks_per_child=8` on the pool, each
+transform's `record()` retried once and a persisting crash written as a `failed="crash ..."` row, and the
+parent survives a dead worker (the placement stays out of the CSVs, so `--resume` retries it). A package-side
+guard would be `name_of` rejecting non-`str` dictionary values and falling through to the centroid lookup.
 
 Full note: `docs/2026-09-20_TOPOLOGICPY_OPPORTUNITIES.md`. Facts, all `[RUN]` unless marked:
 

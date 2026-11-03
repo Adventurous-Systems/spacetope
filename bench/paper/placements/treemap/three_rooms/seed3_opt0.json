@@ -1,0 +1,36 @@
+{
+  "brief": "three_rooms",
+  "boxes": {
+    "living": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 3282,
+      "l": 6094,
+      "h": 3000
+    },
+    "kitchen": {
+      "x": 3282,
+      "y": 0,
+      "z": 0,
+      "w": 3939,
+      "l": 3047,
+      "h": 3000
+    },
+    "bedroom": {
+      "x": 3282,
+      "y": 3047,
+      "z": 0,
+      "w": 3939,
+      "l": 3047,
+      "h": 3000
+    }
+  },
+  "fixture": "three_rooms",
+  "generator": "treemap",
+  "seed": 3,
+  "option": 0,
+  "commit": "33f3856",
+  "verified": false,
+  "expanded": true
+}

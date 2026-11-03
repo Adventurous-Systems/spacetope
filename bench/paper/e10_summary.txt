@@ -1,0 +1,11 @@
+wrote 151 (generator, fixture, seed) rows to bench/paper/e10_discrimination.csv
+
+E10a: distinct score vectors / verified options, summed per generator
+  beam     267/502 distinct; 4 of 65 calls where K>1 options share one vector
+  cpsat    347/498 distinct; 1 of 70 calls where K>1 options share one vector
+  dual     56/57 distinct; 0 of 16 calls where K>1 options share one vector
+
+E10c: unwished room-to-room pairs, mean per option per generator
+  beam     21.4 unwished pairs per option over 502 verified options
+  cpsat    16.3 unwished pairs per option over 498 verified options
+  dual     5.5 unwished pairs per option over 57 verified options

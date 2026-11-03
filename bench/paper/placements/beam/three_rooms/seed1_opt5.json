@@ -1,0 +1,36 @@
+{
+  "brief": "three_rooms",
+  "boxes": {
+    "bedroom": {
+      "x": 1900,
+      "y": 5000,
+      "z": 0,
+      "w": 4000,
+      "l": 3000,
+      "h": 3000
+    },
+    "living": {
+      "x": 3000,
+      "y": 0,
+      "z": 0,
+      "w": 4000,
+      "l": 5000,
+      "h": 3000
+    },
+    "kitchen": {
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "w": 3000,
+      "l": 4000,
+      "h": 3000
+    }
+  },
+  "fixture": "three_rooms",
+  "generator": "beam",
+  "seed": 1,
+  "option": 5,
+  "commit": "33f3856",
+  "verified": true,
+  "expanded": true
+}
