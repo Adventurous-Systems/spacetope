@@ -9,7 +9,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const FIX = path.join(here, '..', 'fixtures', 'circulation');
 const REAL = !!process.env.REAL_BACKEND;
 const RECORD = !!process.env.RECORD;
-const API = 'http://localhost:8000';
+const API = 'http://localhost:8100';
 const EXPECTED_SPACES = 15;   // 10 rooms + 3 corridors + stair + lift
 const EXPECTED_DOORS = 17;    // stair 3 + lift 3 + one per room 10 + office_c–meeting 1
 

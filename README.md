@@ -182,14 +182,14 @@ spacetope generate fixtures/two_levels_stair.yaml --generator cpsat --out out/tw
 Run two terminals from the repository root:
 
 ```bash
-# 1. the API on port 8000
-uvicorn backend.app.main:app --port 8000 --reload --reload-dir spacetope --reload-dir backend
+# 1. the API on port 8100
+uvicorn backend.app.main:app --port 8100 --reload --reload-dir spacetope --reload-dir backend
 
-# 2. the canvas on port 5173 (forwards /api and /static to port 8000)
-cd frontend && npm install && npx vite --port 5173
+# 2. the canvas on port 5273 (forwards /api and /static to port 8100)
+cd frontend && npm install && npx vite --port 5273
 ```
 
-Then open <http://localhost:5173>:
+Then open <http://localhost:5273>:
 
 1. Pick a brief from the list on the left, or edit its spaces and contacts.
 2. Choose a generator and press **Generate**.
@@ -295,7 +295,7 @@ Browser tests (Playwright):
 ```bash
 cd e2e && npm install && npx playwright install chromium
 npx playwright test                    # replays recorded API responses; needs only the canvas
-REAL_BACKEND=1 npx playwright test     # against the real API on port 8000
+REAL_BACKEND=1 npx playwright test     # against the real API on port 8100
 ```
 
 ## Known limits

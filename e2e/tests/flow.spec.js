@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 // M5 gate, browser half. Default: mocked backend from recorded fixtures (e2e/fixtures, made by
-// `npm run test:real` with RECORD=1). REAL_BACKEND=1 runs against uvicorn on :8000 via the Vite proxy.
+// `npm run test:real` with RECORD=1). REAL_BACKEND=1 runs against uvicorn on :8100 via the Vite proxy.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const FIX = path.join(here, '..', 'fixtures');
 const REAL = !!process.env.REAL_BACKEND;
@@ -88,15 +88,15 @@ test('brief -> generate -> view -> highlight -> select', async ({ page, request 
 
   if (REAL && RECORD) {
     // capture the backend responses the mocked run replays
-    const fixtures = await (await request.get('http://localhost:8000/api/fixtures')).json();
-    const brief = await (await request.get('http://localhost:8000/api/fixtures/two_levels_stair')).json();
-    const posted = await (await request.post('http://localhost:8000/api/brief', { data: brief })).json();
-    const job = await (await request.post('http://localhost:8000/api/generate', { data: { brief_id: posted.brief_id, generator: 'beam', seed: 0, wait: true } })).json();
-    const options = await (await request.get(`http://localhost:8000/api/options/${job.job_id}`)).json();
+    const fixtures = await (await request.get('http://localhost:8100/api/fixtures')).json();
+    const brief = await (await request.get('http://localhost:8100/api/fixtures/two_levels_stair')).json();
+    const posted = await (await request.post('http://localhost:8100/api/brief', { data: brief })).json();
+    const job = await (await request.post('http://localhost:8100/api/generate', { data: { brief_id: posted.brief_id, generator: 'beam', seed: 0, wait: true } })).json();
+    const options = await (await request.get(`http://localhost:8100/api/options/${job.job_id}`)).json();
     const details = [];
-    for (let i = 0; i < Math.min(options.length, 3); i++) details.push(await (await request.get(`http://localhost:8000/api/options/${job.job_id}/${i}`)).json());
-    const glb = await (await request.get(`http://localhost:8000${options[0].glb_url}`)).body();
-    const sel = await (await request.post('http://localhost:8000/api/select', { data: { job_id: job.job_id, index: 1, name: 'e2e_record' } })).json();
+    for (let i = 0; i < Math.min(options.length, 3); i++) details.push(await (await request.get(`http://localhost:8100/api/options/${job.job_id}/${i}`)).json());
+    const glb = await (await request.get(`http://localhost:8100${options[0].glb_url}`)).body();
+    const sel = await (await request.post('http://localhost:8100/api/select', { data: { job_id: job.job_id, index: 1, name: 'e2e_record' } })).json();
     fs.mkdirSync(FIX, { recursive: true });
     fs.writeFileSync(path.join(FIX, 'option.glb'), glb);
     fs.writeFileSync(path.join(FIX, 'recording.json'), JSON.stringify({ fixtures, brief, job, options, details, select: sel }));

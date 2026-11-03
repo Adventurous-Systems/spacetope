@@ -5,6 +5,6 @@ export default defineConfig({
   timeout: 120_000,
   retries: 0,
   workers: 1,   // tests share one backend and generation is CPU-bound; parallel runs distort the timing checks
-  use: { baseURL: process.env.BASE_URL || 'http://localhost:5173', headless: true, viewport: { width: 1400, height: 900 } },
+  use: { baseURL: process.env.BASE_URL || 'http://localhost:5273', headless: true, viewport: { width: 1400, height: 900 } },
   reporter: [['list'], ['html', { open: 'never' }]],
 });
