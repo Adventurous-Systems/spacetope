@@ -18,3 +18,4 @@ out/
 
 # Local working notes; not part of the upstream repo
 docs/2026-*_*.md
+experiments/

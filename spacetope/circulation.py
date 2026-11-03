@@ -13,6 +13,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 from .brief import Brief, BriefError, Space, corridor_names, corridor_segments, generated_names
+from .units import to_mm
 
 DEFAULT_DOORS = {"room": {"w": 0.9, "h": 2.1}, "stair": {"w": 1.0, "h": 2.1}, "lift": {"w": 1.1, "h": 2.1}, "jamb": 0.1}
 HEAD_CLEARANCE = 0.3  # metres between the top of a door and the level's ceiling
@@ -81,6 +82,19 @@ def validate_compact(brief: Brief) -> list[Problem]:
     if brief.envelope and "h" in brief.envelope and n * H > float(brief.envelope["h"]) + 1e-9:
         problems.append(Problem("envelope_height",
                                 f"{n} levels × {_fmt(H)} m need {_fmt(n * H)} m; the envelope is {_fmt(float(brief.envelope['h']))} m tall"))
+
+    # M18: a space whose height is a constraint, not a request, and which needs more than one level to
+    # reach it, is a multi-level room (an auditorium, an atrium). No generator places one yet: it would have
+    # to be packed across levels the way a shaft is, and the per-level packers treat every room as one
+    # storey tall. Say so plainly rather than silently building it one level high.
+    for sp in brief.spaces:
+        if not sp.height_is_minimum or sp.is_vertical:
+            continue
+        need = sp.levels_spanned(to_mm(H))
+        if need > 1:
+            problems.append(Problem("tall_space_spans_levels",
+                                    f"{sp.name} needs a clear height of {_fmt(sp.h)} m, which spans {need} "
+                                    f"levels of {_fmt(H)} m; spaces taller than one level are not placed yet"))
 
     if n > 1:
         legacy = [s.name for s in brief.spaces if s.is_vertical and s.serves is None]

@@ -13,6 +13,13 @@ from .units import to_mm
 AXES = ("w", "l", "h")
 PROGRAMS = ("room", "corridor", "stair", "elevator", "void")
 CIRCULATION = ("corridor", "stair", "elevator")
+HEIGHT_MODES = ("request", "minimum")
+
+# No space is ever built lower than this, whatever the brief or the level height says: a clear height
+# below it is not habitable. Checked on the declared height when the brief loads and on the realised
+# height by `preverify.check_bands`.
+MIN_HEIGHT_M = 2.2
+MIN_HEIGHT_MM = 2200
 
 # Default tolerance bands per program as (lo_frac, hi_frac) per axis.
 # Corridors: fixed width, free length up to 3x nominal. Cores: fixed footprint.
@@ -39,6 +46,8 @@ class Space:
     tol: float | dict[str, tuple[float, float]] | None = None
     wishes: dict[str, Any] = field(default_factory=dict)
     serves: tuple[int, int] | None = None   # stairs and lifts: inclusive range of levels the shaft spans (M7)
+    height_mode: str = "request"            # "request": h is an intention the level height may override;
+    #                                         "minimum": h is a floor the realised height must clear (M18)
 
     def __post_init__(self) -> None:
         if self.program not in PROGRAMS:
@@ -46,6 +55,11 @@ class Space:
         for a in AXES:
             if getattr(self, a) <= 0:
                 raise BriefError(f"{self.name}: {a} must be positive")
+        if self.height_mode not in HEIGHT_MODES:
+            raise BriefError(f"{self.name}: height_mode must be one of {', '.join(HEIGHT_MODES)}, "
+                             f"got {self.height_mode!r}")
+        if self.h < MIN_HEIGHT_M:
+            raise BriefError(f"{self.name}: height {self.h} m is below the minimum of {MIN_HEIGHT_M} m")
 
     def nominal(self, axis: str) -> float:
         return float(getattr(self, axis))
@@ -76,6 +90,20 @@ class Space:
         return lo, hi
 
     @property
+    def height_is_minimum(self) -> bool:
+        """True when the declared height is a constraint to clear rather than an intention to adapt.
+        An auditorium asks for `height_mode: minimum`; an office leaves the default and takes the level
+        height."""
+        return self.height_mode == "minimum"
+
+    def levels_spanned(self, level_height_mm: int) -> int:
+        """How many levels this space needs to reach its declared height. One for a space whose height is
+        a request, since it simply becomes the level height; for a minimum, as many levels as it takes."""
+        if not self.height_is_minimum:
+            return 1
+        return max(1, -(-self.nominal_mm("h") // max(1, level_height_mm)))
+
+    @property
     def is_circulation(self) -> bool:
         return self.program in CIRCULATION
 
@@ -91,6 +119,8 @@ class Space:
             d["wishes"] = dict(self.wishes)
         if self.serves is not None:
             d["serves"] = [int(self.serves[0]), int(self.serves[1])]
+        if self.height_mode != "request":
+            d["height_mode"] = self.height_mode
         return d
 
     @property
@@ -167,7 +197,8 @@ class Brief:
             serves = s.get("serves")
             spaces.append(Space(name=str(s["name"]), w=float(s["w"]), l=float(s["l"]), h=float(s["h"]),
                                 program=s.get("program", "room"), tol=tol, wishes=dict(s.get("wishes", {}) or {}),
-                                serves=(int(serves[0]), int(serves[1])) if serves is not None else None))
+                                serves=(int(serves[0]), int(serves[1])) if serves is not None else None,
+                                height_mode=str(s.get("height_mode", "request"))))
         contacts, door_pairs = [], []
         for c in d.get("contacts", []):
             if len(c) not in (2, 3):

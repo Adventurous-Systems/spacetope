@@ -1,4 +1,4 @@
-"""The six checks every option must pass before it is shown."""
+"""The nine checks every option must pass before it is shown."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,12 +12,13 @@ from topologicpy.Vertex import Vertex
 from .brief import Brief
 from .levels import level_height_mm
 from .placement import Placement, diagnose_contact, overlaps
-from .preverify import check_constraints, preverify  # noqa: F401 (pure checks live in preverify.py; re-exported)
+from .preverify import check_bands, check_constraints, preverify  # noqa: F401 (pure checks live in preverify.py; re-exported)
 from .realise import Realised, RealiseError, realise
 from .spacegraph import AssemblyGraph, Contact
 from .units import to_m
 
-CHECKS = ("built", "cell_count", "no_slivers", "contacts", "dictionaries", "constraints", "doors")
+CHECKS = ("built", "cell_count", "no_slivers", "contacts", "dictionaries", "constraints", "doors",
+          "required_contacts", "bands")
 REQUIRED_KEYS = ("name", "program", "w", "l", "h")
 
 
@@ -141,5 +142,14 @@ def verify(brief: Brief, placement: Placement, intent: AssemblyGraph | None = No
 
     checks["constraints"] = check_constraints(brief, placement)
     checks["doors"] = check_doors(brief, r)
+
+    # H1b: the brief's required pairs against the *realised* faces, independent of the placement-derived
+    # intent above — a fault that removes a required contact no longer removes the expectation with it.
+    required = brief.required_pairs()
+    realised_pairs = {c.pair for c in realised}
+    missing_req = sorted({"-".join(sorted(p)) for p in required if p not in realised_pairs})
+    checks["required_contacts"] = (not missing_req, f"{len(required)} required pairs realised" if not missing_req
+                                   else "missing: " + ", ".join(missing_req[:6]))
+    checks["bands"] = check_bands(brief, placement)
     ok = all(p for p, _ in checks.values())
     return VerifyReport(ok, checks, fails, r)

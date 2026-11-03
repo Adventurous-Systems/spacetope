@@ -29,7 +29,7 @@ spacetope works on the topology of the building, not on a drawing of it:
 - **Options, not answers.** Each generator returns several distinct candidates with scores, and every
   generator takes a seed, so any result can be reproduced.
 - **Nothing unverified reaches the architect.** Every option is rebuilt in the geometry kernel and has to
-  pass seven checks first (see [What you get](#what-you-get)).
+  pass nine checks first (see [What you get](#what-you-get)).
 - **Exact geometry.** The solvers work on an integer millimetre grid, so walls meet exactly and never
   "almost". Geometry is never nudged to make it merge.
 
@@ -58,12 +58,13 @@ flowchart LR
   B --> C[Generate<br/>integer-mm placements]
   C --> D[Pre-verify<br/>cheap checks, no kernel]
   D --> E[Realise<br/>topologicpy CellComplex]
-  E --> F[Verify<br/>7 checks]
+  E --> F[Verify<br/>9 checks]
   F --> G[Score + rank]
   G --> H[Options]
 ```
 
 1. **Brief.** Spaces with nominal width, length and height, a tolerance band (±10 % by default) and a use.
+   A height is a request the level height may override, or a minimum to clear (see [Heights](#heights-a-request-or-a-minimum)).
    Wishes are optional: which rooms must touch, which need a door between them, which want an outside wall,
    which level a room is on. So are an envelope and a number of levels.
 2. **Expand and validate.** A compact circulation section becomes concrete spaces: one corridor per level,
@@ -93,7 +94,7 @@ flowchart LR
 
 ## What you get
 
-**Seven checks**, all of which must pass:
+**Nine checks**, all of which must pass:
 
 | Check | Meaning |
 |---|---|
@@ -104,6 +105,8 @@ flowchart LR
 | `dictionaries` | Every cell carries its data (name, use, level, …). |
 | `constraints` | Inside the envelope, on the stated number of levels, and every stair and lift spanning the levels it serves. |
 | `doors` | Every door is where access needs it and connects the two spaces it should. |
+| `required_contacts` | Every contact the **brief** requires exists as a realised shared face — checked against the brief, not against the placement's own intent. |
+| `bands` | Every space lies inside its tolerance band in plan (either orientation), and clears the height rules below. Exempt in plan: corridor lengths left free by the brief. |
 
 **Scores**, used to rank options and shown on each option card:
 
@@ -230,6 +233,30 @@ contacts:                          # faces that must be shared
   - [kitchen, meeting, {door: true}]   # and a door between them
 ```
 
+### Heights: a request, or a minimum
+
+A room's height is usually an **intention**, not a dimension the solver has to hit: a room on a level is
+as tall as the level, so a brief that asks for 3 m rooms on a 3.3 m level gets 3.3 m rooms and that is
+not a fault. Sometimes the height is a real constraint — an auditorium needs its clear height whatever
+the level is. Say which:
+
+```yaml
+spaces:
+  - {name: office,     w: 4,  l: 3,  h: 3}                           # a request: takes the level height
+  - {name: auditorium, w: 12, l: 18, h: 6, height_mode: minimum}     # a constraint: must clear 6 m
+```
+
+- **`request`** (the default): the realised height passes if it is the level height or lies inside the
+  declared band.
+- **`minimum`**: the realised height must clear the declared height. There is no upper bound — taller
+  still satisfies a minimum.
+- **No space is ever built below 2.2 m**, whatever its mode and whatever the level height says. A brief
+  that declares a lower height is rejected when it loads.
+
+A space whose minimum spans more than one level (a 6 m auditorium on 3 m levels) is a multi-level room.
+The brief is checked for it and told plainly that no generator places one yet; the per-level packers
+treat every room as one storey tall. Stairs and lifts already span levels, through `serves`.
+
 For multi-level buildings, declare the circulation once and let spacetope expand it:
 
 ```yaml
@@ -321,7 +348,7 @@ spacetope/              the engine (pure Python + networkx + OR-Tools; topologic
   solve/                generators: beam, cpsat, dual, treemap (+ grid, multilevel, seqpair)
   preverify.py          checks on integer boxes, no kernel
   realise.py            boxes -> topologicpy CellComplex with doors        (topologicpy)
-  verify.py  score.py   the seven checks; the scores                       (topologicpy)
+  verify.py  score.py   the nine checks; the scores                        (topologicpy)
   io/                   GLB, BREP + selectors, OBJ/JSON, TPY, graph JSON   (topologicpy)
   programme.py          building programmes -> briefs
   cli.py                the spacetope command
