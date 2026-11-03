@@ -108,8 +108,8 @@ def generate(gen, brief: Brief, seed: int = 0, params: dict | None = None, name:
     return options, t_gen, t_real
 
 
-def run_generator(gen, brief: Brief, seed: int = 0, params: dict | None = None, name: str = "") -> dict:
-    options, t_gen, t_real = generate(gen, brief, seed, params, name)
+def summarise(brief: Brief, options: list[Option], t_gen: float, t_real: float) -> dict:
+    """One scoreboard row from already-evaluated options."""
     ok = [o for o in options if o.ok]
     distinct = len({o.signature for o in ok})
     expanded = ok[0].realised.brief if ok and ok[0].realised is not None else brief
@@ -118,3 +118,8 @@ def run_generator(gen, brief: Brief, seed: int = 0, params: dict | None = None, 
         return round(sum(o.scores[metric] for o in ok) / len(ok), 4) if ok else 0.0
     return {"options": len(options), "verified": len(ok), "distinct": distinct, "distinct_topologies": distinct_topologies,
             **{m: mean(m) for m in METRICS}, "t_gen": round(t_gen, 3), "t_realise": round(t_real, 3)}
+
+
+def run_generator(gen, brief: Brief, seed: int = 0, params: dict | None = None, name: str = "") -> dict:
+    options, t_gen, t_real = generate(gen, brief, seed, params, name)
+    return summarise(brief, options, t_gen, t_real)
