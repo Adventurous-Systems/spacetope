@@ -155,6 +155,20 @@ retries twice, and raises `RealiseError("kernel failed to build cell ...")`, so 
 `verify` reports `built: False` instead of the process crashing. Multiprocess search with plain specs per
 worker (already the rule) also bounds how much one process asks of the kernel.
 
+**2026-11-03 `[RUN]`: the same fault reaches apertures, where nothing guards it.** During a full gate sweep,
+`tests/gates/test_m14.py::test_tpy_round_trip_keeps_dictionaries_and_doors[three_levels_core]` failed on the
+*door names read back* from a TPY round trip: the sorted aperture names differed from the generator's doors at
+one position (`door_office_a_corridor_0_L0` against `door_office_b_corridor_0_L0`), with the counts equal. It
+was the third test in a long-lived process and has not reproduced since: the whole marker passes on rerun
+(5 of 5), the round trip is stable 10 times out of 10 in a fresh process, and the generator's door set is
+byte-identical across `PYTHONHASHSEED` 0, 1, 2, 3, 7 and 12345, so it is not set-iteration order.
+
+Consistent with the failure above, but on a path the mitigation does not cover: `make_cell` proves a *cell*
+landed where asked, and nothing proves an *aperture* did. A translate failure while placing a door would put
+it on the wrong face, and `Topology.Apertures` would then read back a name that belongs elsewhere — silently,
+since the count still matches. Not yet reproduced deliberately; recorded so the next occurrence is recognised
+rather than re-diagnosed. A centroid check per aperture would close it the same way.
+
 ## 13. Unused graph machinery and the 0.9.71 differential (2026-09-20)
 
 Full note: `docs/2026-09-20_TOPOLOGICPY_OPPORTUNITIES.md`. Facts, all `[RUN]` unless marked:
