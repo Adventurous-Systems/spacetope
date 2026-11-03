@@ -194,6 +194,36 @@ def cmd_programme(args) -> int:
     return 0 if (rows or written) else 1
 
 
+def cmd_planted(args) -> int:
+    """Write briefs with a known exact solution, and that solution next to them (E9)."""
+    from pathlib import Path
+    from .circulation import BriefInvalid, prepare
+    from .placement import save_placement
+    from .planted import plant
+    from .preverify import preverify
+    params = json.loads(args.params) if args.params else {}
+    out_dir = Path(args.out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    written, failed = [], []
+    for seed in _seed_range(args.seeds):
+        brief, pl = plant(args.family, dict(params), seed)
+        try:
+            expanded, _ = prepare(brief)
+        except BriefInvalid as e:
+            failed.append({"seed": seed, "why": str(e)[:160]})
+            continue
+        ok, checks = preverify(expanded, pl)
+        if not ok:  # the sanity rule: a planted placement that fails is a bug, never something to write out
+            failed.append({"seed": seed, "why": "; ".join(d for k, (p, d) in checks.items() if not p)[:160]})
+            continue
+        (out_dir / f"{brief.name}.yaml").write_text(brief.to_yaml())
+        save_placement(pl, out_dir / f"{brief.name}.planted.json", brief.name)
+        written.append(brief.name)
+    emit({"family": args.family.lower(), "params": params, "written": len(written),
+          "failed": failed, "out": str(out_dir)})
+    return 0 if written and not failed else 1
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="spacetope")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -234,6 +264,12 @@ def main(argv=None) -> int:
     pr.add_argument("--params", help="JSON dict of generator params")
     pr.add_argument("--per-brief", type=int, default=None, help="cap the rows kept per brief")
     pr.set_defaults(fn=cmd_programme)
+    pt = sub.add_parser("planted", help="briefs with a known exact solution, written from a planted placement (E9)")
+    pt.add_argument("--family", required=True, choices=["A", "a", "B", "b"], help="A: cut rectangle; B: corridor-served")
+    pt.add_argument("--out", required=True, help="directory for <name>.yaml and <name>.planted.json")
+    pt.add_argument("--seeds", default="0", help="7, 0-19 or 1,4,9")
+    pt.add_argument("--params", help='JSON for the family, e.g. \'{"n": 12, "slicing": false}\' or \'{"rooms": 16, "levels": 2}\'')
+    pt.set_defaults(fn=cmd_planted)
     args = ap.parse_args(argv)
     global _stdout
     _stdout = sys.stdout
