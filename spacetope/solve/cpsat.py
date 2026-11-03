@@ -39,6 +39,8 @@ class CpsatParams:
     frontage_cut: bool = True       # redundant cut: rooms on one corridor side must fit along it (PLAN M10)
     w_stack: int = 3000             # reward per wall plane of level k that lands on a plane of level k-1 (PLAN M11)
     stack_pairs_max: int = 200      # skip the stacking term when a level pair would need more pair literals than this
+    deterministic: bool = False     # E14: one worker, deterministic-time budgets, no wall-clock dependence
+    det_time_per_solve: float = 4.0  # deterministic-time units per solve; calibrated against the 20 s bench budget
 
 
 @dataclass
@@ -282,27 +284,44 @@ def solve_cpsat(brief: Brief, params: CpsatParams | None = None, seed: int = 0,
     statuses: list[str] = []
     seen: set = set()
     status_name = "UNKNOWN"
+
+    def make_solver(i: int, budget: float) -> cp_model.CpSolver:
+        s = cp_model.CpSolver()
+        if p.deterministic:
+            # E14: a deterministic-time budget and one worker make two runs byte-identical; wall clock never
+            # enters the budget split, so the budgets themselves are reproducible too.
+            s.parameters.max_deterministic_time = budget
+            s.parameters.num_workers = 1
+        else:
+            s.parameters.max_time_in_seconds = budget
+            s.parameters.num_workers = p.workers
+        s.parameters.random_seed = seed + i
+        return s
+
     for i in range(p.k):
-        remaining = p.time_limit - (time.perf_counter() - t_start)
-        if remaining <= 0:
-            break
-        solver = cp_model.CpSolver()
-        solver.parameters.max_time_in_seconds = min(p.per_solve_max, max(p.per_solve_min, remaining / max(1, p.k - i)))
-        solver.parameters.num_workers = p.workers
-        solver.parameters.random_seed = seed + i
+        if p.deterministic:
+            budget = p.det_time_per_solve
+        else:
+            remaining = p.time_limit - (time.perf_counter() - t_start)
+            if remaining <= 0:
+                break
+            budget = min(p.per_solve_max, max(p.per_solve_min, remaining / max(1, p.k - i)))
+        solver = make_solver(i, budget)
         st = solver.Solve(m)
         status_name = solver.StatusName(st)
         if st == cp_model.UNKNOWN and not placements:
             # PLAN M10: no option yet and this share ran out. Splitting the budget k ways must not cost the first
             # option: spend what is left on finding one, and stop at the first solution so later solves keep time.
-            remaining = p.time_limit - (time.perf_counter() - t_start)
-            if remaining > p.per_solve_min:
-                solver = cp_model.CpSolver()
-                solver.parameters.max_time_in_seconds = remaining
-                solver.parameters.num_workers = p.workers
-                solver.parameters.random_seed = seed + i
+            if p.deterministic:
+                solver = make_solver(i, p.det_time_per_solve * max(1, p.k - i))
                 st = solver.Solve(m, _StopAtFirst())
                 status_name = solver.StatusName(st)
+            else:
+                remaining = p.time_limit - (time.perf_counter() - t_start)
+                if remaining > p.per_solve_min:
+                    solver = make_solver(i, remaining)
+                    st = solver.Solve(m, _StopAtFirst())
+                    status_name = solver.StatusName(st)
         statuses.append(status_name)
         if st not in (cp_model.OPTIMAL, cp_model.FEASIBLE):
             break
