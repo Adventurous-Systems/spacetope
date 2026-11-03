@@ -477,6 +477,20 @@ wider tolerances.
 `docs/TOPOLOGICPY_NOTES.md` marked `[RUN]` on PythonOCC. Finding 1 is a cost to accept, or to win back with
 fewer builds (M10 already builds only what is shown).
 
+### 2.7 Addendum (2026-11-02): diagrams as input, and more complex buildings
+
+Two tracks were planned on top of this programme in
+`docs/2026-11-02_DIAGRAMS_AND_COMPLEX_BUILDINGS_PLAN.md`, on branch `plan-diagrams-complex-buildings`:
+**track D**, the affinity/adjacency *diagram* (bubble diagram, SLP chart) as a first-class input — a
+BriefGraph model with area-first bubbles and a position sidecar, an editor in the canvas (M25), staged
+import from charts, vector drawings and hand sketches (M27), and the M20 affinity report rendered back on
+the architect's own drawing; **track X**, buildings past the current window — departments/zones declared
+or derived by clustering the affinity graph, solved hierarchically and in parallel (M26), circulation
+loops, hierarchies, multi-core stair coverage and atria (M28), and the graph post-processor of the
+2026-09-14 exploration once its decoder conditions are measured (M29). Both tracks are pure Python on the
+cheap model and need only M18a + M19 to start, so they may jump the curves queue; the decision rows are in
+that document's §4.
+
 ---
 
 ## 3. What the engine does today
