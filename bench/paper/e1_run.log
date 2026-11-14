@@ -458,3 +458,5 @@ TypeError: unhashable type: 'list'
 46/51 bench/paper/placements/dual/hotel_floor/seed0_opt1.json (56s)
 47/51 bench/paper/placements/dual/hotel_floor/seed1_opt0.json (58s)
 48/51 bench/paper/placements/dual/hotel_floor/seed1_opt1.json (59s)
+/Users/arlav/.pyenv/versions/3.11.9/lib/python3.11/multiprocessing/resource_tracker.py:254: UserWarning: resource_tracker: There appear to be 5 leaked semaphore objects to clean up at shutdown
+  warnings.warn('resource_tracker: There appear to be %d '
