@@ -206,6 +206,24 @@ def _rule(entry: dict, by_tag: dict[str, list[str]], problems: list[Problem]) ->
     return out
 
 
+def _conflicts(brief: Brief, affs: list[Affinity]) -> list[Problem]:
+    """A hard 'apart' (or 'never touch') on a pair that also has a required contact can never be met."""
+    required = brief.required_pairs()
+    out, seen = [], set()
+    for af in affs:
+        if af.strength not in HARD or len(af.others) != 1 or frozenset((af.a, af.others[0])) not in required:
+            continue
+        if (af.kind == "apart" and af.strength == "must") or (af.kind == "touch" and af.strength == "never"):
+            pair = frozenset((af.a, af.others[0]))
+            if (pair, af.kind) in seen:
+                continue
+            seen.add((pair, af.kind))
+            wish = "must stay apart from" if af.kind == "apart" else "must never touch"
+            out.append(Problem("affinity_conflict", f"{af.source}: {af.a} {wish} {af.others[0]}, but the brief also requires "
+                               f"them to touch (contacts); drop one of the two"))
+    return out
+
+
 def _parse(brief: Brief) -> tuple[list[Affinity], list[Problem]]:
     known = {s.name for s in brief.spaces} | set(generated_names(brief))
     by_tag: dict[str, list[str]] = {}
@@ -231,6 +249,7 @@ def _parse(brief: Brief) -> tuple[list[Affinity], list[Problem]]:
     for s in brief.spaces:
         if s.wishes.get("exterior") and s.name not in explicit_exterior:
             out.append(Affinity("exterior", s.name, (), "should", 1, dict(DEFAULTS["exterior"]), "wishes.exterior"))
+    problems += _conflicts(brief, out)
     return out, problems
 
 
@@ -271,9 +290,10 @@ def _uncovered(name: str, b: Box, placement: dict[str, Box]) -> dict[str, int]:
     return out
 
 
-def measure(brief: Brief, placement: dict[str, Box]) -> dict:
+def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ...] | None = None) -> dict:
     """Judge every affinity of `brief` on `placement`. `met` always means the wish is satisfied (so for `never`
-    and `avoid` it is the predicate's negation); a space missing from the placement leaves the item unmeasured."""
+    and `avoid` it is the predicate's negation); a space missing from the placement leaves the item unmeasured.
+    `strengths` restricts the judged affinities (`HARD` for the cheap hard check); the tallies then cover those only."""
     H = level_height_mm(brief)
     cache: dict = {}
     top = max((_levels(b, H)[1] for b in placement.values()), default=0)
@@ -325,6 +345,8 @@ def measure(brief: Brief, placement: dict[str, Box]) -> dict:
 
     items = []
     for af in expand(brief):
+        if strengths is not None and af.strength not in strengths:
+            continue
         item = {"kind": af.kind, "a": af.a, "others": list(af.others), "strength": af.strength, "weight": af.weight,
                 "met": None, "value": None, "target": None, "unit": None, "by": None, "source": af.source}
         if af.a in placement:
@@ -355,3 +377,84 @@ def measure(brief: Brief, placement: dict[str, Box]) -> dict:
     score = round(sum(i["weight"] for i in soft if i["met"]) / wsum, 6) if wsum else 1.0
     return {"score": score, "soft": tally(False), "hard": tally(True),
             "unmeasured": sum(1 for i in items if i["met"] is None), "items": items}
+
+
+# ----------------------------------------------------------------------------- what the generators and checks use
+
+SEARCH_KINDS = ("touch", "apart", "stack", "same_level")   # the kinds a search can judge on a partial placement
+
+
+def written(brief: Brief) -> bool:
+    """True when the brief carries any per-space or top-level affinity entry (a cheap guard before `expand`)."""
+    return bool(brief.affinities) or any(s.affinities for s in brief.spaces)
+
+
+def search_items(brief: Brief) -> list[Affinity]:
+    """The affinities a search can score: kinds `touch`, `apart`, `stack`, `same_level`, with at least one partner.
+    `exterior`, `facade`, `near`, `ground` and `top` need the finished plan and are left to the check and the ranking."""
+    return [a for a in expand(brief) if a.kind in SEARCH_KINDS and a.others] if written(brief) else []
+
+
+def holds(kind: str, params: dict, A: Box, B: Box, H: int) -> bool:
+    """The predicate of a search kind on two boxes: the same reading as `measure`, without the detail."""
+    if kind in ("touch", "apart"):
+        gap = A.x1 < B.x or B.x1 < A.x or A.y1 < B.y or B.y1 < A.y or A.z1 < B.z or B.z1 < A.z   # no shared face possible
+        if kind == "apart":
+            return gap or not any(contact_area(A, B, s) for s in ALL_SIDES)
+        if gap or A.z1 <= B.z or B.z1 <= A.z:
+            return False
+        u = max(touches(A, B, s)[0] for s in HSIDES)
+        return u > 0 and u >= to_mm(params["min"])
+    if kind == "stack":
+        if A.z1 != B.z and B.z1 != A.z:
+            return False
+        area = overlap_len(A.interval("x"), B.interval("x")) * overlap_len(A.interval("y"), B.interval("y"))
+        return area / min(A.w * A.l, B.w * B.l) >= params["overlap"] - 1e-9
+    (a0, a1), (b0, b1) = _levels(A, H), _levels(B, H)
+    return max(a0 - b1, b0 - a1, 0) == 0
+
+
+def has_hard(brief: Brief) -> bool:
+    return written(brief) and any(a.strength in HARD for a in expand(brief))
+
+
+def level_rules(brief: Brief) -> dict:
+    """What `must` affinities say about levels: names that must be on the ground level or the top level, and the
+    pairs that must share a level (for `levels.assign_levels`)."""
+    out = {"ground": [], "top": [], "same": []}
+    if not written(brief):
+        return out
+    for a in expand(brief):
+        if a.strength != "must":
+            continue
+        if a.kind in ("ground", "top"):
+            out[a.kind].append(a.a)
+        elif a.kind == "same_level":
+            out["same"] += [(a.a, o) for o in a.others]
+    return out
+
+
+_VERB = {"touch": "share a wall with", "near": "be within {target} doors of", "apart": "have no wall, floor or ceiling in common with",
+         "stack": "sit over or under", "same_level": "be on the same level as"}
+_SITE = {"exterior": "have an outside wall", "ground": "be on the ground level", "top": "be on the top level"}
+
+
+def describe(item: dict) -> str:
+    """One plain line for a `must`/`never` item that was not met."""
+    kind, a = item["kind"], item["a"]
+    if kind in _VERB:
+        verb = _VERB[kind].format(target=item["target"]) + " " + " or ".join(item["others"])
+    elif kind == "facade":
+        verb = f"have an outside wall facing {item['source'].split()[-1]}"
+    else:
+        verb = _SITE[kind]
+    line = f"{a} must never {verb}" if item["strength"] == "never" else f"{a} must {verb}"
+    return line + (f" (measured {item['value']} {item['unit']})" if item["value"] is not None else "")
+
+
+def hard_misses(brief: Brief, placement: dict[str, Box]) -> list[str]:
+    """Plain-language lines for every `must`/`never` affinity that is judged and not met. Unmeasured items (a space
+    not in the placement, `facade: sun`) do not count. Cheap enough to call per candidate."""
+    if not written(brief):
+        return []
+    return [describe(i) for i in measure(brief, placement, strengths=HARD)["items"] if i["met"] is False]

@@ -50,18 +50,18 @@ def evaluate_placements(brief: Brief, placements: list[Placement], generator: st
     return opts
 
 
+# the one table `rank` and `evaluate_top` both read; `affinity` is 1.0 on a brief without affinities (PLAN M20)
+RANK_WEIGHTS = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
+                "vertical": 10, "envelope_fit": 0, "daylight": 2, "affinity": 5}
+
+
 def rank(options: list[Option], weights: dict[str, float] | None = None) -> list[Option]:
-    w = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
-         "vertical": 10, "envelope_fit": 0, "daylight": 2}
+    w = dict(RANK_WEIGHTS)
     if weights:
         w.update(weights)
     def key(o: Option) -> float:
         return sum(w[m] * o.scores.get(m, 0.0) for m in METRICS) if o.ok else -1e9
     return sorted(options, key=key, reverse=True)
-
-
-RANK_WEIGHTS = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
-                "vertical": 10, "envelope_fit": 0, "daylight": 2}
 
 
 def evaluate_top(brief: Brief, placements: list[Placement], generator: str = "", seed: int = 0, keep: int = 3) -> tuple[list[Option], dict]:

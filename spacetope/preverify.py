@@ -28,9 +28,20 @@ def check_constraints(brief: Brief, placement: Placement) -> tuple[bool, str]:
                                 f"got z {b.z} mm, height {b.h} mm")
     return (not problems, "; ".join(problems) or "ok")
 
+def check_affinities(brief: Brief, placement: Placement, show: int = 3) -> tuple[bool, str]:
+    """The eighth check (PLAN M20): every `must` and `never` affinity that can be judged holds. `preverify` and
+    `verify` both call this, so the two never disagree. The detail names the missed wishes."""
+    from .affinity import hard_misses
+    misses = hard_misses(brief, placement)
+    if not misses:
+        return True, "ok"
+    more = f"; and {len(misses) - show} more" if len(misses) > show else ""
+    return False, "; ".join(misses[:show]) + more
+
+
 def preverify(brief: Brief, placement: Placement) -> tuple[bool, dict[str, tuple[bool, str]]]:
     """The checks that need no geometry kernel, on integer boxes (PLAN M10): no overlaps, constraints, door
-    planning and access through doors. `verify` can still reject what this accepts (build, slivers, tags), but in
+    planning and access through doors, and the hard affinities (M20). `verify` can still reject what this accepts (build, slivers, tags), but in
     every run so far the kernel-only checks never failed on a placement that passed these."""
     from .doors import access_problems, plan_doors
     checks: dict[str, tuple[bool, str]] = {}
@@ -45,4 +56,5 @@ def preverify(brief: Brief, placement: Placement) -> tuple[bool, dict[str, tuple
         checks["doors"] = (not issues, "; ".join(issues) if issues else f"{len(doors)} doors")
     else:
         checks["doors"] = (not brief.circulation or False, "no doors required" if not brief.circulation else "not planned")
+    checks["affinities"] = check_affinities(brief, placement)
     return all(ok for ok, _ in checks.values()), checks

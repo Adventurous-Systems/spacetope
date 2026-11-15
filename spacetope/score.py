@@ -6,6 +6,7 @@ import math
 import networkx as nx
 from topologicpy.Face import Face
 
+from . import affinity as _affinity
 from .brief import Brief, CIRCULATION
 from .doors import access_graph  # noqa: F401 (re-exported; lives in doors so affinity stays kernel-free)
 from .placement import Placement
@@ -13,7 +14,7 @@ from .realise import Realised
 from .solve.grid import overlap_len, touches
 from .units import to_mm
 
-METRICS = ("adjacency", "deviation", "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight")
+METRICS = ("adjacency", "deviation", "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight", "affinity")
 DOOR_MM = 900
 HSIDES = ("+x", "-x", "+y", "-y")
 
@@ -129,6 +130,7 @@ def score(r: Realised) -> dict[str, float]:
         "vertical": round(vertical(r.brief, r.placement, r.doors), 6),
         "envelope_fit": round(envelope_fit(r.brief, r.placement), 6),
         "daylight": round(daylight(r.brief, r.placement), 6),
+        "affinity": round(_affinity.measure(r.brief, r.placement)["score"], 6),
     }
 
 
@@ -174,7 +176,7 @@ def compactness_boxes(placement: Placement) -> float:
 
 
 def cheap_scores(brief: Brief, placement: Placement) -> dict[str, float]:
-    """The eight metrics from boxes alone, for ranking before realisation (PLAN M10)."""
+    """The nine metrics from boxes alone, for ranking before realisation (PLAN M10)."""
     from .doors import plan_doors
     from .solve.grid import contact_area
     names = list(placement)
@@ -190,6 +192,7 @@ def cheap_scores(brief: Brief, placement: Placement) -> dict[str, float]:
         "vertical": round(vertical(brief, placement, doors), 6),
         "envelope_fit": round(envelope_fit(brief, placement), 6),
         "daylight": round(daylight(brief, placement), 6),
+        "affinity": round(_affinity.measure(brief, placement)["score"], 6),
     }
 
 

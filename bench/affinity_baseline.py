@@ -5,6 +5,10 @@ One row per fixture that carries any affinity (tags rules, per-space entries or 
 M20 sets its improvement margin from these numbers. Run from the repo root, never beside pytest:
 
     .venv/bin/python -m bench.affinity_baseline [out.csv]
+
+The M20 run (default build, plus eight_rooms_hard) writes bench/history/2026-11-15_m20_affinity.csv:
+
+    .venv/bin/python -m bench.affinity_baseline bench/history/2026-11-15_m20_affinity.csv
 """
 from __future__ import annotations
 
@@ -20,7 +24,7 @@ from spacetope.pipeline import generate
 from spacetope.solve.registry import GENERATORS
 
 ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "bench" / "history" / "2026-11-15_m19_affinity.csv"
+OUT = ROOT / "bench" / "history" / "2026-11-15_m20_affinity.csv"   # the M19 file is a record: pass its path to redo it
 SEEDS = (0, 1, 2)
 SLOW = {}       # fixture -> {"build": "top", "keep": 3}, filled in only if the full run is too long
 COLUMNS = ["fixture", "generator", "seed", "build", "options", "verified", "affinity", "soft_met", "soft_total",

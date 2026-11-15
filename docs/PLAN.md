@@ -1,6 +1,6 @@
 # spacetope — plan
 
-Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. The stretch programme M9–M17 (§4.9) is finished. **Current work: the affinity programme M19–M21 (§4.10)** on branch `m19-affinity`; M19 is gated. Each milestone's status is kept in the table at the top of its section. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
+Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. The stretch programme M9–M17 (§4.9) is finished. **Current work: the affinity programme M19–M21 (§4.10)** on branch `m19-affinity`; M19 and M20 are gated, M21 is not started. Each milestone's status is kept in the table at the top of its section. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
 
 ## 0. In plain words (for readers who are not solver engineers)
 
@@ -63,7 +63,7 @@ flowchart LR
   B["brief<br/>(list of spaces + wishes)"] --> G["generators<br/>beam · CP-SAT · treemap"]
   G --> D["dimensioning<br/>integer mm inside tolerance"]
   D --> R["realise<br/>boxes → CellComplex"]
-  R --> V{"verify<br/>seven checks"}
+  R --> V{"verify<br/>eight checks"}
   V -- "fails" --> X["discarded"]
   V -- "passes" --> SC["score → rank"]
   SC --> O["K options<br/>architect selects one"]
@@ -117,7 +117,7 @@ integer-millimetre box per space. What differs is the search space, the guarante
 Two properties hold for every generator and are what make the options comparable:
 
 - **The same verifier.** No generator's output is trusted. Every placement goes through the same
-  realisation and seven checks; a generator that "guarantees" something only shortens the search.
+  realisation and eight checks; a generator that "guarantees" something only shortens the search.
 - **The same signature.** Two options are distinct when their sets of shared walls differ, not when
   coordinates differ. Generators are compared on distinct verified options per unit time, which is the
   column that matters to an architect choosing among alternatives.
@@ -440,7 +440,7 @@ wait for the versioned contract. M18a still comes before anything that changes a
 | # | Milestone | Status |
 |---|---|---|
 | M19 | Affinity: vocabulary, expansion and measurement (no generator changes) | **done 2026-11-15**, gate 31 green; baseline in `bench/history/2026-11-15_m19_affinity.csv` |
-| M20 | Affinity in the generators: `must`/`never` hard (an eighth verify check), `should`/`avoid` soft | not started; needs the margin fixed in the M19 decision row |
+| M20 | Affinity in the generators: `must`/`never` hard (an eighth verify check), `should`/`avoid` soft | **done 2026-11-15**, gate 17 green; baseline in `bench/history/2026-11-15_m20_affinity.csv` |
 | M21 | Site orientation and sun (`facade: sun`, the eight plan symmetries) | not started |
 
 **What an affinity is.** A wish that relates a space to another space, to a group of spaces, or to the
@@ -529,6 +529,91 @@ Gate `tests/gates/test_m19.py`:
 Iteration: two rounds on a failing line. If line 4 fails, the change that touched a generator is
 reverted rather than the line loosened.
 
+#### M20 — Affinity in the generators (started 2026-11-15)
+
+Margin fixed by the architect 2026-11-15: mean soft affinity over verified beam options, seeds 0–2,
+≥ 0.90 on `school_three_levels` (baseline 0.795) and ≥ 0.82 on `small_hospital` (0.724); no fixture below
+its M19 baseline; verified count and generation time no worse.
+
+**What was measured before designing** (kernel-free, beam, 24 options per fixture). The whole gap is the
+wet rules: `stack` met 9 % on the hospital and 44 % on the school, `cluster` 73 % and 56 %; exterior and
+the quiet/noisy `apart` are at 100 %. Nine in ten stack misses have **zero** overlap, not a small one: the
+beam places small rooms last and interleaved, so each level's wet rooms land wherever the corridor has
+wall left, and it never offers a lower level's room as an alignment position. A full stack is possible
+(four wet rooms per level on stacked corridors). Reordering what the beam already returns cannot reach
+the gate (best single option 0.794 and 0.881), and a same-footprint swap pass reaches 0.786 on the
+hospital and has no candidates on the school. A scratch prototype of the three beam changes below
+reached 1.000 on both, with adjacency, deviation and time unchanged.
+
+**Hard: the eighth check.** `affinities` joins `verify.CHECKS` and `preverify`, both calling
+`affinity.hard_misses(brief, placement)`; an option that misses a `must` or breaks a `never` is not
+shown, and the check's detail names the wish. Unmeasured items do not fail it. `prepare` rejects a `must`
+`apart` (or `never` `touch`) on a pair that also has a required contact.
+
+**Beam** (`solve/beam.py`, `multilevel.py`), all driven by the expanded list, never by tags:
+1. *Group runs.* Spaces joined by `stack` or `touch` group affinities (and `must` `touch` pairs) are
+   ordered as one consecutive run placed right after the level's corridors and shafts
+   (`BeamParams.affinity_order`, default on). Shafts sit at the same place on every level, so "the first
+   slots after the core" recur level over level.
+2. *Move term.* `w_affinity` = 8 per unit of soft weight for each `touch`, `apart`, `stack` or
+   `same_level` item met in the partial placement (an `avoid` broken costs the same). Above the
+   contact-area signal (≈ 4 per wall) and the plane bonus (≤ 3), far below `w_required` = 30, so it never
+   trades away a required contact. `beam_multilevel` passes the finished lower level as named boxes
+   (`below`) so `stack` can be judged when the upper room is placed.
+3. *Alignment offsets.* For a space with a `stack` affinity, its partners' boxes on the level below are
+   offered as alignment positions.
+4. *Hard rules.* A move that makes a `must` `apart` / `never` `touch` pair touch is dropped (unless the
+   pair names a corridor, which can still stretch; the check is the backstop). A `must` `touch` pair is
+   ordered like a required room pair and rewarded at `w_required` once met. After redimensioning on
+   single-level briefs, a result that breaks a hard rule falls back to the placement before it.
+Not scored in the search: `exterior` and `facade` (already met; the final outline is unknown mid-search),
+`near` (doors are planned afterwards), `ground`/`top`. These stay measured and ranked.
+
+**Levels.** `assign_levels` honours `must` `ground`, `top` and `same_level` as it honours `wishes.level`.
+
+**CP-SAT** (`solve/cpsat.py`), `CpsatParams.w_affinity` = 80 000 per unit of soft weight (the beam's 8,
+in the objective's units):
+- `touch`, pair or any-of: `_touch_literal` × 4 sides per same-level partner; `must` is a clause,
+  `should` a rewarded hit literal, `never`/`avoid` the negation.
+- `apart`: four separation literals per pair (strict on a level, plan-disjoint across adjacent levels).
+- `stack`: per partner on an adjacent level, overlap ≥ √`overlap` of the smaller nominal side on each axis
+  (sufficient for the area share, no products); any-of over partners.
+- Level kinds are constants from `assign_levels`. `exterior`, `facade` and `near` are not modelled; the
+  check and the ranking judge them. Affinity terms are skipped past a literal budget, as M11's are.
+
+**Ranking.** `affinity` joins `METRICS` (`score` and `cheap_scores` both take `measure(...)["score"]`,
+1.0 without affinities, so plain briefs rank as before) with rank weight 5, between `daylight` 2 and
+`adjacency` 10; `rank` and `evaluate_top` share one weights table. **`daylight` is not redefined**: the
+exterior wish is now inside a ranked score, and counting it again under another name would weigh it
+twice; `daylight` stays the plain reading of rooms with an outside wall.
+
+**Deferred.** Wet rooms touching a generated riser shaft (the truer reading of `stack`) is a follow-up;
+M20 uses plan overlap, which is what M19 measures. `treemap` and `dual` do not search on affinities;
+`dual` says so when the check removes every layout.
+
+Gate `tests/gates/test_m20.py`:
+1. Hard rules: on `eight_rooms_hard` (`storage` must touch `wc`, `wc` must stay apart from `meeting`; the
+   M19 beam met both in 5 of 24 options, none on seeds 0 and 2) every beam seed 0–2 and CP-SAT return at
+   least one verified option, and every verified option meets every hard rule.
+2. The check: a placement that breaks a `must` fails `affinities` in `preverify` and in `verify` with the
+   wish named; the two never disagree on the fixtures.
+3. Soft: the margin above, on beam placements that pass `preverify`, seeds 0–2.
+4. No regression: `bench/history/<date>_m20_affinity.csv` (real verifier) has no fixture below its M19
+   row in `affinity` or `verified`.
+5. Untouched where nothing is asked: for every fixture without a `touch`/`apart`/`stack`/`same_level`
+   affinity the beam returns placements identical to the M19 commit's (hashes recorded before the change
+   in `tests/gates/m20_beam_reference.json`).
+6. Time: beam `t_gen`, median of three, ≤ 1.25 × the M19 figure on the school and the hospital
+   (20.4 s and 4.3 s measured).
+7. CP-SAT: on a small two-level brief with soft `stack`, `touch` and `apart`, the affinity score with
+   `w_affinity` on is ≥ the score with it off and every `must`/`never` holds; a contradictory pair of
+   hard rules is reported impossible.
+8. Ranking: `affinity` in `METRICS`, box-only equals kernel value, one weights table.
+M19's line 4 ("generators untouched") is retired by this milestone and replaced by line 5.
+
+Iteration: three rounds on line 3 or 6. If the margin is missed, the number is recorded and the scope
+re-decided; the threshold is not moved.
+
 ## 5. Decisions (with why)
 
 | Date | Decision | Why |
@@ -612,6 +697,9 @@ reverted rather than the line loosened.
 | 2026-10-16 | spacetope relicensed from Apache-2.0 to **dual licensing: AGPL-3.0-or-later or a commercial licence** from **Adventurous Systems** (`LICENSE`, `NOTICE`, `COMMERCIAL.md`, `README.md`, `CONTRIBUTING.md`, `pyproject.toml`); versions up to `c419c33` stay Apache-2.0 for whoever has them | Goal: anyone who builds on spacetope and ships or hosts it must share their code, while Adventurous Systems keeps using it in AFlow and can license it to others without copyleft. Possible because Adventurous Systems is the copyright holder and the CLA grants relicensing of contributions, including proprietary terms; the copyright holder is not bound by the public licence. (The 2026-09-13 row records the copyright as held personally; the author assigned it to Adventurous Systems in writing on 2026-10-16. The work is done on the author's own time, on a computer and with resources Adventurous Systems pays for, and the author checked their university's IP policy before assigning.) Side effect: the AGPL release and the AGPL `topologic_core` are now consistent, so the public build may carry the binary. What it does not solve: a commercial licence cannot cover `topologic_core`, so a closed build (AFlow included) still needs the Rust core or the pythonocc backend first. `-or-later` chosen as the common form. Open for a lawyer: the commercial licence text, and whether the CLA's relicensing clause is enough for proprietary licensing. Not legal advice. |
 | 2026-11-15 | M19 built and gated: affinities parse, expand and are measured; generators untouched. `spacetope/affinity.py` (`expand`, `validate`, `measure`, pure, no kernel), `tags`/`affinities` on `Space` and `Brief`, the report on `Option.analysis["affinity"]`, the option card, `spacetope affinity`. **Four departures from the 2026-10-24 sketch, each forced by the code:** (1) `affinity` is reported, not added to `METRICS`; (2) group rules are any-of, not fixed pairs; (3) `daylight` keeps its meaning until M20; (4) the wet baseline is the school and the hospital, the apartments get flat-over-flat stacking, and "the office" is `two_levels_stair` and `three_levels_core` | (1) `rank`, `evaluate_top`, the scoreboard columns and two gates index every metric, and a ranked score would move earlier gates; reporting it changes none of them (M3, M7, M8, M11, M15 rerun green on the edited fixtures: 6, 47, 12, 4, 17; M1, M10, M17: 12, 10, 14; fast suite 98). (2) Levels are assigned by the generator, so "wet over wet" cannot be listed as pairs when the brief is expanded; each tagged room is met when any other member satisfies it. (3) `daylight` carries rank weight 2. (4) `apartments_four_levels` has only whole flats and `office_30` has no exterior wishes. The beam returns identical placements with the new keys stripped (gate line 4). `wishes.exterior`, written since M17 and read by nothing, is now read as `exterior`/`should`, so 12 of 14 fixtures carry a report. Built without M18a: every key is additive. |
 | 2026-11-15 | **M19 baseline** (beam, seeds 0–2, verified options): `school_three_levels` 0.795 (0.822, 0.805, 0.759), `small_hospital` 0.724 (0.743, 0.728, 0.699), `apartments_four_levels` 0.979; every exterior-only fixture 1.000; the school's 72 hard quiet/noisy `apart` items met in every verified option. **Proposed M20 margin, the architect's to fix:** mean soft affinity ≥ baseline + 0.10 on the school and the hospital (≥ 0.90 and ≥ 0.82), no fixture below its baseline, verified count and time no worse than the scoreboard | The beam satisfies exterior wishes and the quiet/noisy separation by accident (rooms hang off a corridor, so one wall is free; the noisy rooms are few and on other levels), so those leave M20 nothing to show. The only measured gap is wet stacking and clustering, which is where the margin has to be set. The hard rule needs a brief that the beam breaks before M20's eighth check can be shown to matter; none of the fixtures is one yet, so M20 starts by writing it. |
+| 2026-11-15 | **M20 built and gated (17 tests, all eight lines).** `must`/`never` are an eighth check, `affinities`, in `preverify` and `verify`; the beam orders tagged groups as runs, adds a move term (`w_affinity` 8), offsets stacked rooms from the level below and drops moves that break a hard rule; CP-SAT carries an affinity block (`w_affinity` 80 000, at most 1500 literals); `affinity` is in `METRICS` with rank weight 5. **Against the margin** (beam, seeds 0–2, real verifier): `school_three_levels` 0.795 → 0.989 (floor 0.90), `small_hospital` 0.724 → 1.000 (floor 0.82), `apartments_four_levels` 0.979 → 0.979, every other fixture 1.000; verified counts per seed identical to M19 on all 12 shared fixtures; `eight_rooms_hard` 8/8/8 verified with both hard rules met (M19 beam: 5 of 24). Beam time, median of three: school 11.3 s (limit 25.5), hospital 4.0 s (limit 5.4) | The margin was fixed before the build and is met without loosening. The whole gain is wet stacking and clustering, which is where M19 measured the gap. The hospital time line has the least room (one run reached 4.6 s on a loaded machine) and is the line most likely to flake. |
+| 2026-11-15 | **M20 departures and limits, recorded so they are not rediscovered.** (1) The time line is met partly by caching `Brief.by_name`, shared code outside the affinity work; the lookup was rebuilt on every call and took about a quarter of beam time. (2) The beam's apartments output is byte-identical to M19 (the plan expected it to change): the flats were already stacked. Beam output changed only on the school and the hospital. (3) `daylight` is **not** redefined; it keeps its meaning and its weight 2. (4) Beam: `must stack` and `must same_level` are rewarded at `w_affinity` and enforced by the check, not by construction; if every move at a step breaks a hard rule the beam retries without the drop, and the check removes what still breaks one. (5) CP-SAT: `stack` is sufficient, not exact; `never stack` is stricter than needed; `near`, `exterior` and `facade` are not modelled; a brief with no required contacts gives one option. (6) `treemap` and `dual` do not search on affinities. (7) Wet `stack` is plan overlap; the riser shaft is deferred. (8) `_conflicts` reads the brief's own contacts only | (1) No code edits a brief's space list in place and beam hashes are identical with the cache, so it is safe; it also makes the M19-to-M20 time comparison flatter than the affinity work alone (about 13 % more candidate moves). (4) Keeps the beam from dying on a hard brief; correctness rests on the eighth check, which gate lines 1 and 2 test. (5)–(8) are honest limits of a first pass, none needed by the gate fixtures. |
+| 2026-11-15 | Full rerun after M20, one marker per process: M0 17, M1 12, M2 26, M3 6, M4 4, M5 8, M7 47, M8 12, M9 10, M10 11, M11 4, M12 11, M13 4, M14 5, M15 17, M16 14, M17 14, M19 27, M20 17; fast suite 129; 349 collected. M19's gate is 27, not 31: its "generators untouched" tests are retired by M20 line 5. **M5 had one failure not caused by M20:** its leftover-word check (`strand`) matched a local variable `stranded` in `spacetope/solve/seqpair.py`, there since M16; the variable is renamed `unreached`, the check is unchanged | The M5 check was not loosened; the rename changes no behaviour (M5 and M16 rerun green). It had gone unnoticed because M5 was not rerun after M16. |
 
 ## 6. Open questions (answer as they become blocking)
 

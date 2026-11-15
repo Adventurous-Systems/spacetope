@@ -151,7 +151,13 @@ class Brief:
 
     @property
     def by_name(self) -> dict[str, Space]:
-        return {s.name: s for s in self.spaces}
+        # built once per spaces list: `space()` runs a million times in a beam search (PLAN M20, time ceiling).
+        # Nothing edits `spaces` in place; `dataclasses.replace` gives a new list and so a new index.
+        key = (id(self.spaces), len(self.spaces))
+        cached = self.__dict__.get("_by_name")
+        if cached is None or cached[0] != key:
+            cached = self.__dict__["_by_name"] = (key, {s.name: s for s in self.spaces})
+        return cached[1]
 
     def space(self, name: str) -> Space:
         return self.by_name[name]

@@ -10,8 +10,11 @@ from __future__ import annotations
 import random
 from dataclasses import dataclass, field, replace
 
+from .. import affinity as _aff
 from ..brief import Brief, CIRCULATION, Space
 from ..doors import corridor_opening_mm, required_overlap_mm, touch_ok
+from ..levels import level_height_mm
+from ..units import to_mm
 from .grid import Box, any_intersection, bounds, contact_area, overlap_len, touches
 
 HSIDES = ("+x", "-x", "+y", "-y")
@@ -37,6 +40,8 @@ class BeamParams:
     w_frontage: float = 0.0        # per metre of projected frontage shortfall; measured 2026-09-20: shaping the score this way
                                    # makes the beam leave rooms off the corridor, so it is off; tight_corridors does the job
     tight_ratio: float = 0.75      # a corridor is tight when its partners' narrow sides need more than this share of its two sides (PLAN M15)
+    w_affinity: float = 8.0        # per unit of soft weight for a touch/apart/stack/same_level affinity met (PLAN M20); 0 turns it off
+    affinity_order: bool = True    # spaces joined by stack/touch group affinities are placed as one run after the corridors (M20)
 
 
 @dataclass
@@ -49,6 +54,130 @@ class State:
     area_mm2: int = 0
     access: frozenset = frozenset()
     dev_sum: float = 0.0
+    aff: float = 0.0               # affinity term of the score (M20); 0 on briefs without searchable affinities
+    hits: frozenset = frozenset()  # indices of the affinity items met so far (M20)
+
+
+class AffinityTerms:
+    """The affinities a beam search can score on a partial placement (PLAN M20), read from `affinity.search_items`
+    and never from tags. `below` holds the finished level underneath by name, so `stack` can be judged when the
+    upper room is placed. Values are in score units: a met item adds `w_affinity` x weight (a broken `avoid` or
+    `never` subtracts it), a met `must touch` pair adds `w_required`."""
+
+    def __init__(self, brief: Brief, items, p: "BeamParams", below: dict[str, Box] | None = None):
+        self.H = level_height_mm(brief)
+        self.below = below or {}
+        self.items: list[tuple] = []
+        self.by_name: dict[str, list[int]] = {}
+        self.hard: dict[str, list[tuple]] = {}      # name -> (partner, kind, params): pairs that must not touch / must stay apart
+        self.must_touch: dict[str, dict[str, int]] = {}
+        self.stack_with: dict[str, set[str]] = {}
+        self.grouped: set[str] = set()
+        corridor = lambda n: brief.space(n).program == "corridor"
+        for af in items:
+            neg = af.strength in _aff.NEGATIVE
+            must_pair = af.kind == "touch" and af.strength == "must" and len(af.others) == 1
+            scale = p.w_required if must_pair else p.w_affinity * af.weight
+            idx = len(self.items)
+            self.items.append((af.kind, af.a, af.others, af.params, -scale if neg else scale))
+            for n in (af.a, *af.others):
+                self.by_name.setdefault(n, []).append(idx)
+            if must_pair:
+                o = af.others[0]
+                need = to_mm(af.params["min"])
+                self.must_touch.setdefault(af.a, {})[o] = need
+                self.must_touch.setdefault(o, {})[af.a] = need
+            if af.kind == "stack":
+                self.grouped.add(af.a)
+                self.grouped.update(af.others)
+                for o in af.others:
+                    self.stack_with.setdefault(af.a, set()).add(o)
+                    self.stack_with.setdefault(o, set()).add(af.a)
+            elif af.kind == "touch" and len(af.others) > 1:
+                self.grouped.add(af.a)
+                self.grouped.update(af.others)
+            if af.strength in _aff.HARD and ((af.kind == "apart" and af.strength == "must") or (af.kind == "touch" and af.strength == "never")):
+                for o in af.others:
+                    if not corridor(af.a) and not corridor(o):
+                        self.hard.setdefault(af.a, []).append((o, af.kind, af.params, af.kind == "apart"))
+                        self.hard.setdefault(o, []).append((af.a, af.kind, af.params, af.kind == "apart"))
+
+    @classmethod
+    def of(cls, brief: Brief, p: "BeamParams", below: dict[str, Box] | None = None):
+        """None when the brief has nothing to score (the search then runs exactly as before M20)."""
+        if not p.w_affinity:
+            return None
+        items = _aff.search_items(brief)
+        return cls(brief, items, p, below) if items else None
+
+    def _hit(self, i: int, get) -> bool:
+        kind, a, others, params, _ = self.items[i]
+        A = get(a)
+        if A is None:
+            return False
+        for o in others:
+            B = get(o)
+            if B is not None and _aff.holds(kind, params, A, B, self.H):
+                return True
+        return False
+
+    def total(self, placed: dict[str, Box]) -> tuple[float, frozenset]:
+        """Value and the set of items hit, judged on `placed` plus the level below."""
+        below = self.below
+        get = lambda n: placed[n] if n in placed else below.get(n)
+        hits = frozenset(i for i, (kind, a, others, params, scale) in enumerate(self.items)
+                         if (a in placed or any(o in placed for o in others)) and self._hit(i, get))
+        return sum(self.items[i][4] for i in sorted(hits)), hits
+
+    def delta(self, parent: State, name: str, box: Box) -> tuple[float, frozenset]:
+        """Value and hit set after box `name` joins `parent` (only the items that mention `name` are looked at)."""
+        placed, below, H = parent.placed, self.below, self.H
+        get = lambda n: box if n == name else (placed[n] if n in placed else below.get(n))
+        add = []
+        for i in self.by_name.get(name, ()):
+            if i in parent.hits:
+                continue            # already hit: another partner cannot change an any-of item
+            kind, a, others, params, scale = self.items[i]
+            if a == name:
+                if self._hit(i, get):
+                    add.append(i)
+            else:
+                A = placed[a] if a in placed else below.get(a)
+                if A is not None and _aff.holds(kind, params, A, box, H):
+                    add.append(i)
+        if not add:
+            return 0.0, parent.hits
+        return sum(self.items[i][4] for i in add), parent.hits | frozenset(add)
+
+    def breaks_hard(self, placed: dict[str, Box], name: str, box: Box) -> bool:
+        for other, kind, params, want_apart in self.hard.get(name, ()):
+            B = placed[other] if other in placed else self.below.get(other)
+            if B is not None and _aff.holds(kind, params, box, B, self.H) != want_apart:
+                return True
+        return False
+
+    def partners(self, name: str) -> set[str]:
+        return set(self.must_touch.get(name, ()))
+
+    def min_overlap(self, name: str, other: str) -> int:
+        return self.must_touch.get(name, {}).get(other, 0)
+
+    def stack_boxes(self, name: str) -> list[Box]:
+        return [self.below[o] for o in sorted(self.stack_with.get(name, ())) if o in self.below]
+
+    def group_run(self, order: list[Space]) -> list[Space]:
+        """Rooms joined by stack / touch-group affinities, as one consecutive run right after the corridors and
+        shafts (they keep their relative order)."""
+        run = [s for s in order if s.name in self.grouped and s.program == "room"]
+        if len(run) < 2:
+            return order
+        names = {s.name for s in run}
+        rest = [s for s in order if s.name not in names]
+        at = sum(1 for s in rest if s.program != "room")
+        return rest[:at] + run + rest[at:]
+
+    def has_hard_rules(self) -> bool:
+        return bool(self.hard or self.must_touch)
 
 
 def space_dev(brief: Brief, name: str, b: Box) -> float:
@@ -66,7 +195,7 @@ def _door_ok(a: Box, b: Box, door: int) -> bool:
 
 
 def _finish(brief: Brief, placed: dict[str, Box], p: BeamParams, req_hit: int, area: int, access: frozenset,
-            dev_sum: float, ref_planes) -> float:
+            dev_sum: float, ref_planes, aff: float | None = None) -> float:
     bb = bounds(placed.values())
     half_perim = (bb.w + bb.l) / 1000
     covered = sum(b.w * b.l for b in placed.values()) / 1e6
@@ -76,11 +205,12 @@ def _finish(brief: Brief, placed: dict[str, Box], p: BeamParams, req_hit: int, a
         px, py = planes(placed.values())
         tot = len(px) + len(py)
         stack = (len(px & ref_planes[0]) + len(py & ref_planes[1])) / tot if tot else 0.0
-    return (p.w_required * req_hit + p.w_access * len(access) + p.w_contact_area * area / 1e6
-            - p.w_perimeter * half_perim - p.w_dead * dead - p.w_dev * dev_sum + p.w_stack * stack)
+    score = (p.w_required * req_hit + p.w_access * len(access) + p.w_contact_area * area / 1e6
+             - p.w_perimeter * half_perim - p.w_dead * dead - p.w_dev * dev_sum + p.w_stack * stack)
+    return score if aff is None else score + aff
 
 
-def state_from_placed(brief: Brief, placed: dict[str, Box], p: BeamParams, ref_planes=None) -> State:
+def state_from_placed(brief: Brief, placed: dict[str, Box], p: BeamParams, ref_planes=None, aff: "AffinityTerms | None" = None) -> State:
     """Full (non-incremental) evaluation; used for initial states and after a corridor stretch."""
     names = list(placed)
     req = brief.required_pairs()
@@ -96,15 +226,19 @@ def state_from_placed(brief: Brief, placed: dict[str, Box], p: BeamParams, ref_p
     circ = [n for n in names if brief.space(n).program in CIRCULATION]
     access = frozenset(n for n in names if brief.space(n).program == "room" and any(_door_ok(placed[n], placed[c], p.door_mm) for c in circ))
     dev_sum = sum(space_dev(brief, n, b) for n, b in placed.items())
-    return State(placed, _finish(brief, placed, p, hit, area, access, dev_sum, ref_planes), contacts_key(placed), hit, area, access, dev_sum)
+    if aff is None:
+        return State(placed, _finish(brief, placed, p, hit, area, access, dev_sum, ref_planes), contacts_key(placed), hit, area, access, dev_sum)
+    av, hits = aff.total(placed)
+    return State(placed, _finish(brief, placed, p, hit, area, access, dev_sum, ref_planes, av), contacts_key(placed), hit, area, access, dev_sum, av, hits)
 
 
-def extend_state(brief: Brief, parent: State, new: dict[str, Box], name: str, p: BeamParams, ref_planes=None) -> State:
+def extend_state(brief: Brief, parent: State, new: dict[str, Box], name: str, p: BeamParams, ref_planes=None,
+                 aff: "AffinityTerms | None" = None) -> State:
     """Score `new` = parent.placed + box `name` incrementally. Falls back to a full evaluation when
     an existing box changed (corridor stretch)."""
     for n, b in parent.placed.items():
         if new[n] != b:
-            return state_from_placed(brief, new, p, ref_planes)
+            return state_from_placed(brief, new, p, ref_planes, aff)   # full recompute, affinity term included
     box = new[name]
     req = brief.required_pairs()
     area, hit = parent.area_mm2, parent.req_hit
@@ -131,7 +265,11 @@ def extend_state(brief: Brief, parent: State, new: dict[str, Box], name: str, p:
         for s in HSIDES:
             if contact_area(box, parent.placed[n], s) > 0:
                 key.add((name, s, n) if name <= n else (n, OPPOSITE_H[s], name))
-    return State(new, _finish(brief, new, p, hit, area, access, dev_sum, ref_planes), frozenset(key), hit, area, access, dev_sum)
+    if aff is None:
+        return State(new, _finish(brief, new, p, hit, area, access, dev_sum, ref_planes), frozenset(key), hit, area, access, dev_sum)
+    d, hits = aff.delta(parent, name, box)
+    av = parent.aff + d
+    return State(new, _finish(brief, new, p, hit, area, access, dev_sum, ref_planes, av), frozenset(key), hit, area, access, dev_sum, av, hits)
 
 
 def dims(space: Space, rotated: bool, height: int | None = None, length: int | None = None) -> tuple[int, int, int]:
@@ -169,7 +307,7 @@ def order_spaces(brief: Brief, rng: random.Random, spaces: list[Space] | None = 
     return out
 
 
-def pair_adjacent(brief: Brief, order: list[Space]) -> list[Space]:
+def pair_adjacent(brief: Brief, order: list[Space], extra=()) -> list[Space]:
     """PLAN M15: rooms that must touch each other are placed as one contiguous run, walked from an end of their
     chain (lab, prep room, lab; imaging, x-ray, control room). Each usually also needs the corridor, and the only
     position touching both is the slot beside the partner on the corridor's side. Placed apart, other rooms take
@@ -177,7 +315,7 @@ def pair_adjacent(brief: Brief, order: list[Space]) -> list[Space]:
     import networkx as nx
     names = [s.name for s in order]
     g = nx.Graph()
-    g.add_edges_from((a, b) for a, b in brief.contacts if a in names and b in names
+    g.add_edges_from((a, b) for a, b in (*brief.contacts, *extra) if a in names and b in names
                      and brief.space(a).program == "room" and brief.space(b).program == "room")
     if g.number_of_edges() == 0:
         return list(order)
@@ -318,27 +456,37 @@ def stretch_corridor(cor: Box, axis: str, need: tuple[int, int], band: tuple[int
 
 def moves(brief: Brief, state: State, space: Space, p: BeamParams, height: int | None = None,
           envelope: dict[str, int] | None = None, context: list[Box] | None = None,
-          level_z: int | None = None, tight: dict[str, int] | None = None) -> list[dict[str, Box]]:
+          level_z: int | None = None, tight: dict[str, int] | None = None,
+          aff: AffinityTerms | None = None) -> list[dict[str, Box]]:
     out: list[dict[str, Box]] = []
     placed = state.placed
     orientations = [False, True] if (p.rotate and space.w != space.l) else [False]
     others = list(placed.values())
     partners = {b if a == space.name else a for a, b in brief.contacts if space.name in (a, b)}
+    if aff is not None:
+        partners |= aff.partners(space.name)       # a `must touch` pair attaches like a required pair (M20)
     restrict = p.attach_required_first and bool(partners & set(placed))
     targets = [n for n in placed if n in partners] if restrict else list(placed)
-    out = _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z, tight=tight)
+    out = _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z, tight=tight, aff=aff)
     if not out and restrict:  # required partner has no free face: fall back to any placed space
-        out = _moves_to(brief, state, space, p, [n for n in placed if n not in partners], others, orientations, height, envelope, context, level_z, tight=tight)
+        out = _moves_to(brief, state, space, p, [n for n in placed if n not in partners], others, orientations, height, envelope, context, level_z, tight=tight, aff=aff)
     if not out:  # last resort: allow a door pair to graze, which door planning will then report
         out = _moves_to(brief, state, space, p, list(placed), others, orientations, height, envelope, context, level_z,
-                        enforce_doors=False, tight=tight)
+                        enforce_doors=False, tight=tight, aff=aff)
+    if not out and aff is not None and aff.has_hard_rules():
+        # every move broke a hard rule: keep the beam alive and let the `affinities` check (the backstop) decide
+        out = _moves_to(brief, state, space, p, list(placed), others, orientations, height, envelope, context, level_z,
+                        enforce_doors=False, tight=tight, aff=aff, hard=False)
     return out
 
 
 def _moves_to(brief, state, space, p, targets, others, orientations, height, envelope, context, level_z=None,
-              enforce_doors=True, tight=None) -> list[dict[str, Box]]:
+              enforce_doors=True, tight=None, aff=None, hard=True) -> list[dict[str, Box]]:
     out: list[dict[str, Box]] = []
     placed = state.placed
+    stack_boxes = aff.stack_boxes(space.name) if aff is not None else ()
+    if stack_boxes:
+        others = list(others) + stack_boxes       # a stack partner on the level below offers its edges as alignment positions
     for pname in targets:
         pbox = placed[pname]
         pspace = brief.space(pname)
@@ -362,6 +510,8 @@ def _moves_to(brief, state, space, p, targets, others, orientations, height, env
                     if (side in ("+y", "-y") and long_axis == "y") or (side in ("+x", "-x") and long_axis == "x"):
                         continue  # rooms do not cap a corridor's ends; the corridor must stay stretchable
                 min_ov = required_overlap_mm(brief, space.name, pname, p.door_mm)
+                if aff is not None:
+                    min_ov = max(min_ov, aff.min_overlap(space.name, pname))
                 # corridor may stretch to receive the room: widen the candidate set beyond its ends
                 stretchable = pspace.program == "corridor" and (axis == ("y" if pbox.l >= pbox.w else "x"))
                 target = pbox
@@ -403,6 +553,8 @@ def _moves_to(brief, state, space, p, targets, others, orientations, height, env
                                              for n, b in new.items() if n != space.name):
                         continue  # a pair that needs a door would only graze this box
                     new[space.name] = box
+                    if hard and aff is not None and aff.breaks_hard(new, space.name, box):
+                        continue
                     if envelope is not None:
                         bb = bounds(list(new.values()) + (context or []))
                         if bb.w > envelope["w"] or bb.l > envelope["l"]:
@@ -416,12 +568,14 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
                 context: list[Box] | None = None, ref_planes: tuple[set[int], set[int]] | None = None,
                 envelope: dict[str, int] | None = None, height: int | None = None, z0: int = 0,
                 normalise_output: bool = True, redim: bool | None = None,
-                scorer=None, trace: list | None = None, batch_scorer=None) -> list[dict[str, Box]]:
+                scorer=None, trace: list | None = None, batch_scorer=None,
+                below: dict[str, Box] | None = None) -> list[dict[str, Box]]:
     """Place `spaces` (default: all) one by one. `fixed` boxes are pre-placed (cores on this level);
     `context` boxes (other levels) only count towards the envelope bounding box.
     `scorer(brief, state, progress, ref_planes) -> float` replaces the hand-weighted score (M6).
     `trace`, when a list, receives one entry per step: the full candidate pool before truncation.
-    `batch_scorer(brief, states, progress, ref_planes) -> list[float]` scores a whole pool in one call (GNN)."""
+    `batch_scorer(brief, states, progress, ref_planes) -> list[float]` scores a whole pool in one call (GNN).
+    `below`: the finished level underneath, by name, so affinities that reach across levels can be judged (M20)."""
     p = params or BeamParams()
     if any(s.program == "corridor" and s.wishes.get("segment") for s in brief.spaces) and p.w_access < p.w_required:
         # On a chained spine a room names no corridor, so reaching one by a door *is* the requirement and carries
@@ -430,21 +584,24 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
         p = replace(p, w_access=p.w_required)
     rng = random.Random(seed)
     order = order_spaces(brief, rng, spaces)
+    aff = AffinityTerms.of(brief, p, below)
     if p.pair_order:
-        order = pair_adjacent(brief, order)
+        order = pair_adjacent(brief, order, _must_pairs(aff))
+    if aff is not None and p.affinity_order:
+        order = aff.group_run(order)
     if not order and not fixed:
         return []  # nothing to place on this level (a stale `expanded: true` file can get here)
     n_steps = max(1, len(order))
     tight = tight_corridors(brief, order, envelope, p)
     beam: list[State] = []
     if fixed:
-        beam.append(state_from_placed(brief, dict(fixed), p, ref_planes))
+        beam.append(state_from_placed(brief, dict(fixed), p, ref_planes, aff))
         rest = order
     else:
         first = order[0]
         for rot in ([False, True] if (p.rotate and first.w != first.l) else [False]):
             w, l, h = dims(first, rot, height, tight.get(first.name))
-            beam.append(state_from_placed(brief, {first.name: Box(0, 0, z0, w, l, h)}, p, ref_planes))
+            beam.append(state_from_placed(brief, {first.name: Box(0, 0, z0, w, l, h)}, p, ref_planes, aff))
         rest = order[1:]
     for step, space in enumerate(rest, start=1):
         pool: dict[frozenset, State] = {}
@@ -456,8 +613,8 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
         if batch_scorer is not None:
             cands: dict[frozenset, State] = {}
             for st in beam:
-                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight):
-                    ns = extend_state(brief, st, new, space.name, p, ref_planes)
+                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight, aff=aff):
+                    ns = extend_state(brief, st, new, space.name, p, ref_planes, aff)
                     if ns.key not in cands or cands[ns.key].score < ns.score:
                         cands[ns.key] = ns   # dedupe on the hand score first; the batch scorer then ranks the survivors
             if cands:
@@ -469,8 +626,8 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
                     pool[ns.key] = ns
         else:
             for st in beam:
-                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight):
-                    ns = extend_state(brief, st, new, space.name, p, ref_planes)
+                for new in moves(brief, st, space, p, height, envelope, context, level_z=z0, tight=tight, aff=aff):
+                    ns = extend_state(brief, st, new, space.name, p, ref_planes, aff)
                     ns.score += rng.uniform(-p.jitter, p.jitter)
                     if p.w_frontage:
                         ns.score -= p.w_frontage * frontage_shortfall(brief, ns.placed, rest[step:], envelope)
@@ -485,8 +642,22 @@ def beam_search(brief: Brief, params: BeamParams | None = None, seed: int = 0, *
     results = [normalise(st.placed) if normalise_output else dict(st.placed) for st in beam[:p.k]]
     if (p.redim if redim is None else redim):
         from .redim import redimension
-        results = [redimension(brief, pl) or pl for pl in results]
+        if _aff.has_hard(brief):
+            # redimensioning keeps contacts and separations but not the 0.9 m a `touch` needs: keep the placement
+            # before it when the resized one misses a hard wish (M20)
+            results = [_redim_keeping_hard(brief, pl, redimension) for pl in results]
+        else:
+            results = [redimension(brief, pl) or pl for pl in results]
     return results
+
+
+def _must_pairs(aff: AffinityTerms | None) -> list[tuple[str, str]]:
+    return [] if aff is None else [(a, b) for a, d in aff.must_touch.items() for b in d if a < b]
+
+
+def _redim_keeping_hard(brief: Brief, pl: dict[str, Box], redimension) -> dict[str, Box]:
+    out = redimension(brief, pl)
+    return pl if out is None or _aff.hard_misses(brief, out) else out
 
 
 def normalise(placed: dict[str, Box]) -> dict[str, Box]:

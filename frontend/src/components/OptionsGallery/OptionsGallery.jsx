@@ -7,11 +7,11 @@ const MAX_MISSED = 6;
 const METRICS = ['adjacency', 'deviation', 'compactness', 'circulation', 'stacking', 'vertical', 'daylight'];
 const LOWER_IS_BETTER = new Set(['deviation', 'circulation']);
 
-function Bar({ metric, value, reported }) {
+function Bar({ metric, value, separate }) {
   const v = Math.max(0, Math.min(1, value ?? 0));
   const good = LOWER_IS_BETTER.has(metric) ? 1 - v : v;
   return (
-    <div className={`bar ${reported ? 'bar--reported' : ''}`} title={reported ? `${metric}: ${value} (reported, not used for ranking)` : `${metric}: ${value}`}>
+    <div className={`bar ${separate ? 'bar--separate' : ''}`} title={`${metric}: ${value}`}>
       <span className="bar__label">{metric}</span>
       <span className="bar__track"><span className="bar__fill" style={{ width: `${v * 100}%`, background: good > 0.66 ? '#4ecdc4' : good > 0.33 ? '#fdae6b' : '#e94560' }} /></span>
       <span className="bar__value">{(value ?? 0).toFixed(2)}</span>
@@ -24,7 +24,7 @@ function Affinity({ aff }) {
   const hardMiss = aff.hard.met < aff.hard.total;
   return (
     <div data-testid="affinity">
-      <Bar metric="affinity" value={aff.score} reported />
+      <Bar metric="affinity" value={aff.score} separate />
       <div className="card__analysis" data-testid="affinity-summary">
         soft wishes met {aff.soft.met} / {aff.soft.total}
         {' · '}

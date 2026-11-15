@@ -1,7 +1,7 @@
 """M19 gate: affinity vocabulary, expansion and measurement (PLAN §4.10). One group of tests per gate line.
 
-Nothing here changes a generator: the gate shows that the new brief keys are carried, measured and reported, and
-that the beam still receives the same problem. Unit-level detail lives in `tests/test_affinity.py`.
+M19 changed no generator: the gate shows that the new brief keys are carried, measured and reported. (Its line 4,
+"generators untouched", is retired by M20, whose gate line 5 replaces it.) Unit-level detail lives in `tests/test_affinity.py`.
 """
 import csv
 import subprocess
@@ -22,6 +22,7 @@ from spacetope.solve.registry import GENERATORS
 
 pytestmark = [pytest.mark.gate_m19, pytest.mark.slow]
 ROOT = Path(__file__).resolve().parent.parent.parent
+M20_FIXTURES = {"eight_rooms_hard"}       # added after the M19 baseline was recorded
 BASELINE = ROOT / "bench" / "history" / "2026-11-15_m19_affinity.csv"
 EDITED = ("school_three_levels", "small_hospital", "apartments_four_levels")
 
@@ -154,30 +155,7 @@ def test_a_tag_nobody_carries_is_a_warning_not_an_error():
     assert [(p.code, p.severity) for p in warnings] == [("affinity_tag", "warning")]
 
 
-# --- line 4: generators untouched --------------------------------------------------------------------------------
-
-def stripped(brief_):
-    d = brief_.to_dict()
-    d.pop("affinities", None)
-    for s in d["spaces"]:
-        s.pop("tags", None)
-        s.pop("affinities", None)
-    return Brief.from_dict(d)
-
-
-@pytest.mark.parametrize("fx", EDITED)
-def test_beam_gets_the_same_problem_with_or_without_tags_and_affinities(fixtures_dir, fx):
-    full = load(fixtures_dir / f"{fx}.yaml")
-    assert any(s.tags for s in full.spaces) and full.affinities
-    a, _ = prepare(full)
-    b, _ = prepare(stripped(full))
-    assert affinity.expand(a) and not [x for x in affinity.expand(b) if x.source != "wishes.exterior"]
-    assert GENERATORS["beam"](a, None, 0) == GENERATORS["beam"](b, None, 0)
-
-
-def test_no_solver_module_mentions_affinity():
-    for p in (ROOT / "spacetope" / "solve").rglob("*.py"):
-        assert "affinity" not in p.read_text().lower(), p
+# --- line 4 (generators untouched) is retired by M20; its replacement is M20 gate line 5 (beam hashes) ----------
 
 
 # --- line 5: no kernel; the report on an option is `measure` on its placement --------------------------------------
@@ -206,7 +184,8 @@ def rows():
 
 
 def test_baseline_has_a_row_per_fixture_with_affinities_and_seed(fixtures_dir):
-    expected = {p.stem for p in sorted(fixtures_dir.glob("*.yaml")) if affinity.expand(prepare(load(p))[0])}
+    # pinned to the fixtures that existed at M19: fixtures added later (eight_rooms_hard) are not in this CSV
+    expected = {p.stem for p in sorted(fixtures_dir.glob("*.yaml")) if p.stem not in M20_FIXTURES and affinity.expand(prepare(load(p))[0])}
     assert set(EDITED) <= expected and {"clinic", "two_levels_stair", "three_levels_core"} <= expected
     got = {(r["fixture"], r["generator"], int(r["seed"])) for r in rows()}
     assert got == {(fx, "beam", s) for fx in expected for s in range(3)}
