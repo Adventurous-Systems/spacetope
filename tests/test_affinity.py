@@ -144,14 +144,13 @@ def test_ground_and_top():
     assert [i["met"] for i in af.measure(br, {"a": box(0, 0, 3000), "b": box(0, 0, 0)})["items"]] == [False, False, False]
 
 
-def test_facade_sun_unmeasured_and_missing_space():
+def test_facade_sun_is_measured_since_m21_and_a_missing_space_is_unmeasured():
     br = brief([room("a", affinities=[{"facade": "sun"}, {"touch": "b"}]), room("b"), room("c")])
     r = af.measure(br, {"a": box(0, 0, 0)})
-    assert r["unmeasured"] == 2 and r["score"] == 1.0
-    assert r["soft"] == {"met": 0, "total": 0} and r["hard"] == {"met": 0, "total": 0}
-    assert all(i["met"] is None for i in r["items"])
-    r = af.measure(br, {"a": box(0, 0, 0), "b": box(3000, 0, 0)})
     assert r["unmeasured"] == 1 and r["soft"] == {"met": 1, "total": 1}
+    assert [i["met"] for i in r["items"]] == [True, None]
+    r = af.measure(br, {"a": box(0, 0, 0), "b": box(3000, 0, 0)})
+    assert r["unmeasured"] == 0 and r["soft"] == {"met": 2, "total": 2}
 
 
 # --- rotated rooms and shafts ----------------------------------------------

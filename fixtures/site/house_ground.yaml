@@ -1,0 +1,99 @@
+# A single-level house: a hall serves every room, and three room-to-room doors make the adjacency
+# graph richer than a plain star (living–dining, kitchen–dining, kitchen–utility).
+# Orientation wishes added for M21: true north points to plan -y (north 180), so the sun side is the plan's +y side;
+# the wishes are the plan-y mirror image of the usual living-south, kitchen-east, study-north house.
+name: house_ground
+levels: 1
+level_height: 2.8
+envelope:
+  w: 13
+  l: 10
+  h: 2.8
+circulation:
+  corridor:
+    w: 1.5
+    l: 6
+  doors:
+    room:
+      w: 0.9
+      h: 2.1
+    jamb: 0.1
+spaces:
+- name: living
+  w: 5
+  l: 4.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: dining
+  w: 4
+  l: 3.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: kitchen
+  w: 3.5
+  l: 3.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: W
+    strength: should
+- name: study
+  w: 3
+  l: 3
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: N
+    strength: should
+- name: utility
+  w: 2
+  l: 2.5
+  h: 2.8
+  program: room
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: wc
+  w: 1.5
+  l: 2
+  h: 2.8
+  program: room
+contacts:
+- - corridor_0
+  - living
+- - corridor_0
+  - dining
+- - corridor_0
+  - kitchen
+- - corridor_0
+  - study
+- - corridor_0
+  - utility
+- - corridor_0
+  - wc
+- - living
+  - dining
+  - door: true
+- - kitchen
+  - dining
+  - door: true
+- - kitchen
+  - utility
+  - door: true
+site:
+  north: 180
+  hemisphere: N

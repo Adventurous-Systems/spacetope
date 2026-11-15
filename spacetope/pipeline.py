@@ -4,7 +4,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
-from . import affinity
+from . import affinity, orient
 from .brief import Brief
 from .placement import Placement, assembly_from_placement, space_graph, topology_classes  # noqa: F401 (re-exported)
 from .realise import Realised
@@ -103,10 +103,21 @@ def generate(gen, brief: Brief, seed: int = 0, params: dict | None = None, name:
     placements = gen(brief, params, seed)
     t_gen = time.perf_counter() - t0
     t1 = time.perf_counter()
+    records: dict[int, dict] = {}
+    if orient.wants_facade(brief):  # M21: turn or mirror each finished plan for its facade wishes, before de-duplication
+        turned = []
+        for pl in placements:
+            q, rec = orient.best(brief, pl)
+            records[id(q)] = rec
+            turned.append(q)
+        placements = turned
     if build == "top":
         options, _info = evaluate_top(brief, placements, name, seed, keep)
     else:
         options = evaluate_placements(brief, placements, name, seed)
+    for o in options:
+        if id(o.placement) in records:
+            o.analysis["orientation"] = records[id(o.placement)]
     t_real = time.perf_counter() - t1
     return options, t_gen, t_real
 

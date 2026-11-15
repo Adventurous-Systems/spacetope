@@ -38,8 +38,9 @@ the engine.
 | M17 | Brief programmes and dataset L0 | done | 14 |
 | M19 | Affinity: vocabulary, expansion and measurement | done | 27 (4 retired by M20) |
 | M20 | Affinity in the generators: hard rules checked, soft wishes searched and ranked | done | 17 |
+| M21 | Site orientation and sun: `site:` block, `facade: sun`, turn-or-mirror pass | done | 34 |
 
-**349 tests** collected in total, 129 of them fast (2026-11-15, after M20; every gate rerun green). All green as of 2026-10-04 on topologicpy 0.9.71; on 2026-11-15
+**430 tests** collected in total, 176 of them fast (2026-11-15, after M21). Every gate was rerun green after M20; after M21 the fast suite and the M1, M5, M7, M10, M19, M20 and M21 gates were rerun green. All green as of 2026-10-04 on topologicpy 0.9.71; on 2026-11-15
 M19 added 66 (35 fast unit tests, 31 in the gate), and the fast suite and the M1, M3, M7, M8, M10, M11, M15 and M17
 gates were rerun green with it.
 
@@ -55,6 +56,13 @@ exterior-only fixture 1.0. Design and gate in `docs/PLAN.md` §4.10; M18a/M18b a
 school 0.795 → 0.989, hospital 0.724 → 1.000, no fixture lower, verified counts unchanged. Limits: `near`,
 `exterior` and `facade` are measured and ranked but not searched on; `treemap` and `dual` do not search on
 affinities; wet stacking is plan overlap, with no riser shaft yet; CP-SAT's `stack` is sufficient, not exact.
+
+2026-11-15, M21: a brief can carry `site: {north, hemisphere}`; a compass side is the wall within 45° of it and
+`facade: sun` is the wall facing the equator (orientation only, no sun study). After generation each option is
+turned or mirrored to the envelope-fitting symmetry that best meets its facade wishes. Facade wishes met on
+`fixtures/site/`: school 0.19 → 0.81, hospital 0.44 → 0.60, house 0.82 → 0.97, clinic 0.51 → 0.60. On corridor
+plans the pass only chooses the side of the corridor; moving rooms across it is not built. Mirror images count
+as duplicates, so a brief can return fewer distinct options.
 
 2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
 drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is
@@ -167,7 +175,7 @@ a closed build or a commercial licensee may not, until one of the two lands.
 ## 7. Running it
 
 ```bash
-pytest -m "not slow"                       # fast suite, 129 tests
+pytest -m "not slow"                       # fast suite, 176 tests
 pytest -m gate_m15                         # one milestone's gate
 cd e2e && npx playwright test              # browser tests, mocked
 python -m bench.dead_space                 # where a layout's empty ground goes

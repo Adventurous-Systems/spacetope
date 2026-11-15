@@ -26,11 +26,11 @@ const MANY = {
   items: Array.from({ length: 8 }, (_, k) => item({ kind: 'same_level', a: `room_${k}`, others: ['wc_0'], strength: 'should', source: `room_${k}: same_level` })),
 };
 
-async function mockBackend(page, report) {
+async function mockBackend(page, report, orientation) {
   const read = (f) => fs.readFileSync(path.join(FIX, f));
   const rec = JSON.parse(read('recording.json').toString());
   const options = structuredClone(rec.options);
-  options[0].analysis = { affinity: report };
+  options[0].analysis = { affinity: report, ...(orientation ? { orientation } : {}) };
   await page.route('**/api/health', (r) => r.fulfill({ json: { ok: true, generators: ['beam'], capabilities: { beam: { multi_level: true } } } }));
   await page.route('**/api/fixtures', (r) => r.fulfill({ json: rec.fixtures }));
   await page.route('**/api/fixtures/*', (r) => r.fulfill({ json: rec.brief }));
@@ -42,8 +42,8 @@ async function mockBackend(page, report) {
   await page.route('**/static/**', (r) => r.fulfill({ body: read('option.glb'), contentType: 'model/gltf-binary' }));
 }
 
-async function openCards(page, report) {
-  await mockBackend(page, report);
+async function openCards(page, report, orientation) {
+  await mockBackend(page, report, orientation);
   await page.goto('/');
   await page.getByTestId('fixture-select').selectOption('two_levels_stair');
   await page.getByTestId('generate-button').click();
@@ -84,4 +84,23 @@ test('more than six missed wishes list six and count the rest', async ({ page })
   await expect(card.getByTestId('affinity-summary')).toContainText('soft wishes met 2 / 10');
   await expect(card.getByTestId('affinity-missed')).toHaveCount(6);
   await expect(card.getByTestId('affinity-more')).toHaveText('+ 2 more');
+});
+
+test('sun wishes read as a side, with the turn and the north arrow', async ({ page }) => {
+  const sun = (o) => item({ kind: 'facade', strength: 'should', side: 'sun', faces: ['-y'], ...o });
+  const report = {
+    score: 0.5, soft: { met: 1, total: 2 }, hard: { met: 0, total: 0 }, unmeasured: 0,
+    site: { north: 30, hemisphere: 'N' },
+    items: [
+      sun({ a: 'office_a', met: true, value: 4, target: 1, unit: 'm', source: 'office_a: facade sun' }),
+      sun({ a: 'office_b', met: false, value: 0, target: 1, unit: 'm', source: 'office_b: facade sun' }),
+    ],
+  };
+  const cards = await openCards(page, report, { symmetry: 'mx_r90', facade_before: 0.2, facade_after: 0.5 });
+  const card = cards.nth(0);
+  await expect(card.getByTestId('affinity-missed')).toHaveCount(1);
+  await expect(card.getByTestId('affinity-missed')).toContainText('office_b should face the sun side (south)');
+  await expect(card.getByTestId('orientation-turned')).toHaveText('Turned to face the site: mirrored and turned 90°');
+  await expect(card.getByLabel('North, 30° from up')).toHaveCount(1);
+  await expect(cards.nth(1).getByTestId('north-arrow')).toHaveCount(0);
 });

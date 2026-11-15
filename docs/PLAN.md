@@ -1,6 +1,6 @@
 # spacetope — plan
 
-Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. The stretch programme M9–M17 (§4.9) is finished. **Current work: the affinity programme M19–M21 (§4.10)** on branch `m19-affinity`; M19 and M20 are gated, M21 is not started. Each milestone's status is kept in the table at the top of its section. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
+Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. The stretch programme M9–M17 (§4.9) is finished. **Current work: the affinity programme M19–M21 (§4.10)** on branch `m19-affinity`; M19, M20 and M21 are gated. Each milestone's status is kept in the table at the top of its section. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
 
 ## 0. In plain words (for readers who are not solver engineers)
 
@@ -441,7 +441,7 @@ wait for the versioned contract. M18a still comes before anything that changes a
 |---|---|---|
 | M19 | Affinity: vocabulary, expansion and measurement (no generator changes) | **done 2026-11-15**, gate 31 green; baseline in `bench/history/2026-11-15_m19_affinity.csv` |
 | M20 | Affinity in the generators: `must`/`never` hard (an eighth verify check), `should`/`avoid` soft | **done 2026-11-15**, gate 17 green; baseline in `bench/history/2026-11-15_m20_affinity.csv` |
-| M21 | Site orientation and sun (`facade: sun`, the eight plan symmetries) | not started |
+| M21 | Site orientation and sun (`site:` block, `facade: sun`, the plan symmetries as a post-pass) | **done 2026-11-15**, gate 34 green; baseline in `bench/history/2026-11-15_m21_site.csv` |
 
 **What an affinity is.** A wish that relates a space to another space, to a group of spaces, or to the
 site, with a strength. A required contact (`contacts:`) stays what it is and is still measured by
@@ -611,6 +611,62 @@ Gate `tests/gates/test_m20.py`:
 8. Ranking: `affinity` in `METRICS`, box-only equals kernel value, one weights table.
 M19's line 4 ("generators untouched") is retired by this milestone and replaced by line 5.
 
+#### M21 — Site orientation and sun (started 2026-11-15)
+
+**Measured before the design** (beam, seeds 0–2, pre-verified options, four briefs with `facade` wishes
+added; score over the facade items only): as generated the school meets 0.194, the hospital 0.439, the house
+0.522, the clinic 0.506. No generator acts on `facade`, because the outline is unknown until the plan is
+finished. Turning or mirroring a finished plan changes which wall faces which way and nothing else: over 95
+placements × 8 symmetries the only check that ever changed was `constraints` (the envelope), and only under
+quarter turns; door pairs, every score except `affinity`, and every non-facade affinity item were identical.
+Best of the symmetries that keep the envelope: school 0.806, hospital 0.596, house 0.974, clinic 0.595.
+
+**The site.** A brief may carry `site: {north: <degrees>, hemisphere: N|S}`. `north` is degrees clockwise
+from plan +y to true north, default 0 (today's compass); `hemisphere` defaults to `N`. A compass side maps to
+the box side whose outward normal is within 45° of it; at exactly 45° two box sides tie and either meets the
+wish, and the item says so. `site` round-trips, survives `circulation.expand`, and is validated in `prepare`.
+
+**Sun.** `facade: sun` is the side facing the equator: S in the northern hemisphere, N in the southern, with
+the same predicate and `min` as any `facade`. It is **orientation, not insolation**: no altitude, season or
+obstruction, met or not met, no partial credit. The report says "faces the equator", and a solar study is a
+separate milestone if it is ever wanted. `topologicpy.Sun` is not used (it needs `ephem` and installs it at
+import, and `affinity.py` stays kernel-free).
+
+**The pass.** `spacetope/orient.py`: the eight symmetries of the rectangle applied to the whole placement
+(all levels together, z untouched, moved back to the origin), keeping those whose bounding box still fits
+the envelope (a fit test per placement; on the enveloped fixtures that is usually the four that keep the
+box). For each option `pipeline.generate` picks the symmetry with no more hard misses and the highest soft
+facade score, identity on ties, **before** de-duplication; doors are derived afterwards as now. It runs only
+when the brief has a `facade` wish, so every other brief is untouched and no generator changes. The choice
+is recorded in `Option.analysis["orientation"]` (`symmetry`, facade score before and after). Mirroring is
+valid only while doors have no hinge and stairs no run direction; the module says so.
+
+**Limits, stated up front.** On corridor plans the pass only chooses which side of the corridor faces the
+sun; it cannot put more rooms on that side (hospital and clinic stop near 0.6). Swapping same-footprint
+rooms across the corridor is the honest next step and is **not** in M21. Mirror images share a signature, so
+de-duplication can return fewer distinct options (house, seed 0: 7 → 5); the gate records the loss.
+
+**Fixtures.** `fixtures/site/` (a subdirectory, so no earlier gate's fixture glob sees it):
+`school_three_levels`, `small_hospital`, `house_ground` and `clinic` with facade wishes, one of them with
+`facade: sun` and a `site.north` that is not 0.
+
+**Gate** (`tests/gates/test_m21.py`, marker `gate_m21`):
+
+1. `site` survives `to_dict`/`from_dict`, `prepare` twice, `circulation.expand`, `brief_for_levels` and
+   `variations`; each malformed key gives one named problem.
+2. Compass: hand-built boxes at `north` 0, 30, 90, 180, 270 and 45 (the tie) resolve to the right box
+   side; `sun` follows the hemisphere; with no `site` every M20 report is unchanged.
+3. Neutral: on every fixture and the four site briefs, each symmetry the pass accepts passes `preverify`
+   exactly when the original does and leaves `cheap_scores` equal except `affinity`; kernel `verify` agrees
+   on a sample.
+4. Margin (beam, seeds 0–2, pre-verified options, facade items): school ≥ 0.80, hospital ≥ 0.59, house
+   ≥ 0.97, clinic ≥ 0.59, and no option ends below its as-generated facade score or with more hard misses.
+5. Untouched: on a brief without a `facade` wish the pass is the identity; the M20 beam reference hashes
+   and `bench/history/2026-11-15_m20_affinity.csv` reproduce.
+6. Verified count per seed on the four site briefs is no lower with the pass than without; the loss of
+   distinct signatures is written to `bench/history/<date>_m21_site.csv`; the pass costs ≤ 5 % of beam
+   `t_gen` on the school (measured, median of three).
+
 Iteration: three rounds on line 3 or 6. If the margin is missed, the number is recorded and the scope
 re-decided; the threshold is not moved.
 
@@ -700,6 +756,8 @@ re-decided; the threshold is not moved.
 | 2026-11-15 | **M20 built and gated (17 tests, all eight lines).** `must`/`never` are an eighth check, `affinities`, in `preverify` and `verify`; the beam orders tagged groups as runs, adds a move term (`w_affinity` 8), offsets stacked rooms from the level below and drops moves that break a hard rule; CP-SAT carries an affinity block (`w_affinity` 80 000, at most 1500 literals); `affinity` is in `METRICS` with rank weight 5. **Against the margin** (beam, seeds 0–2, real verifier): `school_three_levels` 0.795 → 0.989 (floor 0.90), `small_hospital` 0.724 → 1.000 (floor 0.82), `apartments_four_levels` 0.979 → 0.979, every other fixture 1.000; verified counts per seed identical to M19 on all 12 shared fixtures; `eight_rooms_hard` 8/8/8 verified with both hard rules met (M19 beam: 5 of 24). Beam time, median of three: school 11.3 s (limit 25.5), hospital 4.0 s (limit 5.4) | The margin was fixed before the build and is met without loosening. The whole gain is wet stacking and clustering, which is where M19 measured the gap. The hospital time line has the least room (one run reached 4.6 s on a loaded machine) and is the line most likely to flake. |
 | 2026-11-15 | **M20 departures and limits, recorded so they are not rediscovered.** (1) The time line is met partly by caching `Brief.by_name`, shared code outside the affinity work; the lookup was rebuilt on every call and took about a quarter of beam time. (2) The beam's apartments output is byte-identical to M19 (the plan expected it to change): the flats were already stacked. Beam output changed only on the school and the hospital. (3) `daylight` is **not** redefined; it keeps its meaning and its weight 2. (4) Beam: `must stack` and `must same_level` are rewarded at `w_affinity` and enforced by the check, not by construction; if every move at a step breaks a hard rule the beam retries without the drop, and the check removes what still breaks one. (5) CP-SAT: `stack` is sufficient, not exact; `never stack` is stricter than needed; `near`, `exterior` and `facade` are not modelled; a brief with no required contacts gives one option. (6) `treemap` and `dual` do not search on affinities. (7) Wet `stack` is plan overlap; the riser shaft is deferred. (8) `_conflicts` reads the brief's own contacts only | (1) No code edits a brief's space list in place and beam hashes are identical with the cache, so it is safe; it also makes the M19-to-M20 time comparison flatter than the affinity work alone (about 13 % more candidate moves). (4) Keeps the beam from dying on a hard brief; correctness rests on the eighth check, which gate lines 1 and 2 test. (5)–(8) are honest limits of a first pass, none needed by the gate fixtures. |
 | 2026-11-15 | Full rerun after M20, one marker per process: M0 17, M1 12, M2 26, M3 6, M4 4, M5 8, M7 47, M8 12, M9 10, M10 11, M11 4, M12 11, M13 4, M14 5, M15 17, M16 14, M17 14, M19 27, M20 17; fast suite 129; 349 collected. M19's gate is 27, not 31: its "generators untouched" tests are retired by M20 line 5. **M5 had one failure not caused by M20:** its leftover-word check (`strand`) matched a local variable `stranded` in `spacetope/solve/seqpair.py`, there since M16; the variable is renamed `unreached`, the check is unchanged | The M5 check was not loosened; the rename changes no behaviour (M5 and M16 rerun green). It had gone unnoticed because M5 was not rerun after M16. |
+| 2026-11-15 | **M21 designed from measurements; margin proposed.** A `site` block (north angle, hemisphere), `facade: sun` as the equator-facing side, and a generator-agnostic pass that picks the best envelope-fitting symmetry of each finished option. Floors for the gate are the measured best-of-symmetries figures (school 0.80, hospital 0.59, house 0.97, clinic 0.59, against 0.19, 0.44, 0.52, 0.51 as generated). No search term in the beam and no room-swap pass in M21 | The outline is unknown mid-search, so the beam cannot judge a facade; a finished plan can be turned for free, and 95 placements × 8 symmetries changed no check but the envelope under quarter turns. The school's as-generated score equals its worst symmetry on all 24 options, so most of its gain undoes a fixed side bias in the beam, and the margin is reported against the worst as well as the as-generated figure. `sun` is orientation only and is named so, since a cosine or "insolation" credit would be a proxy passed off as a sun study. |
+| 2026-11-15 | **M21 built and gated (34 tests, all six lines).** `site` on the brief, the compass resolved from it, `facade: sun` measured as the equator-facing side, `spacetope/orient.py` and the pass in `pipeline.generate`. Facade score, beam seeds 0–2, as generated → after the pass (floor): school 0.194 → 0.806 (0.80), hospital 0.439 → 0.596 (0.59), house 0.817 → 0.974 (0.97), clinic 0.506 → 0.595 (0.59); no option ends worse; verified counts per seed equal with and without the pass on all 12 rows; pass time 2.1 % of beam `t_gen` on the school (limit 5 %). Distinct signatures lost: 2, both on the house, seed 0 (7 → 5). **Notes:** (1) the floors hold on the mean over seeds, as the gate says; single seeds fall under them (school seed 0 0.794, hospital seed 2 0.579), so the headroom is thin. (2) The house fixture is the mirror image of the brief the floor was measured on, so its as-generated figure is 0.82, not 0.52; its best is unchanged. (3) The school's as-generated score equals its worst symmetry on every seed. (4) The chosen symmetries are almost all the half turn; a mirror or quarter turn is chosen four times, all on the house. (5) `facade: sun` with no `site` now measures as S, where M19 and M20 reported it unmeasured; one M19 unit test was rewritten to say so. (6) The pass also runs on placements that later fail `preverify`. (7) No north arrow in the 3D viewer, only on the option card | The margin was set from measurements before the build and met without loosening. (1)–(4) are recorded so the size of the result is not overstated: on corridor plans this is a choice of side, and the room-swap pass is the next step if more is wanted. (7) The viewer's plan-to-screen mapping was not verified, and a wrong arrow is worse than none. |
 
 ## 6. Open questions (answer as they become blocking)
 

@@ -7,6 +7,7 @@ plain language; `measure(brief, placement)` judges every affinity on integer box
 from __future__ import annotations
 
 import dataclasses
+import math
 from dataclasses import dataclass
 
 import networkx as nx
@@ -25,7 +26,10 @@ STRENGTHS = ("must", "should", "avoid", "never")
 HARD = ("must", "never")
 NEGATIVE = ("avoid", "never")
 RULES = ("stack", "cluster", "same_level", "apart", "near")
-SIDES = {"N": "+y", "E": "+x", "S": "-y", "W": "-x"}   # until M21 gives the site a north
+SIDES = {"N": "+y", "E": "+x", "S": "-y", "W": "-x"}   # the box side of each compass side when the site north is 0
+BEARING = {"+y": 0, "+x": 90, "-y": 180, "-x": 270}     # box side -> degrees clockwise from plan +y
+COMPASS = {"N": 0, "E": 90, "S": 180, "W": 270}
+SITE_KEYS = ("north", "hemisphere")
 HSIDES = ("+x", "-x", "+y", "-y")
 ALL_SIDES = HSIDES + ("ceiling", "floor")
 DEFAULTS = {"touch": {"min": 0.9}, "near": {"depth": 2}, "stack": {"overlap": 0.5},
@@ -265,6 +269,42 @@ def validate(brief: Brief) -> list[Problem]:
     return _parse(brief)[1]
 
 
+# ----------------------------------------------------------------------------- the site (M21)
+
+def site_of(brief: Brief) -> tuple[float, str]:
+    """(north, hemisphere) of the brief's `site`, with the defaults 0 and N; unreadable values fall back too."""
+    site = brief.site if isinstance(brief.site, dict) else {}
+    north = site.get("north", 0)
+    ok = isinstance(north, (int, float)) and not isinstance(north, bool) and math.isfinite(north)
+    return (float(north) % 360 if ok else 0.0), ("S" if site.get("hemisphere") == "S" else "N")
+
+
+def validate_site(brief: Brief) -> list[Problem]:
+    """One plain error per bad part of `site`: an unknown key, a north that is not a number, a hemisphere not N or S."""
+    site = brief.site
+    if site is None:
+        return []
+    if not isinstance(site, dict):
+        return [Problem("site_key", f"site must be a mapping such as {{north: 30, hemisphere: N}}, got {site!r}")]
+    out = [Problem("site_key", f"site: unknown key {k!r}; use north and hemisphere") for k in site if k not in SITE_KEYS]
+    north = site.get("north", 0)
+    if isinstance(north, bool) or not isinstance(north, (int, float)) or not math.isfinite(north):
+        out.append(Problem("site_north", f"site: north must be a number of degrees clockwise from plan +y, got {north!r}"))
+    if site.get("hemisphere", "N") not in ("N", "S"):
+        out.append(Problem("site_hemisphere", f"site: hemisphere must be N or S, got {site['hemisphere']!r}"))
+    return out
+
+
+def compass_faces(side: str, north: float = 0.0, hemisphere: str = "N") -> list[str]:
+    """The box sides whose outward normal is within 45 degrees of a compass side (N, E, S, W or sun), given the angle
+    of true north clockwise from plan +y. At exactly 45 degrees two sides tie and either meets the wish. `sun` is the
+    side facing the equator: S in the northern hemisphere, N in the southern (orientation only, PLAN §4.10 M21)."""
+    if side == "sun":
+        side = "N" if hemisphere == "S" else "S"
+    bearing = (north + COMPASS[side]) % 360
+    return [b for b in HSIDES if round(min((BEARING[b] - bearing) % 360, (bearing - BEARING[b]) % 360), 9) <= 45]
+
+
 # ----------------------------------------------------------------------------- measuring
 
 def _levels(b: Box, H: int) -> tuple[int, int]:
@@ -290,12 +330,15 @@ def _uncovered(name: str, b: Box, placement: dict[str, Box]) -> dict[str, int]:
     return out
 
 
-def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ...] | None = None) -> dict:
+def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ...] | None = None,
+            kinds: tuple[str, ...] | None = None) -> dict:
     """Judge every affinity of `brief` on `placement`. `met` always means the wish is satisfied (so for `never`
     and `avoid` it is the predicate's negation); a space missing from the placement leaves the item unmeasured.
-    `strengths` restricts the judged affinities (`HARD` for the cheap hard check); the tallies then cover those only."""
+    `strengths` and `kinds` restrict the judged affinities (`HARD` for the cheap hard check, `("facade",)` for the
+    orientation pass); the tallies then cover those only."""
     H = level_height_mm(brief)
     cache: dict = {}
+    north, hemi = site_of(brief)
     top = max((_levels(b, H)[1] for b in placement.values()), default=0)
 
     def walk() -> nx.Graph:
@@ -333,10 +376,8 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
         b = placement[a]
         p = af.params
         if af.kind in ("facade", "exterior"):
-            if af.kind == "facade" and p["side"] == "sun":
-                return None
             sides = _uncovered(a, b, placement)
-            u = sides[SIDES[p["side"]]] if af.kind == "facade" else max(sides.values())
+            u = max(sides[f] for f in compass_faces(p["side"], north, hemi)) if af.kind == "facade" else max(sides.values())
             return u >= to_mm(p["min"]) and u > 0, _metres(u), p["min"], "m"
         lv = _levels(b, H)
         if af.kind == "ground":
@@ -345,10 +386,12 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
 
     items = []
     for af in expand(brief):
-        if strengths is not None and af.strength not in strengths:
+        if (strengths is not None and af.strength not in strengths) or (kinds is not None and af.kind not in kinds):
             continue
         item = {"kind": af.kind, "a": af.a, "others": list(af.others), "strength": af.strength, "weight": af.weight,
                 "met": None, "value": None, "target": None, "unit": None, "by": None, "source": af.source}
+        if af.kind == "facade":
+            item.update(side=af.params["side"], faces=compass_faces(af.params["side"], north, hemi))
         if af.a in placement:
             if af.kind in PAIR_KINDS:
                 parts = [(o, r) for o in af.others if o in placement for r in [pair(af, af.a, o)] if r is not None]
@@ -375,8 +418,11 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
     soft = [i for i in items if i["met"] is not None and i["strength"] not in HARD]
     wsum = sum(i["weight"] for i in soft)
     score = round(sum(i["weight"] for i in soft if i["met"]) / wsum, 6) if wsum else 1.0
-    return {"score": score, "soft": tally(False), "hard": tally(True),
-            "unmeasured": sum(1 for i in items if i["met"] is None), "items": items}
+    report = {"score": score, "soft": tally(False), "hard": tally(True),
+              "unmeasured": sum(1 for i in items if i["met"] is None), "items": items}
+    if brief.site is not None:
+        report["site"] = {"north": north, "hemisphere": hemi}
+    return report
 
 
 # ----------------------------------------------------------------------------- what the generators and checks use
@@ -445,7 +491,8 @@ def describe(item: dict) -> str:
     if kind in _VERB:
         verb = _VERB[kind].format(target=item["target"]) + " " + " or ".join(item["others"])
     elif kind == "facade":
-        verb = f"have an outside wall facing {item['source'].split()[-1]}"
+        side = item.get("side") or item["source"].split()[-1]
+        verb = "have an outside wall that faces the equator" if side == "sun" else f"have an outside wall facing {side}"
     else:
         verb = _SITE[kind]
     line = f"{a} must never {verb}" if item["strength"] == "never" else f"{a} must {verb}"
@@ -454,7 +501,7 @@ def describe(item: dict) -> str:
 
 def hard_misses(brief: Brief, placement: dict[str, Box]) -> list[str]:
     """Plain-language lines for every `must`/`never` affinity that is judged and not met. Unmeasured items (a space
-    not in the placement, `facade: sun`) do not count. Cheap enough to call per candidate."""
+    not in the placement) do not count. Cheap enough to call per candidate."""
     if not written(brief):
         return []
     return [describe(i) for i in measure(brief, placement, strengths=HARD)["items"] if i["met"] is False]

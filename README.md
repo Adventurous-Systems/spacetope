@@ -280,17 +280,29 @@ affinities:
 | `apart` | no shared wall, floor or ceiling |
 | `stack` | on adjacent levels, plan overlap at least `overlap` of the smaller footprint (0.5) |
 | `same_level` | on the same level |
-| `facade` | an uncovered wall of at least `min` (1 m) on side `N`, `E`, `S` or `W` |
+| `facade` | an uncovered wall of at least `min` (1 m) on side `N`, `E`, `S`, `W` or `sun` |
 | `exterior` | an uncovered wall of at least `min` on any side |
 | `ground`, `top` | on the lowest / highest occupied level |
 
 Strength says how much it matters: `must` and `never` are hard, `should` and `avoid` are soft and take a
-`weight` (default 1). `must` and `should` want the kind met; `never` and `avoid` want it not met. Until the
-site has a north, the compass is N = +y, E = +x, S = -y, W = -x.
+`weight` (default 1). `must` and `should` want the kind met; `never` and `avoid` want it not met.
+
+A brief may say where the site is:
+
+```yaml
+site: {north: 30, hemisphere: N}   # north: degrees clockwise from plan +y (default 0); hemisphere: N or S (default N)
+```
+
+With `north: 0` the compass is N = +y, E = +x, S = -y, W = -x. A compass side means the wall within 45° of
+it. `facade: sun` means the wall facing the equator (south in the northern hemisphere, north in the southern).
+It is orientation only: no altitude, season or shading, so it is met or not and gets no partial credit.
 
 `must` and `never` are enforced: they are the eighth check, so an option that breaks one is not shown.
 `should` and `avoid` steer the `beam` and `cpsat` generators for `touch`, `apart`, `stack` and `same_level`.
-`exterior`, `facade` and `near` are measured and ranked but not searched on, and `treemap` and `dual` do not search on affinities at all.
+`exterior` and `near` are measured and ranked but not searched on, and so is `facade`: the generators do not
+act on it, but after generation each option is turned or mirrored to the symmetry that best meets its facade
+wishes, when the envelope allows (on corridor plans that only chooses the side of the corridor). The option card
+says when it was turned. `treemap` and `dual` do not search on affinities at all.
 
 Each option reports a score (the weighted share of soft wishes met, ranked with the other scores) and the
 wishes it missed, hard ones first. `spacetope affinity BRIEF PLACEMENT` prints the same report for a hand-made

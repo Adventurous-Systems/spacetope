@@ -115,6 +115,7 @@ class Brief:
     circulation: dict[str, Any] | None = None  # compact corridor/stairs/lifts/doors section (M7)
     door_pairs: list[tuple[str, str]] = field(default_factory=list)  # contacts explicitly marked {door: true}
     affinities: list[dict] = field(default_factory=list)  # brief-level affinities as written (M19)
+    site: dict | None = None  # {north: degrees clockwise from plan +y, hemisphere: N|S}, as written (M21)
     expanded: bool = False  # True once circulation has been expanded into concrete spaces
 
     def __post_init__(self) -> None:
@@ -196,7 +197,8 @@ class Brief:
         return cls(name=str(d.get("name", "brief")), spaces=spaces, contacts=contacts,
                    envelope=d.get("envelope"), levels=d.get("levels"), level_height=d.get("level_height"),
                    circulation=d.get("circulation"), door_pairs=door_pairs, expanded=bool(d.get("expanded", False)),
-                   affinities=[dict(a) if isinstance(a, dict) else a for a in (d.get("affinities") or [])])
+                   affinities=[dict(a) if isinstance(a, dict) else a for a in (d.get("affinities") or [])],
+                   site=dict(d["site"]) if isinstance(d.get("site"), dict) else d.get("site"))
 
     @classmethod
     def from_path(cls, path: str | Path) -> "Brief":
@@ -219,6 +221,8 @@ class Brief:
             d["circulation"] = self.circulation
         if self.affinities:
             d["affinities"] = [dict(a) if isinstance(a, dict) else a for a in self.affinities]
+        if self.site is not None:
+            d["site"] = dict(self.site) if isinstance(self.site, dict) else self.site
         if self.expanded:
             d["expanded"] = True
         return d

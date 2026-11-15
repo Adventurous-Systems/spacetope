@@ -18,10 +18,23 @@ const show = (it, v) => (v === null || v === undefined ? null : (SHOW[it.unit] |
 
 export const isHard = (it) => it.strength === 'must' || it.strength === 'never';
 
-export function sentence(it) {
+const SIDE = { N: 'north', E: 'east', S: 'south', W: 'west' };
+const EQUATOR = { N: 'south', S: 'north' };
+
+// What a facade wish asks for, in words. `sun` is orientation (the equator-facing side), not hours of sun.
+export function facadeWish(it, site) {
+  const m = (it.source || '').match(/facade ([NESW])$/);
+  const side = it.side || (m ? m[1] : null);
+  if (side === 'sun') {
+    const eq = site && EQUATOR[site.hemisphere];
+    return `face the sun side${eq ? ` (${eq})` : ''}`;
+  }
+  return `have a wall facing ${side ? (SIDE[side] || side) : 'a given side'}`;
+}
+
+export function sentence(it, site) {
   const other = it.others.length > 1 ? `any of ${it.others.join(', ')}` : it.others[0];
-  const side = it.source.match(/facade ([NESW])$/);
-  const wish = it.kind === 'facade' ? `have a wall facing ${side ? side[1] : 'a given side'}` : WISH[it.kind](other, it);
+  const wish = it.kind === 'facade' ? facadeWish(it, site) : WISH[it.kind](other, it);
   // a miss of 'apart' (or a hit of never/avoid) is something that exists, so report what was found
   const found = it.kind === 'apart' || it.strength === 'never' || it.strength === 'avoid';
   const got = show(it, it.value);
@@ -34,3 +47,13 @@ export function sentence(it) {
 
 export const missed = (aff) => aff.items.filter((it) => it.met === false)
   .sort((x, y) => Number(isHard(y)) - Number(isHard(x)));
+
+// The symmetry `orient.best` chose (id, r90, r180, r270, mx, mx_r90, ...), in plain words; nothing for the
+// identity, and an unknown name is shown as it is.
+export function turnedText(orientation) {
+  const name = orientation && orientation.symmetry;
+  if (!name || name === 'id' || name === 'identity') return null;
+  const m = String(name).match(/^(mx)?_?(?:r(90|180|270))?$/);
+  const how = m ? [m[1] && 'mirrored', m[2] && `turned ${m[2]}°`].filter(Boolean).join(' and ') : name;
+  return `Turned to face the site: ${how}`;
+}
