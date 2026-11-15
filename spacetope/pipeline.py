@@ -4,6 +4,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
+from . import affinity
 from .brief import Brief
 from .placement import Placement, assembly_from_placement, space_graph, topology_classes  # noqa: F401 (re-exported)
 from .realise import Realised
@@ -43,6 +44,8 @@ def evaluate_placements(brief: Brief, placements: list[Placement], generator: st
         rep = verify(brief, pl, intent)
         sc = score(rep.realised) if rep.ok and rep.realised else {}
         an = analysis(rep.realised) if rep.ok and rep.realised else {}
+        if rep.ok and rep.realised and affinity.expand(rep.realised.brief):
+            an["affinity"] = affinity.measure(rep.realised.brief, pl)  # reported, not ranked (M19)
         opts.append(Option(pl, intent.signature(), rep, sc, generator, seed, an))
     return opts
 

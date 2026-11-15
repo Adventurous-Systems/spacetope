@@ -36,8 +36,17 @@ the engine.
 | M15c | Gap-closing pass | **measured and dropped**: nothing to close | ” |
 | M16 | Sequence pair + annealing | **gate failed**, not registered | 14 |
 | M17 | Brief programmes and dataset L0 | done | 14 |
+| M19 | Affinity: vocabulary, expansion and measurement | done | 31 |
 
-**250 tests** collected in total, 63 of them fast. All green as of 2026-10-04 on topologicpy 0.9.71.
+**316 tests** collected in total, 98 of them fast. All green as of 2026-10-04 on topologicpy 0.9.71; on 2026-11-15
+M19 added 66 (35 fast unit tests, 31 in the gate), and the fast suite and the M1, M3, M7, M8, M10, M11, M15 and M17
+gates were rerun green with it.
+
+2026-11-15, M19: a brief can now say what a space needs beside what it touches (`tags:`, `affinities:`; kinds
+`touch`, `near`, `apart`, `stack`, `same_level`, `facade`, `exterior`, `ground`, `top`; strengths `must`, `should`,
+`avoid`, `never`). Every option reports an `affinity` score and the wishes it missed. The generators do not use
+it yet (M20), and `must`/`never` are reported, not enforced. Beam baseline: school 0.795, hospital 0.724, every
+exterior-only fixture 1.0. Design and gate in `docs/PLAN.md` §4.10; M18a/M18b are not built.
 
 2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
 drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is

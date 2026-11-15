@@ -17,7 +17,7 @@ import math
 import time
 from dataclasses import dataclass, field
 
-from .brief import Brief
+from .brief import Brief, generated_names
 from .circulation import level_height_m, prepare
 from .pipeline import Option, evaluate_placements
 from .placement import assembly_from_placement
@@ -207,7 +207,9 @@ def brief_for_levels(brief: Brief, levels: int) -> Brief:
             item.pop("serves", None)
     if levels > 1 and circ and not circ.get("stairs"):
         circ["stairs"] = [{"name": "stair", "w": 3.0, "l": 5.0}]
-    return Brief.from_dict(d)
+    out = Brief.from_dict(d)
+    from .affinity import prune  # an affinity naming a corridor that no longer exists goes with it
+    return prune(out, {s.name for s in out.spaces} | set(generated_names(out)))
 
 
 def proxy_score(brief: Brief, placement) -> float:

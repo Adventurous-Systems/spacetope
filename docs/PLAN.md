@@ -1,6 +1,6 @@
 # spacetope — plan
 
-Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. **Current work: the stretch programme M9–M17 (§4.9)**, built in order on branch `m9-stretch`; each milestone's status is kept in the table at the top of §4.9. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
+Written 2026-09-13, replanned 2026-09-20. Status: M0–M5, M7 and M8 gates green; M6 (learned scorers) failed its gate four times and is parked. The stretch programme M9–M17 (§4.9) is finished. **Current work: the affinity programme M19–M21 (§4.10)** on branch `m19-affinity`; M19 is gated. Each milestone's status is kept in the table at the top of its section. Plain-language guide: §0. A short snapshot of where everything stands, with the gate counts and the known limits, is `STATUS.md` (tracked, unlike the dated notes).
 
 ## 0. In plain words (for readers who are not solver engineers)
 
@@ -430,6 +430,105 @@ Entry conditions in the exploration note §5: L1 needs a decoder (M12 or M16) wi
 success; L2 needs L1 and a millisecond environment; L3 needs a synthetic-data plateau. Four training
 rounds per phase, then a decision.
 
+### 4.10 Affinity programme M19–M21 (started 2026-11-15)
+
+Planned 2026-10-24 together with the bridge (M18a contract, M18b polygon envelope) and curves (M22–M24).
+Affinity is built first on branch `m19-affinity`: it is pure Python on integer boxes, touches no kernel, and
+every change it makes to the brief and to the option is **additive** (new optional keys), so it does not
+wait for the versioned contract. M18a still comes before anything that changes an existing key.
+
+| # | Milestone | Status |
+|---|---|---|
+| M19 | Affinity: vocabulary, expansion and measurement (no generator changes) | **done 2026-11-15**, gate 31 green; baseline in `bench/history/2026-11-15_m19_affinity.csv` |
+| M20 | Affinity in the generators: `must`/`never` hard (an eighth verify check), `should`/`avoid` soft | not started; needs the margin fixed in the M19 decision row |
+| M21 | Site orientation and sun (`facade: sun`, the eight plan symmetries) | not started |
+
+**What an affinity is.** A wish that relates a space to another space, to a group of spaces, or to the
+site, with a strength. A required contact (`contacts:`) stays what it is and is still measured by
+`adjacency`; affinities are the wishes beside it. The scale follows Muther's SLP chart: A → `must`,
+E/I/O → `should` with weights 4/2/1, U → nothing, X → `avoid`.
+
+**Strengths.** `must` and `should` want the kind met; `never` and `avoid` want it not met. `must` and
+`never` are hard, `should` and `avoid` are soft and carry a `weight` (default 1). In M19 nothing is
+enforced: hard misses are reported, not filtered.
+
+**Kinds**, each a predicate on integer boxes (expanded brief + placement, no kernel):
+
+| Kind | Between | Met when | Parameter (default) |
+|---|---|---|---|
+| `touch` | space–space | a shared vertical wall at least `min` long | `min` 0.9 m (a door) |
+| `near` | space–space | walk-graph depth ≤ `depth` (door graph, or the access graph on legacy briefs) | `depth` 2 |
+| `apart` | space–space | no shared wall, floor or ceiling | — |
+| `stack` | space–space | on adjacent levels and plan overlap ≥ `overlap` × the smaller footprint | `overlap` 0.5 |
+| `same_level` | space–space | same z band | — |
+| `facade` | space–site | uncovered wall on the named side ≥ `min` | side `N|E|S|W` (`sun` waits for M21), `min` 1.0 m |
+| `exterior` | space–site | uncovered wall on any side ≥ `min` | `min` 1.0 m |
+| `ground` / `top` | space–site | on level 0 / on the highest occupied level | — |
+
+Compass until M21 gives a site north: **N = +y, E = +x, S = −y, W = −x**. "Uncovered" is the reading
+`daylight` already uses (wall length not covered by a full-height neighbour), kept per side; a courtyard
+wall counts as outside. `wishes.exterior: true`, written by the programmes and the fixtures and read by
+nothing until now, is read as `{exterior: true, strength: should}`.
+
+**Brief format** (all optional, older briefs unchanged):
+
+```yaml
+spaces:
+  - {name: bath_1, w: 2.4, l: 2.0, h: 3.0, tags: [wet]}
+  - {name: bed_1,  w: 3.6, l: 3.2, h: 3.0, tags: [quiet],
+     affinities: [{facade: S, strength: should}, {apart: plant, strength: must}]}
+affinities:
+  - {between: [ward_1, nurse_station], kind: near, depth: 2, strength: should, weight: 4}
+  - {tag: wet, rule: stack, strength: should}        # every wet room sits over or under another wet room
+  - {tag: wet, rule: cluster, strength: should}      # every wet room shares a wall with another wet room
+  - {tags: [quiet, noisy], rule: apart, strength: must}   # every quiet–noisy pair
+  - {tags: [ward, nurse], rule: near, strength: should}   # every ward near some nurse space
+  - {tag: teaching, rule: same_level, strength: should}   # all on the level of the first
+```
+
+`tags` and `affinities` are fields of `Space` and `Brief`, not entries of `wishes` (CP-SAT hashes the
+wishes). The brief stores what the architect wrote and round-trips it verbatim.
+
+**Expansion.** `affinity.expand(brief) -> list[Affinity]` is a pure, deterministic function of the brief,
+computed on demand and never stored, so it cannot duplicate on a second `prepare`. An `Affinity` is
+`(kind, a, others, strength, weight, params, source)`: `others` is empty for site kinds, one name for a
+pair, and several for the group rules, which are met when **any** of the others satisfies the predicate
+(`stack` and `cluster` cannot be written as fixed pairs before levels are assigned). Generators will
+only ever see this list, never tags. Tag rules apply to the spaces that carry the tag; generated
+corridors and shafts carry none. `prepare` validates (unknown space, kind, strength, side or rule is an
+error; a tag no space carries is a warning) on both the circulation path and the legacy path.
+
+**Measurement.** `affinity.measure(brief, placement) -> dict`:
+`{"score": float, "soft": {"met", "total"}, "hard": {"met", "total"}, "unmeasured": int,
+"items": [{"kind", "a", "others", "strength", "weight", "met", "value", "target", "unit", "by", "source"}]}`.
+`score` is the weighted share of soft affinities satisfied, in [0, 1], and 1.0 when there are none;
+`value`/`target` say by how much (metres of wall, depth, overlap share); `by` names the partner that
+satisfied a group rule. `facade: sun` is listed as unmeasured and left out of the score until M21.
+
+**Where it shows.** `Option.analysis["affinity"]` (reported, not ranked — `METRICS`, the ranking weights
+and the scoreboard columns are unchanged, so every earlier gate is untouched); the option card in the
+canvas (a bar and the list of missed wishes); `spacetope affinity <brief> <placement>` on the CLI.
+`daylight` keeps its meaning in M19; redefining it to "asked for an exterior wall and got one" changes a
+ranked score and belongs to M20.
+
+Gate `tests/gates/test_m19.py`:
+1. Parse and round trip: a brief with tags and all three affinity forms survives
+   `to_dict`/`from_dict`, `prepare` (twice), `floors.brief_for_levels` and `programme.variations`.
+2. Every kind and both polarities measured correctly on hand-built placements, including each group rule,
+   a rotated room and a shaft.
+3. Validation: each malformed affinity gives one plain-language problem.
+4. Generators untouched: on the fixtures with affinities added, the beam returns the same placements
+   with the `tags`/`affinities` keys stripped; no module under `spacetope/solve/` imports `affinity`.
+5. `affinity.py` imports no topologicpy; the report on an option equals `measure` on its placement.
+6. Baseline recorded: `bench/affinity_baseline.py` writes `bench/history/<date>_m19_affinity.csv`
+   (fixture, generator, seed, verified, affinity, soft met/total, hard met/total) for beam seeds 0–2 on
+   every fixture that carries affinities: wet stacking and clustering in the school and the hospital,
+   quiet/noisy separation in the school, flat-over-flat stacking in the apartments, exterior in the
+   clinic and the offices (`two_levels_stair`, `three_levels_core`).
+
+Iteration: two rounds on a failing line. If line 4 fails, the change that touched a generator is
+reverted rather than the line loosened.
+
 ## 5. Decisions (with why)
 
 | Date | Decision | Why |
@@ -511,6 +610,8 @@ rounds per phase, then a decision.
 | 2026-10-03 | Finished the dual enumerator's blind spot (§6.0). **The planned fix was wrong and is reverted; the generator now explains its failures instead** | The theory was that triangulating by chords invents contacts that over-constrain sparse briefs. Built it: fill an inner face with a void cell rather than a chord. It **never fired once** — not on any fixture, nor on a deliberately sparse chain or star — because the outer-walk chording leaves every inner face a triangle before that branch runs. Reverted (the M15c precedent). What actually blocks `house_ground` and `gallery_rich` is arithmetic: a rectangular dual is a perfect tiling, so every room's size is fixed by the walls it shares, and these rooms cannot tile within ±10 %. Measured by widening the bands uniformly: house_ground needs about ±50 %, gallery_rich about ±30 %; at ±35 % and below neither sizes at all. So `dual` now raises `WillNotTile` with that number, what it means, and which engines can do the brief instead, in about 2 s. Two gate tests keep it honest: the message must name a tolerance of at least 20 %, and following its advice (house_ground at ±50 %) must really produce verified plans — it gives 2. **A bug found on the way:** `insert_vertex` was never ported into `solve/dual.py`, and the seed loop's blanket `except Exception` swallowed the `NameError` as "this drawing did not work", so the change appeared to run and do nothing. The except is now narrowed to the geometric failures, and a programming error surfaces. |
 | 2026-10-04 | M17 built and gated: brief programmes (`spacetope/programme.py`, four families in `programmes/`, `spacetope programme`, `docs/PROGRAMMES.md`) and the L0 dataset rows | Gate met on all three lines, but only after a measurement caught the first version drawing briefs **nothing could build**: 7 %, 10 %, 23 % and 0 % of draws were buildable by the beam. Two causes, both found by looking rather than guessing. (1) **The programmes never said a room opens off its corridor.** Every hand-written fixture states that contact; mine stated none, leaving the search with almost no reason to put a room on a corridor — the same weakness M15b measured, where a required contact scores 30 and door access 4. Every room is now given a contact with its level's corridor, which also forces every room to be assigned a concrete level when it is drawn rather than leaving it to the brief. (2) **The envelope was sized from room area alone**, ignoring the corridor and shafts expansion adds; on housing those are a fifth of a floor, so the envelope came out far too small. After both fixes: clinic 20/20, office 20/20, housing 18/20, secondary_school 17/20. Throughput followed, since a brief that builds nothing yields no rows: 5,573 rows/hour over the four programmes together (clinic 34,276, office 11,250, housing 5,353, secondary_school 2,198 — the largest family alone is below the 5,000 line). The frontage reading was useless as first measured, because the corridor length is derived from the same demand; squeezing the envelope shows it does predict, 53 % of loose briefs building against 4 % of tight ones, and the gate tests that rather than the bare number. A sample of every dataset run is re-realised through the kernel by `check_row`, so the rows cannot drift from what the engine actually builds. |
 | 2026-10-16 | spacetope relicensed from Apache-2.0 to **dual licensing: AGPL-3.0-or-later or a commercial licence** from **Adventurous Systems** (`LICENSE`, `NOTICE`, `COMMERCIAL.md`, `README.md`, `CONTRIBUTING.md`, `pyproject.toml`); versions up to `c419c33` stay Apache-2.0 for whoever has them | Goal: anyone who builds on spacetope and ships or hosts it must share their code, while Adventurous Systems keeps using it in AFlow and can license it to others without copyleft. Possible because Adventurous Systems is the copyright holder and the CLA grants relicensing of contributions, including proprietary terms; the copyright holder is not bound by the public licence. (The 2026-09-13 row records the copyright as held personally; the author assigned it to Adventurous Systems in writing on 2026-10-16. The work is done on the author's own time, on a computer and with resources Adventurous Systems pays for, and the author checked their university's IP policy before assigning.) Side effect: the AGPL release and the AGPL `topologic_core` are now consistent, so the public build may carry the binary. What it does not solve: a commercial licence cannot cover `topologic_core`, so a closed build (AFlow included) still needs the Rust core or the pythonocc backend first. `-or-later` chosen as the common form. Open for a lawyer: the commercial licence text, and whether the CLA's relicensing clause is enough for proprietary licensing. Not legal advice. |
+| 2026-11-15 | M19 built and gated: affinities parse, expand and are measured; generators untouched. `spacetope/affinity.py` (`expand`, `validate`, `measure`, pure, no kernel), `tags`/`affinities` on `Space` and `Brief`, the report on `Option.analysis["affinity"]`, the option card, `spacetope affinity`. **Four departures from the 2026-10-24 sketch, each forced by the code:** (1) `affinity` is reported, not added to `METRICS`; (2) group rules are any-of, not fixed pairs; (3) `daylight` keeps its meaning until M20; (4) the wet baseline is the school and the hospital, the apartments get flat-over-flat stacking, and "the office" is `two_levels_stair` and `three_levels_core` | (1) `rank`, `evaluate_top`, the scoreboard columns and two gates index every metric, and a ranked score would move earlier gates; reporting it changes none of them (M3, M7, M8, M11, M15 rerun green on the edited fixtures: 6, 47, 12, 4, 17; M1, M10, M17: 12, 10, 14; fast suite 98). (2) Levels are assigned by the generator, so "wet over wet" cannot be listed as pairs when the brief is expanded; each tagged room is met when any other member satisfies it. (3) `daylight` carries rank weight 2. (4) `apartments_four_levels` has only whole flats and `office_30` has no exterior wishes. The beam returns identical placements with the new keys stripped (gate line 4). `wishes.exterior`, written since M17 and read by nothing, is now read as `exterior`/`should`, so 12 of 14 fixtures carry a report. Built without M18a: every key is additive. |
+| 2026-11-15 | **M19 baseline** (beam, seeds 0–2, verified options): `school_three_levels` 0.795 (0.822, 0.805, 0.759), `small_hospital` 0.724 (0.743, 0.728, 0.699), `apartments_four_levels` 0.979; every exterior-only fixture 1.000; the school's 72 hard quiet/noisy `apart` items met in every verified option. **Proposed M20 margin, the architect's to fix:** mean soft affinity ≥ baseline + 0.10 on the school and the hospital (≥ 0.90 and ≥ 0.82), no fixture below its baseline, verified count and time no worse than the scoreboard | The beam satisfies exterior wishes and the quiet/noisy separation by accident (rooms hang off a corridor, so one wall is free; the noisy rooms are few and on other levels), so those leave M20 nothing to show. The only measured gap is wet stacking and clustering, which is where the margin has to be set. The hard rule needs a brief that the beam breaks before M20's eighth check can be shown to matter; none of the fixtures is one yet, so M20 starts by writing it. |
 
 ## 6. Open questions (answer as they become blocking)
 

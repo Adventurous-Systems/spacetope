@@ -170,6 +170,7 @@ spaces:
     level: 0
     exterior: true
 - name: wc_public_0
+  tags: [wet]
   w: 3
   l: 4
   h: 3.6
@@ -177,6 +178,7 @@ spaces:
   wishes:
     level: 0
 - name: wc_staff_0
+  tags: [wet]
   w: 2.5
   l: 2.5
   h: 3.6
@@ -184,6 +186,7 @@ spaces:
   wishes:
     level: 0
 - name: clean_utility_0
+  tags: [wet]
   w: 3
   l: 3
   h: 3.6
@@ -191,6 +194,7 @@ spaces:
   wishes:
     level: 0
 - name: dirty_utility_0
+  tags: [wet]
   w: 3
   l: 3
   h: 3.6
@@ -338,6 +342,7 @@ spaces:
     level: 1
     exterior: true
 - name: wc_patients_1
+  tags: [wet]
   w: 3
   l: 4
   h: 3.6
@@ -345,6 +350,7 @@ spaces:
   wishes:
     level: 1
 - name: wc_staff_1
+  tags: [wet]
   w: 2.5
   l: 2.5
   h: 3.6
@@ -352,6 +358,7 @@ spaces:
   wishes:
     level: 1
 - name: clean_utility_1
+  tags: [wet]
   w: 3
   l: 3
   h: 3.6
@@ -359,6 +366,7 @@ spaces:
   wishes:
     level: 1
 - name: dirty_utility_1
+  tags: [wet]
   w: 3
   l: 3
   h: 3.6
@@ -487,3 +495,6 @@ contacts:
   - linen
 - - corridor_1
   - store_1
+affinities:
+- {tag: wet, rule: stack, strength: should}
+- {tag: wet, rule: cluster, strength: should}

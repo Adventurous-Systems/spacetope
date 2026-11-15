@@ -7,6 +7,7 @@ import networkx as nx
 from topologicpy.Face import Face
 
 from .brief import Brief, CIRCULATION
+from .doors import access_graph  # noqa: F401 (re-exported; lives in doors so affinity stays kernel-free)
 from .placement import Placement
 from .realise import Realised
 from .solve.grid import overlap_len, touches
@@ -69,26 +70,6 @@ def stacking(placement: Placement) -> float:
             tot += len(planes[hi][i])
             hits += len(planes[hi][i] & planes[lo][i])
     return hits / tot if tot else 0.0
-
-
-def access_graph(brief: Brief, placement: Placement) -> nx.Graph:
-    """Walkable adjacency: horizontal contacts with door-width overlap, plus vertical contacts
-    between two cores of the same program (a stair stack, a lift stack). Floors are not doors."""
-    g = nx.Graph()
-    g.add_nodes_from(placement)
-    names = list(placement)
-    for i, a in enumerate(names):
-        for b in names[i + 1:]:
-            sa, sb = brief.space(a), brief.space(b)
-            for side in HSIDES:
-                u, v = touches(placement[a], placement[b], side)
-                if u >= DOOR_MM and v >= 2000:
-                    g.add_edge(a, b)
-            if sa.is_vertical and sa.program == sb.program:
-                for side in ("ceiling", "floor"):
-                    if touches(placement[a], placement[b], side)[0] > 0:
-                        g.add_edge(a, b)
-    return g
 
 
 def vertical(brief: Brief, placement: Placement, doors: list | None = None) -> float:

@@ -207,6 +207,7 @@ Small briefs return options in seconds. The 64-space three-level school takes ab
 |---|---|
 | `spacetope generate BRIEF --generator G --seed N --out DIR [--html] [--save]` | Generate, verify, score and rank options. `--params '{"k": 4}'` sets how many. |
 | `spacetope realise BRIEF PLACEMENT [--html F] [--save F]` | Build and verify a hand-made placement (integer-mm boxes). |
+| `spacetope affinity BRIEF PLACEMENT` | Measure the brief's affinities on a placement. |
 | `spacetope floors BRIEF [--generator beam\|cpsat]` | Find how many floors a brief needs within its envelope. |
 | `spacetope export --stem STEM --obj F.obj --json F.json` | Write OBJ and JSON of an option saved with `--save`. |
 | `spacetope programme NAME --seeds 0-99 --out DIR` | Draw briefs from a building programme (see below). `--dataset rows.jsonl` writes training rows instead. |
@@ -254,6 +255,40 @@ Doors are placed between each corridor and every stair and lift on the levels th
 room and a corridor on its level. Room-to-room doors are added only where a contact asks for one. A corridor
 can also be a chain of segments (`corridor: {…, segments: 2}`) when one straight corridor cannot give every
 room a frontage.
+
+**Affinities** are wishes beside the required contacts: these rooms stack, these stay apart, this one has an
+outside wall on the south. Write `tags:` on spaces and `affinities:` on the brief or on a space. All optional;
+a brief without them is unchanged.
+
+```yaml
+spaces:
+  - {name: bath_1, w: 2.4, l: 2.0, h: 3.0, tags: [wet]}
+  - {name: bed_1,  w: 3.6, l: 3.2, h: 3.0, tags: [quiet],
+     affinities: [{facade: S, strength: should}, {apart: plant, strength: must}]}
+affinities:
+  - {between: [ward_1, nurse_station], kind: near, depth: 2, strength: should, weight: 4}
+  - {tag: wet, rule: stack, strength: should}             # every wet room over or under another wet room
+  - {tags: [quiet, noisy], rule: apart, strength: must}   # every quiet-noisy pair
+```
+
+| Kind | Met when |
+|---|---|
+| `touch` | the two share a vertical wall at least `min` long (0.9 m, a door) |
+| `near` | at most `depth` doors apart (2) |
+| `apart` | no shared wall, floor or ceiling |
+| `stack` | on adjacent levels, plan overlap at least `overlap` of the smaller footprint (0.5) |
+| `same_level` | on the same level |
+| `facade` | an uncovered wall of at least `min` (1 m) on side `N`, `E`, `S` or `W` |
+| `exterior` | an uncovered wall of at least `min` on any side |
+| `ground`, `top` | on the lowest / highest occupied level |
+
+Strength says how much it matters: `must` and `never` are hard, `should` and `avoid` are soft and take a
+`weight` (default 1). `must` and `should` want the kind met; `never` and `avoid` want it not met. Until the
+site has a north, the compass is N = +y, E = +x, S = -y, W = -x.
+
+Each option reports a score (the weighted share of soft wishes met) and the wishes it missed, hard ones
+first. The score is shown on the option card but is not used for ranking, and the generators do not yet aim
+for affinities. `spacetope affinity BRIEF PLACEMENT` prints the same report for a hand-made placement.
 
 **Example briefs** in `fixtures/`, from small to large:
 

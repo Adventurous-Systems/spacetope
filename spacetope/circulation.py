@@ -225,7 +225,7 @@ def expand(brief: Brief) -> Brief:
             # chained corridors: which segment a shaft lands on is the generator's choice; `doors.door_kind_for`
             # already requires a door wherever a shaft meets a corridor, and door planning places it (M15b)
     return Brief(name=brief.name, spaces=spaces, contacts=contacts, envelope=brief.envelope, levels=brief.levels,
-                 level_height=H, circulation=circ, door_pairs=doors, expanded=True)
+                 level_height=H, circulation=circ, door_pairs=doors, affinities=brief.affinities, expanded=True)
 
 
 # ----------------------------------------------------------------------------- validation (expanded brief)
@@ -286,7 +286,8 @@ def validate_expanded(brief: Brief) -> list[Problem]:
 
 def prepare(brief: Brief) -> tuple[Brief, list[Problem]]:
     """Validate, expand, validate again. Raises BriefInvalid on any error; returns the expanded brief and warnings."""
-    problems = validate_compact(brief)
+    from .affinity import validate as validate_affinities  # lazy: affinity imports this module
+    problems = validate_compact(brief) + validate_affinities(brief)
     if any(p.severity == "error" for p in problems):
         raise BriefInvalid(problems)
     try:
