@@ -1,0 +1,766 @@
+# A three-level secondary school, 64 spaces after expansion: 24 classrooms, two science labs with a
+# shared prep room, art, music and IT with their stores, admin and dining on the ground level, two
+# stairs and a lift. Written to find where the beam and CP-SAT run out of steam (design note D.1).
+# Measured 2026-09-14, seed 0: beam 0 of 8 verified (the last small rooms find no corridor frontage);
+# CP-SAT 4 of 4 verified in 245 s with a 300 s budget (stacking 0.49), nothing at the UI default of
+# 60 s. A 76 m envelope does not rescue the beam. Level frontage is at 88 % of a straight corridor.
+# Orientation wishes added for M21: classrooms and labs face the sun, the library faces north, stores keep off the
+# sunny side. Site north is plan +y in the northern hemisphere, so the sun side is the plan's -y side.
+name: school_three_levels
+levels: 3
+level_height: 3.5
+envelope:
+  w: 64
+  l: 26
+  h: 10.5
+circulation:
+  corridor:
+    w: 2.4
+    l: 44
+  stairs:
+  - name: stair_east
+    w: 3
+    l: 6
+  - name: stair_west
+    w: 3
+    l: 6
+  lifts:
+  - name: lift
+    w: 2.4
+    l: 2.4
+spaces:
+- name: entrance_hall
+  w: 8
+  l: 6
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: reception
+  w: 4
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: head_office
+  tags:
+  - quiet
+  w: 4
+  l: 3.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: admin_office
+  w: 5
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: staff_room
+  w: 7
+  l: 5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: sick_room
+  tags:
+  - quiet
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: library
+  tags:
+  - quiet
+  w: 10
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: N
+    strength: should
+- name: canteen
+  tags:
+  - noisy
+  w: 12
+  l: 8
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: kitchen
+  w: 6
+  l: 5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: kitchen_store
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: class_01
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_02
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_03
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_04
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_05
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_06
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: wc_boys_0
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: wc_girls_0
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: wc_staff_0
+  tags:
+  - wet
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: store_0
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: cleaners_0
+  tags:
+  - wet
+  w: 2
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: class_07
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_08
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_09
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_10
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_11
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_12
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_13
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_14
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_15
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_16
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: science_lab_1
+  w: 10
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: science_lab_2
+  w: 10
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: prep_room
+  w: 4
+  l: 5
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: wc_boys_1
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: wc_girls_1
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: wc_staff_1
+  tags:
+  - wet
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: store_1
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: cleaners_1
+  tags:
+  - wet
+  w: 2
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: class_17
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_18
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_19
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_20
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_21
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_22
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_23
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: class_24
+  w: 8
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: art_room
+  w: 10
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: art_store
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: music_room
+  tags:
+  - noisy
+  w: 9
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: practice_room
+  tags:
+  - noisy
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: it_lab
+  w: 9
+  l: 7
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: server_room
+  w: 2.5
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: wc_boys_2
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: wc_girls_2
+  tags:
+  - wet
+  w: 4
+  l: 4
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: wc_staff_2
+  tags:
+  - wet
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: store_2
+  w: 3
+  l: 3
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: cleaners_2
+  tags:
+  - wet
+  w: 2
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  affinities:
+  - facade: sun
+    strength: avoid
+contacts:
+- - corridor_0
+  - entrance_hall
+- - corridor_0
+  - reception
+- - entrance_hall
+  - reception
+  - door: true
+- - corridor_0
+  - head_office
+- - corridor_0
+  - admin_office
+- - corridor_0
+  - staff_room
+- - corridor_0
+  - sick_room
+- - corridor_0
+  - library
+- - corridor_0
+  - canteen
+- - corridor_0
+  - kitchen
+- - canteen
+  - kitchen
+  - door: true
+- - corridor_0
+  - kitchen_store
+- - kitchen
+  - kitchen_store
+  - door: true
+- - corridor_0
+  - class_01
+- - corridor_0
+  - class_02
+- - corridor_0
+  - class_03
+- - corridor_0
+  - class_04
+- - corridor_0
+  - class_05
+- - corridor_0
+  - class_06
+- - corridor_0
+  - wc_boys_0
+- - corridor_0
+  - wc_girls_0
+- - corridor_0
+  - wc_staff_0
+- - corridor_0
+  - store_0
+- - corridor_0
+  - cleaners_0
+- - corridor_1
+  - class_07
+- - corridor_1
+  - class_08
+- - corridor_1
+  - class_09
+- - corridor_1
+  - class_10
+- - corridor_1
+  - class_11
+- - corridor_1
+  - class_12
+- - corridor_1
+  - class_13
+- - corridor_1
+  - class_14
+- - corridor_1
+  - class_15
+- - corridor_1
+  - class_16
+- - corridor_1
+  - science_lab_1
+- - corridor_1
+  - science_lab_2
+- - corridor_1
+  - prep_room
+- - science_lab_1
+  - prep_room
+  - door: true
+- - prep_room
+  - science_lab_2
+  - door: true
+- - corridor_1
+  - wc_boys_1
+- - corridor_1
+  - wc_girls_1
+- - corridor_1
+  - wc_staff_1
+- - corridor_1
+  - store_1
+- - corridor_1
+  - cleaners_1
+- - corridor_2
+  - class_17
+- - corridor_2
+  - class_18
+- - corridor_2
+  - class_19
+- - corridor_2
+  - class_20
+- - corridor_2
+  - class_21
+- - corridor_2
+  - class_22
+- - corridor_2
+  - class_23
+- - corridor_2
+  - class_24
+- - corridor_2
+  - art_room
+- - corridor_2
+  - art_store
+- - art_room
+  - art_store
+  - door: true
+- - corridor_2
+  - music_room
+- - corridor_2
+  - practice_room
+- - music_room
+  - practice_room
+  - door: true
+- - corridor_2
+  - it_lab
+- - corridor_2
+  - server_room
+- - it_lab
+  - server_room
+  - door: true
+- - corridor_2
+  - wc_boys_2
+- - corridor_2
+  - wc_girls_2
+- - corridor_2
+  - wc_staff_2
+- - corridor_2
+  - store_2
+- - corridor_2
+  - cleaners_2
+affinities:
+- tag: wet
+  rule: stack
+  strength: should
+- tag: wet
+  rule: cluster
+  strength: should
+- tags:
+  - quiet
+  - noisy
+  rule: apart
+  strength: must
+site:
+  north: 0
+  hemisphere: N

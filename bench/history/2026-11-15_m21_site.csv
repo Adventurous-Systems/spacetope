@@ -1,0 +1,13 @@
+fixture,seed,options,preverified,verified_without,verified_with,facade_generated,facade_after,facade_worst,signatures_before,signatures_after,symmetries,t_gen,t_pass
+school_three_levels,0,8,8,8,8,0.2059,0.7941,0.2059,8,8,r180:8,10.219,0.226
+school_three_levels,1,8,8,8,8,0.1912,0.8088,0.1912,8,8,r180:8,9.95,0.227
+school_three_levels,2,8,8,8,8,0.1838,0.8162,0.1838,8,8,r180:8,11.592,0.256
+small_hospital,0,8,8,8,8,0.3947,0.6053,0.3947,8,8,r180:8,3.24,0.103
+small_hospital,1,8,8,8,8,0.5,0.6053,0.3947,8,8,id:4;r180:4,3.193,0.103
+small_hospital,2,8,8,8,8,0.4211,0.5789,0.4211,8,8,r180:8,3.436,0.103
+house_ground,0,8,8,8,8,0.75,0.975,0.375,7,5,id:5;r180:3,0.144,0.007
+house_ground,1,8,7,7,7,0.9143,0.9714,0.3714,6,6,id:5;mx:2;r270:1,0.142,0.007
+house_ground,2,8,8,8,8,0.8,0.975,0.425,7,7,id:5;mx:1;r180:2,0.137,0.007
+clinic,0,8,8,8,8,0.5179,0.5893,0.4107,7,7,id:4;r180:4,0.347,0.012
+clinic,1,8,8,8,8,0.4643,0.5714,0.4286,8,8,id:2;r180:6,0.344,0.012
+clinic,2,8,8,8,8,0.5357,0.625,0.4821,8,8,id:5;r180:3,0.325,0.012

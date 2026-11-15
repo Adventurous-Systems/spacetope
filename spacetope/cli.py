@@ -36,6 +36,19 @@ def cmd_realise(args) -> int:
     return 0 if rep.ok else 1
 
 
+def cmd_affinity(args) -> int:
+    """Measure the brief's affinities on a placement; prints the same report the option card shows."""
+    from .affinity import measure
+    from .circulation import BriefInvalid, prepare
+    try:
+        brief, _ = prepare(load(args.brief))
+    except BriefInvalid as e:
+        print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1))
+        return 2
+    print(json.dumps(measure(brief, load_placement(args.placement)), indent=1))
+    return 0
+
+
 def cmd_generate(args) -> int:
     """Generate, verify, score and rank options; write a JSON index plus optional HTML/BREP per option."""
     from pathlib import Path
@@ -191,6 +204,9 @@ def main(argv=None) -> int:
     r.add_argument("brief"); r.add_argument("placement")
     r.add_argument("--html"); r.add_argument("--save")
     r.set_defaults(fn=cmd_realise)
+    af = sub.add_parser("affinity", help="measure a brief's affinities on a placement")
+    af.add_argument("brief"); af.add_argument("placement")
+    af.set_defaults(fn=cmd_affinity)
     g = sub.add_parser("generate", help="generate, verify, score and rank options for a brief")
     g.add_argument("brief")
     g.add_argument("--generator", default="beam", choices=["beam", "cpsat", "treemap", "dual"])
