@@ -1,0 +1,57 @@
+name: planted_b_r8_t10_f75_straight_dbl_l1_s11
+spaces:
+- name: room_1
+  w: 4.053
+  l: 4.872
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_2
+  w: 4.461
+  l: 5.133
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_3
+  w: 4.052
+  l: 5.282
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_4
+  w: 3.434
+  l: 5.065
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_5
+  w: 4.079
+  l: 5.322
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_6
+  w: 3.281
+  l: 4.453
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_7
+  w: 3.206
+  l: 5.58
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_8
+  w: 4.269
+  l: 4.289
+  h: 3.0
+  program: room
+  tol: 0.1
+contacts: []
+levels: 1
+level_height: 3.0
+circulation:
+  corridor:
+    w: 1.8
+    l: 20.879

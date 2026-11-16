@@ -1,0 +1,77 @@
+name: planted_a_n9_t2_rho50_slice_s14
+spaces:
+- name: room_1
+  w: 2.58
+  l: 6.451
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_2
+  w: 4.744
+  l: 3.091
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_3
+  w: 2.97
+  l: 5.151
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_4
+  w: 2.503
+  l: 5.223
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_5
+  w: 4.782
+  l: 3.321
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_6
+  w: 5.48
+  l: 2.86
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_7
+  w: 3.616
+  l: 4.799
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_8
+  w: 3.717
+  l: 4.83
+  h: 3.0
+  program: room
+  tol: 0.02
+- name: room_9
+  w: 5.44
+  l: 3.152
+  h: 3.0
+  program: room
+  tol: 0.02
+contacts:
+- - room_1
+  - room_5
+  - door: true
+- - room_3
+  - room_5
+  - door: true
+- - room_3
+  - room_4
+  - door: true
+- - room_3
+  - room_6
+- - room_2
+  - room_3
+  - door: true
+- - room_5
+  - room_8
+- - room_6
+  - room_9
+- - room_7
+  - room_8

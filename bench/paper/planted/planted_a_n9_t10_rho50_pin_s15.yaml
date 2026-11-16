@@ -1,0 +1,77 @@
+name: planted_a_n9_t10_rho50_pin_s15
+spaces:
+- name: room_1
+  w: 6.199
+  l: 3.016
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_2
+  w: 2.543
+  l: 6.993
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_3
+  w: 3.043
+  l: 5.268
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_4
+  w: 3.362
+  l: 5.019
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_5
+  w: 2.616
+  l: 6.646
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_6
+  w: 3.37
+  l: 3.847
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_7
+  w: 3.256
+  l: 4.473
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_8
+  w: 2.931
+  l: 4.748
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_9
+  w: 5.564
+  l: 2.977
+  h: 3.0
+  program: room
+  tol: 0.1
+contacts:
+- - room_1
+  - room_5
+- - room_1
+  - room_2
+  - door: true
+- - room_1
+  - room_6
+  - door: true
+- - room_6
+  - room_9
+- - room_7
+  - room_9
+  - door: true
+- - room_7
+  - room_8
+  - door: true
+- - room_4
+  - room_8
+- - room_3
+  - room_4

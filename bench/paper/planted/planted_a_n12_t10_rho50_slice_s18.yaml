@@ -1,0 +1,105 @@
+name: planted_a_n12_t10_rho50_slice_s18
+spaces:
+- name: room_1
+  w: 2.705
+  l: 5.479
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_10
+  w: 3.049
+  l: 5.754
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_11
+  w: 4.262
+  l: 3.449
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_12
+  w: 4.209
+  l: 3.493
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_2
+  w: 2.783
+  l: 5.558
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_3
+  w: 2.951
+  l: 5.467
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_4
+  w: 6.527
+  l: 2.534
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_5
+  w: 2.998
+  l: 4.54
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_6
+  w: 3.416
+  l: 4.938
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_7
+  w: 4.518
+  l: 3.75
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_8
+  w: 4.101
+  l: 3.943
+  h: 3.0
+  program: room
+  tol: 0.1
+- name: room_9
+  w: 3.606
+  l: 5.253
+  h: 3.0
+  program: room
+  tol: 0.1
+contacts:
+- - room_1
+  - room_7
+  - door: true
+- - room_11
+  - room_7
+  - door: true
+- - room_11
+  - room_12
+- - room_7
+  - room_8
+- - room_5
+  - room_8
+- - room_5
+  - room_6
+  - door: true
+- - room_8
+  - room_9
+  - door: true
+- - room_10
+  - room_9
+- - room_3
+  - room_8
+- - room_2
+  - room_8
+- - room_4
+  - room_6
+  - door: true
+- - room_10
+  - room_6
+  - door: true

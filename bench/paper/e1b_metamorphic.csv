@@ -1834,3 +1834,17 @@ metamorphic,mirror_x,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floo
 metamorphic,mirror_y,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,mirror in y,True,True,,1.0,0,True,True,0.72,True
 metamorphic,shuffle,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,shuffle space order,True,True,,1.0,0,True,True,0.72,True
 metamorphic,swap_identical,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,swap room_01 and room_02,True,True,,1.0,0,True,True,0.73,True
+metamorphic,translate,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,"translate (12 345, 6 789) mm",True,True,,1.0,0,True,True,0.07,True
+metamorphic,mirror_x,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,mirror in x,True,True,,1.0,0,True,True,0.07,True
+metamorphic,mirror_y,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,mirror in y,True,True,,1.0,0,True,True,0.07,True
+metamorphic,rotate,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,rotate 90 degrees,True,True,,1.0,0,True,True,0.07,True
+metamorphic,shuffle,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,shuffle space order,True,True,,1.0,0,True,True,0.07,True
+metamorphic,translate,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,"translate (12 345, 6 789) mm",True,True,,1.0,0,True,True,0.07,True
+metamorphic,mirror_x,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,mirror in x,True,True,,1.0,0,True,True,0.07,True
+metamorphic,mirror_y,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,mirror in y,True,True,,1.0,0,True,True,0.07,True
+metamorphic,rotate,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,rotate 90 degrees,True,True,,1.0,0,True,True,0.07,True
+metamorphic,shuffle,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,shuffle space order,True,True,,1.0,0,True,True,0.07,True
+metamorphic,mirror_x,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,mirror in x,True,True,,1.0,0,True,True,0.68,True
+metamorphic,mirror_y,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,mirror in y,True,True,,1.0,0,True,True,0.64,True
+metamorphic,shuffle,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,shuffle space order,True,True,,1.0,0,True,True,0.65,True
+metamorphic,swap_identical,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,swap room_01 and room_02,True,True,,1.0,0,True,True,0.67,True

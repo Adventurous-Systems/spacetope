@@ -1,0 +1,145 @@
+name: planted_b_r16_t10_f75_straight_dbl_l2_s12
+spaces:
+- name: room_1
+  w: 3.95
+  l: 5.19
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_2
+  w: 4.066
+  l: 4.528
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_3
+  w: 3.367
+  l: 5.028
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_4
+  w: 3.698
+  l: 5.417
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_5
+  w: 4.245
+  l: 5.26
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_6
+  w: 4.164
+  l: 5.055
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_7
+  w: 3.341
+  l: 4.837
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_8
+  w: 3.463
+  l: 5.824
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_9
+  w: 3.294
+  l: 5.25
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_10
+  w: 3.426
+  l: 5.262
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_11
+  w: 3.746
+  l: 4.712
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_12
+  w: 4.514
+  l: 4.182
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_13
+  w: 3.387
+  l: 5.439
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_14
+  w: 4.034
+  l: 4.205
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+- name: room_15
+  w: 4.873
+  l: 5.449
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 0
+- name: room_16
+  w: 3.304
+  l: 4.801
+  h: 3.0
+  program: room
+  tol: 0.1
+  wishes:
+    level: 1
+contacts: []
+levels: 2
+level_height: 3.0
+circulation:
+  corridor:
+    w: 1.8
+    l: 20.477
+  stairs:
+  - name: stair
+    w: 3.0
+    l: 5.0
+  lifts:
+  - name: lift
+    w: 2.5
+    l: 2.5

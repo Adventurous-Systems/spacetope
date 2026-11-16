@@ -3283,3 +3283,24 @@ brief,grow_out_of_band,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_fl
 hard constraint,shaft_half_height,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,lift cut to half height,False,False,constraints bands,1.0,1,,,0.71
 hard constraint,out_of_envelope,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,layout moved out of the envelope,False,False,constraints,1.0,0,,,0.7
 brief,door_slide,hotel_floor,dual,1,1,bench/paper/placements/dual/hotel_floor/seed1_opt1.json,room_09 slid to a 550 mm run on corridor_0 (< 1100),False,False,constraints doors,1.0,0,,,0.7
+original,none,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,,True,True,,1.0,0,,,0.07
+brief,gap_required,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,living moved 1 mm off bedroom,False,False,built cell_count no_slivers contacts dictionaries constraints doors required_contacts bands,0.0,0,,,0.03
+control,gap_incidental,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,kitchen moved 1 mm off bedroom,True,True,,1.0,0,,,0.07
+geometry,overlap_50mm,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,kitchen pushed 50 mm into bedroom,False,False,built cell_count no_slivers contacts dictionaries constraints doors required_contacts bands,1.0,0,,,0.08
+brief,shrink_room,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,living width cut to 75 %,False,False,bands,1.0,1,,,0.07
+brief,grow_out_of_band,three_rooms,dual,1,0,bench/paper/placements/dual/three_rooms/seed1_opt0.json,bedroom grown 30 %,False,False,bands,1.0,1,,,0.07
+original,none,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,,True,True,,1.0,0,,,0.07
+brief,gap_required,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,living moved 1 mm off bedroom,False,False,built cell_count no_slivers contacts dictionaries constraints doors required_contacts bands,0.0,0,,,0.03
+control,gap_incidental,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,kitchen moved 1 mm off bedroom,True,True,,1.0,0,,,0.07
+geometry,overlap_50mm,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,living pushed 50 mm into kitchen,False,False,built cell_count no_slivers contacts dictionaries constraints doors required_contacts bands,0.0,0,,,0.08
+brief,shrink_room,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,bedroom width cut to 75 %,False,False,bands,1.0,1,,,0.07
+brief,grow_out_of_band,three_rooms,dual,0,0,bench/paper/placements/dual/three_rooms/seed0_opt0.json,bedroom grown 30 %,False,False,bands,1.0,1,,,0.07
+original,none,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,,True,True,,1.0,0,,,0.66
+brief,gap_required,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,room_09 moved 1 mm off corridor_0,False,False,doors required_contacts,0.9333,0,,,0.64
+control,gap_incidental,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,room_07 moved 1 mm off linen,True,True,,1.0,0,,,0.64
+geometry,overlap_50mm,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,room_03 pushed 50 mm into room_01,False,False,built cell_count no_slivers contacts dictionaries constraints doors required_contacts bands,1.0,0,,,0.55
+brief,shrink_room,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,linen width cut to 75 %,False,False,bands,1.0,1,,,0.64
+brief,grow_out_of_band,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,room_09 grown 30 %,False,False,bands,1.0,1,,,0.66
+hard constraint,shaft_half_height,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,lift cut to half height,False,False,constraints bands,1.0,1,,,0.64
+hard constraint,out_of_envelope,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,layout moved out of the envelope,False,False,constraints,1.0,0,,,0.67
+brief,door_slide,hotel_floor,dual,1,2,bench/paper/placements/dual/hotel_floor/seed1_opt2.json,room_07 slid to a 550 mm run on corridor_0 (< 1100),False,False,doors,1.0,0,,,0.64
