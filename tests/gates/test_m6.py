@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M6 gate (research track; allowed to fail, outcome recorded in docs/PLAN.md §5).
 
 Model A: learned move scorers inside beam search at width 8 — a linear scorer and a graph neural

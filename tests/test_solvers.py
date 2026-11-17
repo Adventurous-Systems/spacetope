@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Solver-level regressions from the 2026-09-13 review: doors survive re-dimensioning (#5) and the
 CP-SAT touch literal measures the whole overlap (#6)."""
 import pytest

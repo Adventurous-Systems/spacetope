@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Adapter for topologicpy's TGraph: the only module in spacetope that imports it (PLAN M9).
 
 TGraph builds the same graphs as `topologicpy.Graph` from a built complex several times faster and hands back

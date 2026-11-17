@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E10a/E10c from the recorded run, no regeneration: do the eight scores tell a generator's K
 options apart (E10a), and how many room-to-room contacts nobody asked for does each generator
 leave (E10c)?

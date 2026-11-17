@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Graph payloads for the viewer and for persistence: names, kinds, coordinates, index-pair edges."""
 from __future__ import annotations
 

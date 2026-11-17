@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M6 dataset: one JSON line per verified option. Enough to re-realise and re-verify every row
 from stored coordinates (integrity), and to train proposal models on brief graph -> relations."""
 from __future__ import annotations

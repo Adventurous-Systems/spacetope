@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Rectangular-dual generator (PLAN M12, design note B, prototype docs/experiments/2026-09-20_dual_proto.py).
 
 Starts from the wish graph instead of from geometry:

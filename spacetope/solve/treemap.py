@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Baseline: integer slicing-tree treemap. Areas proportional to w*l, exact tiling by construction.
 Ignores adjacency and dimension bands; exists to give an always-valid comparison point and a seed."""
 from __future__ import annotations

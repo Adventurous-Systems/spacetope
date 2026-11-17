@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M11 gate: cross-level alignment as a soft term in CP-SAT (design note A)."""
 import pytest
 

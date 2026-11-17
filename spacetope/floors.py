@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M8: how many floors does a brief need?
 
 Three stages, cheapest first (docs/2026-09-13_M7_vertical_circulation_plan.md §7):

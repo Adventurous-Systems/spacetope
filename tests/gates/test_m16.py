@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M16 gate: the sequence-pair encoding (design note §D), and the measured reason its generator is not registered.
 
 What is delivered and tested here: the encoding, an O(n log n) packer, and an annealer that solves small

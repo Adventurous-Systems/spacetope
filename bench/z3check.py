@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Z3 cross-check of the relational model (PLAN M13, design note C). Development tool, not part of the package.
 
 A second encoding of "which wall of a touches which wall of b", written from the model's definition rather than

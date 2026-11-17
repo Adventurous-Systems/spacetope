@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M10 gate: measured engine fixes. CP-SAT budget rule, frontage cut, pure pre-verify, build only what is shown."""
 import pytest
 

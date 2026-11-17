@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E5: report the Z3 cross-check counts that `gate_m13` asserts but does not print.
 
 The gate proves the two encodings enumerate the same set of required-touch assignments and that a

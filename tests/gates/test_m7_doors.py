@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.4 gate: doors where access is needed (plan §3.5, §6 M7.4)."""
 from collections import Counter
 

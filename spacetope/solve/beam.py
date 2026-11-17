@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Generator v1: beam search over incremental wall-to-wall attachment (single level, boxes only).
 
 State = placement of a prefix of the spaces. Move = attach the next space to a free wall segment of a

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Which geometry kernel topologicpy is running on, and the version pinned for each (STATUS §2.6).
 
 topologicpy 0.9.71 picks PythonOCC when `OCC` imports and falls back to topologic_core; the environment variable

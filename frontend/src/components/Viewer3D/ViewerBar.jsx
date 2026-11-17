@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import useAppStore from '../../stores/appStore';
 import useViewerStore from '../../stores/viewerStore';
 import './ViewerBar.css';

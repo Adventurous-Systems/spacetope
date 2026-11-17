@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M2 gate: thresholds on the scoreboard for the beam generator and the treemap baseline."""
 import json
 from pathlib import Path

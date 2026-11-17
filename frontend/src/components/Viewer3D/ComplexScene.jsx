@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import { useEffect, useMemo } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Center, Line, useGLTF } from '@react-three/drei';

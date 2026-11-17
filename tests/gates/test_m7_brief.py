@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.1 gate: compact circulation briefs expand deterministically; each validation rule yields its message;
 the API rejects invalid briefs with 422 and returns the expanded form for valid ones."""
 import copy

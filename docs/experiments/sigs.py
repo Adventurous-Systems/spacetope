@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import inspect, importlib
 targets = {
  "Cell": ["Box","Prism","ByFaces","ByWires","ByThickenedFace","ByShell","Volume","Cylinder","ByThickenedShell"],

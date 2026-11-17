@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """spacetope CLI. M1: realise a placement, verify, score, render."""
 from __future__ import annotations
 

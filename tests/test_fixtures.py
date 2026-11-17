@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Every brief in fixtures/ loads, validates and expands; the UI lists them all through /api/fixtures."""
 from pathlib import Path
 

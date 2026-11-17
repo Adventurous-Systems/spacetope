@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.0: a stair and a lift as single cells through three floors (spike 2026-09-13, plan §2.1)."""
 import pytest
 from topologicpy.CellComplex import CellComplex

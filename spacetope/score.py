@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Metrics for ranking options (docs/ALGORITHM_SURVEY.md §H). v0: four metrics + stacking placeholder."""
 from __future__ import annotations
 

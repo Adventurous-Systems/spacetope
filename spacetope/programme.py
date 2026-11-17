@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Brief programmes: a family of buildings one can draw briefs from (PLAN M17).
 
 A fixture is one building. A programme is the kind of building: "a secondary school has eighteen to

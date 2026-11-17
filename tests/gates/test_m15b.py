@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M15b gate: chained (L, U) corridors. A level's spine may be several boxes; a room reaches it by a door to
 whichever segment it touches, so contacts to the spine name are dropped with a warning (PLAN §6, option a)."""
 import pathlib

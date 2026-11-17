@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import json, sys
 import topologicpy; print("VERSION", topologicpy.__version__, topologicpy.__file__)
 from topologicpy.Vertex import Vertex

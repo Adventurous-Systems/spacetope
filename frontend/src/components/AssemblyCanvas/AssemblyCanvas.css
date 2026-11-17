@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* SPDX-FileCopyrightText: 2026 Adventurous Systems */
+
 .assembly-canvas { position: absolute; inset: 0; }
 .assembly-canvas__flow { position: absolute; inset: 0; z-index: 1; }
 .assembly-canvas__flow--transparent .react-flow, .assembly-canvas__flow--transparent .react-flow__pane { background: transparent !important; }

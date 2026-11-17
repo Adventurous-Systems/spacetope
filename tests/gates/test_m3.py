@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M3 gate: two-level fixture with a stair and a lift as shafts (migrated to the M7 circulation form on 2026-09-13).
 Vertical connectivity through shafts only; envelope; stacking."""
 import networkx as nx

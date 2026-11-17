@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M5 gate: API contract, GLB node naming, export round trip."""
 import json
 from pathlib import Path

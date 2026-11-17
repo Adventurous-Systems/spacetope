@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import { create } from 'zustand';
 
 /** fetch JSON; on failure the error carries the HTTP status and any validation problems from the API. */

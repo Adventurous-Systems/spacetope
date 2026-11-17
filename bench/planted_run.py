@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E9: planted-brief recovery. One factor at a time around a base, 20 seeds per point.
 
 For every (sweep point, seed): plant the brief, run each generator at the bench budgets, and record

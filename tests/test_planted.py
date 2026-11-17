@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E9 sanity gate: every planted placement passes all nine checks — a failure here is a bug in planted.py —
 and the planted topology class is computable."""
 import pytest

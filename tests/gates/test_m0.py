@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M0 gate: pins, brief round trip, assembly validation, relation signature."""
 import json
 from importlib.metadata import version

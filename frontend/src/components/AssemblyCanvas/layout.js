@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 /** Project the realised graph (3D coords in metres) onto the xyflow plane.
  * x -> x, y -> -y (screen down); each level gets its own panel to the right of the previous one.
  * Shafts (stairs, lifts with `serves`) are drawn once, in the panel of their first level, with edges to every

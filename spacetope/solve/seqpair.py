@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Sequence-pair search with simulated annealing (PLAN M16, design note §D).
 
 An arrangement is written as two orderings of the spaces. A space before another in *both* orderings is to its

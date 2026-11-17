@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import { memo } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { PROGRAM_COLOURS } from '../Viewer3D/colours';

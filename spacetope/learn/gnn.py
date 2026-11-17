@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Model A' (M6): a graph neural network move scorer (PyTorch Geometric).
 
 Each candidate beam state becomes a graph over ALL spaces of the level being assembled:

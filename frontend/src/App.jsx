@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import BriefEditor from './components/BriefEditor/BriefEditor';
 import AssemblyCanvas from './components/AssemblyCanvas/AssemblyCanvas';
 import OptionsGallery from './components/OptionsGallery/OptionsGallery';

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M18: a declared height is normally a request the level height may override, sometimes a minimum to
 clear, and never below `MIN_HEIGHT_M`. A space whose minimum spans more than one level is named as
 unplaceable rather than built one storey tall."""

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Planted briefs (E9): build a placement first, then write it back as a brief, so at least one exact
 solution exists by construction. Two families:
 

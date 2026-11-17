@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M4 gate: CP-SAT exact engine on the fixtures; infeasibility reported; beam comparison."""
 import networkx as nx
 import pytest

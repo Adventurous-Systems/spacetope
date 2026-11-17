@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M9 gate: topologicpy's TGraph on the pinned version (adapter), topology-distinct counts, PyG export."""
 import csv
 import time

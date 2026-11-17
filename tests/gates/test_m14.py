@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M14 gate: topologicpy >= 0.9.68 features. TPY one-file persistence and vertical-route redundancy.
 The pin bump itself is gated by every earlier gate module staying green on the new version."""
 import importlib.metadata as md

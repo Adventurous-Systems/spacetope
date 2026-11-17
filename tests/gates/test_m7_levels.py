@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.2 gate: the beam generator on shaft briefs (plan §6, M7.2)."""
 import pytest
 

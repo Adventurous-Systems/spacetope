@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Prototype of docs/2026-09-14_STRETCH_GOALS_DESIGN.md §B.3–B.5: wish graph -> PTP graph -> RELs by CP-SAT -> wall
 segments -> integer dimensioning. Pure networkx + ortools; verification by spacetope.verify at the end."""
 from __future__ import annotations

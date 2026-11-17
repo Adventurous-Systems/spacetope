@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.3 gate: the CP-SAT engine on shaft briefs (plan §6, M7.3). Same structural checks as M7.2."""
 import pytest
 

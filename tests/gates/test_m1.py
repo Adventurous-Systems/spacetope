@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M1 gate: realise, verify (with named failures), score, persistence, viewer."""
 import json
 import os

@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* SPDX-FileCopyrightText: 2026 Adventurous Systems */
+
 .viewerbar { position: absolute; bottom: 12px; right: 12px; z-index: 10; display: flex; align-items: center; gap: 8px;
              padding: 6px 10px; border: 1px solid #2a2a4a; border-radius: 6px; background: rgba(15, 15, 30, 0.9); }
 .viewerbar__label { font-size: 10px; font-weight: 700; color: #e94560; }

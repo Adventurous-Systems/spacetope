@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Generator registry: name -> callable(brief, params, seed) -> list[placement]."""
 from .beam import BeamParams, beam_search
 from .multilevel import beam_multilevel

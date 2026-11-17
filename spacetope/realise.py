@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """AssemblyGraph intent + Placement coordinates -> topologicpy CellComplex with dictionaries."""
 from __future__ import annotations
 

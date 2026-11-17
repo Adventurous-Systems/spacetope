@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Collect distinct rectangular-dual options per brief across triangulation seeds, verified by spacetope.verify."""
 import json, sys, time
 # run from the repo root with the project venv: .venv/bin/python docs/experiments/2026-09-20_dual_collect.py fixtures/eight_rooms_corridor.yaml

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E8 ablation flags: beam without re-dimensioning, CP-SAT without the beam warm start.
 
 Both already exist as parameters; these tests pin that each flag changes behaviour and the default does not.

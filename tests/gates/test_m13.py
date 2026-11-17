@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M13 gate: Z3 cross-check of the relational model (design note C). Needs the dev dependency z3-solver."""
 import pytest
 

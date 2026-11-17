@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """GLB with one named node per cell (`cell_{i}`, i in Topology.Cells order) and one per door (`door_{j}`).
 
 Doors are openings, not slabs: each cell is built face by face and the door rectangles on its walls are cut

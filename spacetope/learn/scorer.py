@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Model A (M6): a learned linear move scorer for beam search, trained by pairwise ranking.
 
 Teacher: the hand-weighted beam at a wide beam width. For each step we keep the teacher's whole

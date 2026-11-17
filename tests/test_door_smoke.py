@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.0: doors as apertures on shared faces, including per-floor pieces of shaft walls (spike 2026-09-13, plan §2.2)."""
 import networkx as nx
 import pytest

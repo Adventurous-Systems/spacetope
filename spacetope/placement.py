@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """A placement assigns an integer-mm Box to every space. Intent can be derived from it."""
 from __future__ import annotations
 

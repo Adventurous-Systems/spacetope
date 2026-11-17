@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import { Suspense, useCallback, useMemo } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GizmoHelper, GizmoViewport, OrbitControls } from '@react-three/drei';

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Exact engine: CP-SAT relational model (Wu et al. 2018 style) on the integer-mm grid.
 
 Variables per space: x, y, w, l (bands, optional 90-degree rotation); z fixed by level assignment.

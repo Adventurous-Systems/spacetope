@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { ReactFlow, Controls, MiniMap, Background, BackgroundVariant, useReactFlow, useNodesInitialized } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';

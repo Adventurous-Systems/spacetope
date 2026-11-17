@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """spacetope API: brief -> generate (job) -> options (scores, graph, GLB per cell) -> select (export).
 Geometry work runs in a thread (topologicpy holds the GIL but must not block the event loop)."""
 from __future__ import annotations

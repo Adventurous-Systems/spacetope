@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Contract with topologicpy: the two-box facts in docs/TOPOLOGICPY_NOTES.md §3.
 If any of these change after a version bump, update the notes, then the rules, never just the assertion."""
 import pytest

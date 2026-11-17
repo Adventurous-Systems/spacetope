@@ -1,0 +1,36 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+#
+# The direct dependencies of spacetope, pinned to the versions the paper runs used
+# (bench/paper/machine.json). Python 3.11 on Apple Silicon; topologic_core ships no
+# macOS x86_64 wheel. pyproject.toml carries the looser ranges and stays the source of
+# truth for what spacetope needs; this file records what it was run with.
+#
+#   python -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/pip install -e . --no-deps
+
+# runtime
+topologicpy==0.9.71
+topologic_core==8.0.0
+networkx==3.6.1
+ortools==9.15.6755
+shapely==2.1.2
+scipy==1.17.1
+numpy==2.4.6
+pyyaml==6.0.3
+plotly==7.0.0
+trimesh==5.1.0
+
+# web backend (pyproject extra "web")
+fastapi==0.141.1
+uvicorn==0.52.4
+
+# tests and benches (pyproject extra "dev")
+pytest==9.1.1
+httpx==0.28.1
+squarify==0.4.5
+z3-solver==5.1.0.0
+
+# Optional, the parked M6 learning track only (spacetope/learn); not needed for any gate
+# that is green or for the paper runs:
+# torch==2.14.0
+# torch-geometric==2.8.0.post1

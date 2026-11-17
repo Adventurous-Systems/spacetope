@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Pilot validation: fault injection (mutations) and metamorphic invariance on real SpaceTope options.
 Run with cwd = repo root:  .venv/bin/python ../pilot_validation.py out.json"""
 import json

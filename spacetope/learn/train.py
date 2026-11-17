@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Train Model A: python -m spacetope.learn.train [--briefs 40] [--width 48] [--out spacetope/learn/weights.json]
 
 Training briefs are single-level synthetic briefs from seeds disjoint from the held-out set.

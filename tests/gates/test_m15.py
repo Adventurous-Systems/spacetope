@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M15a gate: the beam on large, corridor-tight briefs (tight-corridor mode, chains of room partners in one run)."""
 import random
 

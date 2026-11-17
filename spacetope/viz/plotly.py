@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Quick-look Plotly figure: cells coloured by program + realised graph overlay. No network calls."""
 from __future__ import annotations
 

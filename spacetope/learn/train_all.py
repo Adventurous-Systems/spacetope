@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Train both learned move scorers on the same teacher data (single- and multi-level briefs).
 
 python -m spacetope.learn.train_all [--single 30] [--multi 20] [--max-pool 80]

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E14: CP-SAT deterministic mode — one worker, deterministic-time budgets, byte-identical runs."""
 from spacetope.brief import load
 from spacetope.circulation import prepare

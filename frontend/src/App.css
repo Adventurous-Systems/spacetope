@@ -1,3 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* SPDX-FileCopyrightText: 2026 Adventurous Systems */
+
 :root { color-scheme: dark; --bg: #0f0f1e; --panel: #16213e; --line: #2a2a4a; --text: #e0e0e0; --muted: #888; --accent: #e94560; --teal: #4ecdc4; }
 * { box-sizing: border-box; }
 html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(--text); font: 13px/1.4 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; }

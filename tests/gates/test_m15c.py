@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M15c gate: no generator leaves a gap to close.
 
 M15c planned a pass that slides rooms together. Measured first (`bench/dead_space.py`): the beam, the exact engine

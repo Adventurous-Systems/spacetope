@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Levels are emergent z-bands, but generators need a working assignment of spaces to levels.
 Rules: explicit `wishes.level` wins; cores/corridors are dealt round-robin; rooms follow their required
 contacts; the rest balance floor area. Level height = brief.level_height or the tallest space."""

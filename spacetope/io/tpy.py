@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """One-file persistence through topologicpy's native TPY archive (PLAN M14; needs topologicpy >= 0.9.68).
 
 `docs/TOPOLOGICPY_NOTES.md` §13: a TPY round trip keeps cell dictionaries and face apertures with their

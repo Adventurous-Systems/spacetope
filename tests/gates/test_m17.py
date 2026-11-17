@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M17 gate: brief programmes and the L0 dataset.
 
 A programme describes a kind of building; `sample` draws a brief from it. The gate asks three things of every

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E1/E1b: fault injection and metamorphic invariance on saved placements (the generalised pilot).
 
 Reads the placements that `bench.py --save-placements` wrote, applies one fault of each kind and every

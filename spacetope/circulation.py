@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7: expand a brief's compact circulation section into concrete spaces, and validate briefs before generation.
 
     corridor:  {w, l, segments?}              -> corridor_<k> on every level, or a chain corridor_<k>_1..N

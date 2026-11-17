@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """OBJ and JSON export of a realised cell complex, taken from topologic itself.
 
 Both formats come from `Topology.Geometry` of every cell of the complex, merged into one vertex table

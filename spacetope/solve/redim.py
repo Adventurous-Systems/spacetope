@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Relation-preserving re-dimensioning with CP-SAT: keep every realised contact and every
 separation, move sizes inside their bands to reduce dead space and deviation. Integer mm throughout,
 so contacts stay exact. Returns None when infeasible or the solver times out."""

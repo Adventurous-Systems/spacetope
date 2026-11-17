@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 import pytest
 
 from spacetope.solve.grid import Box, any_intersection, bounds, contact_area, intersects, overlap_len, touches

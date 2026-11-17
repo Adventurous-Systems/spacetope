@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Cores-first multi-level assembly (MANSION / Rodrigues discipline).
 
 Shaft briefs (M7): each stair or lift is one tall box, placed once while assembling its first served level

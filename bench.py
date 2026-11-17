@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Scoreboard: run every registered generator on every fixture over fixed seeds.
 
 Usage: python bench.py [--out bench/scoreboard.csv] [--fixtures three_rooms ... | all]

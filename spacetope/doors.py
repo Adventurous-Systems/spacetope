@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7 doors. This first part decides which pairs need a door and how much shared wall that takes, so the
 generators can leave room for doors. Door planning, realisation and verification follow in step M7.4.
 Plan: docs/2026-09-13_M7_vertical_circulation_plan.md §3.5 (rules D8, sizes D9)."""

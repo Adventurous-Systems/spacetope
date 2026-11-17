@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Integer-millimetre boxes and interval tests. Pure Python, no topologicpy."""
 from __future__ import annotations
 

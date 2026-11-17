@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M18 gate: the verifier tests the brief, not the placement against itself.
 
 Two new checks (the eighth and ninth): `required_contacts` takes its expectation from the brief's required

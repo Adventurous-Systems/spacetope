@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 /** Colours for the 3D scene and the graph. Programs keep one hue; a highlighted space turns yellow. */
 export const PROGRAM_COLOURS = {
   room: '#6baed6',

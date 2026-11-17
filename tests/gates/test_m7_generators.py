@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """M7.5 gate: generators declare what they support; treemap refuses multi-level briefs with a plain message."""
 import pytest
 

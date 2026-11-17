@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """E10a pilot: do the eight scores tell a generator's K options apart? Also counts unwished contacts (E10c).
 Run with cwd = repo root:  .venv/bin/python ../discrimination.py out.csv"""
 import csv

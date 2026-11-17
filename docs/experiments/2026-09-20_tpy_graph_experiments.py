@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """[RUN] experiments: which topologicpy 0.9.57 graph algorithms work on spacetope's realised complexes and graphs."""
 import json, time, sys, os, traceback
 import networkx as nx

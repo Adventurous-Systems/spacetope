@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Synthetic briefs for training and held-out evaluation (M6), in the M7 circulation form.
 
 Deterministic by seed. Each brief has 8-30 spaces after expansion and 1-3 levels. Every level gets a

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-FileCopyrightText: 2026 Adventurous Systems
+
 """Where does a layout's empty ground go? (PLAN M15c). Development tool, not part of the package.
 
 M15c planned a gap-closing pass, on the premise that "rooms attached at alignment offsets leave slivers of dead
