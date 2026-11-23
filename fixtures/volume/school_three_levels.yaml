@@ -1,0 +1,648 @@
+name: school_three_levels
+spaces:
+- name: entrance_hall
+  w: 8.0
+  l: 6.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: reception
+  w: 4.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: head_office
+  w: 4.0
+  l: 3.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  tags:
+  - quiet
+- name: admin_office
+  w: 5.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: staff_room
+  w: 7.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: sick_room
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - quiet
+- name: library
+  w: 10.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  tags:
+  - quiet
+- name: canteen
+  w: 12.0
+  l: 8.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  tags:
+  - noisy
+- name: kitchen
+  w: 6.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: kitchen_store
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: class_01
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_02
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_03
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_04
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_05
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_06
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: wc_boys_0
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: wc_girls_0
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: wc_staff_0
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: store_0
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: cleaners_0
+  w: 2.0
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: class_07
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_08
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_09
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_10
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_11
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_12
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_13
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_14
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_15
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_16
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: science_lab_1
+  w: 10.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: science_lab_2
+  w: 10.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: prep_room
+  w: 4.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: wc_boys_1
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: wc_girls_1
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: wc_staff_1
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: store_1
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+- name: cleaners_1
+  w: 2.0
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: class_17
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_18
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_19
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_20
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_21
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_22
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_23
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: class_24
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: art_room
+  w: 10.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: art_store
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: music_room
+  w: 9.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  tags:
+  - noisy
+- name: practice_room
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  tags:
+  - noisy
+- name: it_lab
+  w: 9.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: server_room
+  w: 2.5
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: wc_boys_2
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  tags:
+  - wet
+- name: wc_girls_2
+  w: 4.0
+  l: 4.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  tags:
+  - wet
+- name: wc_staff_2
+  w: 2.5
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  tags:
+  - wet
+- name: store_2
+  w: 3.0
+  l: 3.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+- name: cleaners_2
+  w: 2.0
+  l: 2.5
+  h: 3.5
+  program: room
+  wishes:
+    level: 2
+  tags:
+  - wet
+contacts:
+- - spine
+  - entrance_hall
+- - spine
+  - reception
+- - entrance_hall
+  - reception
+- - spine
+  - head_office
+- - spine
+  - admin_office
+- - spine
+  - staff_room
+- - spine
+  - sick_room
+- - spine
+  - library
+- - spine
+  - canteen
+- - spine
+  - kitchen
+- - canteen
+  - kitchen
+- - spine
+  - kitchen_store
+- - kitchen
+  - kitchen_store
+- - spine
+  - class_01
+- - spine
+  - class_02
+- - spine
+  - class_03
+- - spine
+  - class_04
+- - spine
+  - class_05
+- - spine
+  - class_06
+- - spine
+  - wc_boys_0
+- - spine
+  - wc_girls_0
+- - spine
+  - wc_staff_0
+- - spine
+  - store_0
+- - spine
+  - cleaners_0
+- - spine
+  - class_07
+- - spine
+  - class_08
+- - spine
+  - class_09
+- - spine
+  - class_10
+- - spine
+  - class_11
+- - spine
+  - class_12
+- - spine
+  - class_13
+- - spine
+  - class_14
+- - spine
+  - class_15
+- - spine
+  - class_16
+- - spine
+  - science_lab_1
+- - spine
+  - science_lab_2
+- - spine
+  - prep_room
+- - science_lab_1
+  - prep_room
+- - prep_room
+  - science_lab_2
+- - spine
+  - wc_boys_1
+- - spine
+  - wc_girls_1
+- - spine
+  - wc_staff_1
+- - spine
+  - store_1
+- - spine
+  - cleaners_1
+- - spine
+  - class_17
+- - spine
+  - class_18
+- - spine
+  - class_19
+- - spine
+  - class_20
+- - spine
+  - class_21
+- - spine
+  - class_22
+- - spine
+  - class_23
+- - spine
+  - class_24
+- - spine
+  - art_room
+- - spine
+  - art_store
+- - art_room
+  - art_store
+- - spine
+  - music_room
+- - spine
+  - practice_room
+- - music_room
+  - practice_room
+- - spine
+  - it_lab
+- - spine
+  - server_room
+- - it_lab
+  - server_room
+- - spine
+  - wc_boys_2
+- - spine
+  - wc_girls_2
+- - spine
+  - wc_staff_2
+- - spine
+  - store_2
+- - spine
+  - cleaners_2
+levels: 3
+level_height: 3.5
+affinities:
+- tag: wet
+  rule: stack
+  strength: should
+- tag: wet
+  rule: cluster
+  strength: should
+- tags:
+  - quiet
+  - noisy
+  rule: apart
+  strength: must
+paths:
+- name: spine
+  width: 2.4
+  points:
+  - - 0.5
+    - 10.9
+  - - 53.2
+    - 10.9
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 53.7
+      - 0
+    - - 53.7
+      - 21.8
+    - - 0
+      - 21.8
+    levels:
+    - 0
+    - 2

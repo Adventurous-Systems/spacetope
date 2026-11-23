@@ -1,0 +1,282 @@
+name: office_30
+spaces:
+- name: office_a1
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a2
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a3
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a4
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a5
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a6
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a7
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_a8
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: meeting_a
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: kitchen_a
+  w: 3.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: wc_a1
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: wc_a2
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: storage_a
+  w: 2.0
+  l: 2.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: print_a
+  w: 2.0
+  l: 2.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: a
+- name: office_b1
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b2
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b3
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b4
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b5
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b6
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b7
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: office_b8
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: meeting_b
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: kitchen_b
+  w: 3.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: wc_b1
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: wc_b2
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: storage_b
+  w: 2.0
+  l: 2.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+- name: print_b
+  w: 2.0
+  l: 2.0
+  h: 3.0
+  program: room
+  wishes:
+    zone: b
+contacts:
+- - spine
+  - office_a1
+- - spine
+  - office_a2
+- - spine
+  - office_a3
+- - spine
+  - office_a4
+- - spine
+  - office_a5
+- - spine
+  - office_a6
+- - spine
+  - office_a7
+- - spine
+  - office_a8
+- - spine
+  - meeting_a
+- - spine
+  - kitchen_a
+- - spine
+  - wc_a1
+- - spine
+  - wc_a2
+- - spine
+  - storage_a
+- - spine
+  - print_a
+- - spine
+  - office_b1
+- - spine
+  - office_b2
+- - spine
+  - office_b3
+- - spine
+  - office_b4
+- - spine
+  - office_b5
+- - spine
+  - office_b6
+- - spine
+  - office_b7
+- - spine
+  - office_b8
+- - spine
+  - meeting_b
+- - spine
+  - kitchen_b
+- - spine
+  - wc_b1
+- - spine
+  - wc_b2
+- - spine
+  - storage_b
+- - spine
+  - print_b
+level_height: 3.0
+paths:
+- name: spine
+  width: 1.8
+  points:
+  - - 0.5
+    - 4.42
+  - - 20.88
+    - 4.42
+  - - 20.88
+    - 13.27
+  - - 0.5
+    - 13.27
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 25.4
+      - 0
+    - - 25.4
+      - 17.8
+    - - 0
+      - 17.8
+    levels:
+    - 0
+    - 0

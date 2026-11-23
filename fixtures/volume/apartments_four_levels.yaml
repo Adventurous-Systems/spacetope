@@ -1,0 +1,127 @@
+name: apartments_four_levels
+spaces:
+- name: flat_a0
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  tags:
+  - wet
+- name: flat_b0
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+  tags:
+  - wet
+- name: flat_a1
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  tags:
+  - wet
+- name: flat_b1
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  tags:
+  - wet
+- name: flat_a2
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  tags:
+  - wet
+- name: flat_b2
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+  tags:
+  - wet
+- name: flat_a3
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 3
+    exterior: true
+  tags:
+  - wet
+- name: flat_b3
+  w: 7.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 3
+    exterior: true
+  tags:
+  - wet
+contacts:
+- - spine
+  - flat_a0
+- - spine
+  - flat_b0
+- - spine
+  - flat_a1
+- - spine
+  - flat_b1
+- - spine
+  - flat_a2
+- - spine
+  - flat_b2
+- - spine
+  - flat_a3
+- - spine
+  - flat_b3
+levels: 4
+level_height: 3.0
+affinities:
+- tag: wet
+  rule: stack
+  strength: should
+paths:
+- name: spine
+  width: 1.8
+  points:
+  - - 0.5
+    - 5.0
+  - - 12.3
+    - 5.0
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 12.8
+      - 0
+    - - 12.8
+      - 10.0
+    - - 0
+      - 10.0
+    levels:
+    - 0
+    - 3

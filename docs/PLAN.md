@@ -683,7 +683,7 @@ not built, and the site outline here is the first polygon the engine accepts (`s
 | M26 | Five tessellations and one way into topologic (`tessellate.py`, `cells.py`) | **done 2026-11-23**, gate 24 green |
 | M27 | Field briefs: site, paths, relaxation, stack-up, options per aspect (`field.py`) | **done 2026-11-23**, gate 10 green |
 | M28 | Live canvas: field mode, `/api/field/solve`, `/api/field/options` | **done 2026-11-23**, `e2e/tests/field.spec.js` 4 green |
-| M29 | Bodies on springs in a three-dimensional void; storey cells, and free cells as a sketch (`volume.py`) | **done 2026-11-23**, gate 16 green, `e2e/tests/volume.spec.js` 4 green |
+| M29 | Bodies on springs in a three-dimensional void; storey cells, and free cells as a sketch (`volume.py`) | **done 2026-11-23**, gate 19 green, `e2e/tests/volume.spec.js` 4 green |
 
 #### M25 — One measure for boxes and cells
 
@@ -837,6 +837,16 @@ storeys and nothing above overlaps it; same seed, same contraption; an inflated 
 second; a moved body is pinned on its storey; wall-node springs put a body east of, south of and over
 another; a box option yields its springs; with a path the storeys' rooms line it and the stair joins them;
 three kinds verify in the kernel; the sketch fills the void and every piece is a cell.
+
+**Every box brief as a volume brief.** `volume.from_brief` (and `spacetope volume BOX_BRIEF --write F`) keeps
+the rooms with their sizes, tags, affinities and level wishes, turns the corridor into one path on every
+storey (a spine down the long middle, or a U where the rooms want more frontage than a spine has), turns a
+contact with the corridor into a contact with that path, and drops stairs and lifts, since a path on several
+levels brings its own stair. The void takes the envelope's proportions but is sized so the rooms fill 80 % of
+each storey beside the path: the envelopes of the box briefs are loose, and filling one as written made rooms
+up to eight times the area asked. All 20 briefs (16 fixtures and the four site briefs) are on file in
+`fixtures/volume/`. Measured: 14 of 20 pass every check at seed 0 with `power`; over three kinds and three
+seeds 18 of 20 have a passing solve; the two 58-room three-level schools stop at 95 % of rooms on the path.
 
 **Canvas.** A `volume` mode: the void's storeys in outline, lens bodies, springs, and the storey cells
 extruded in the browser from the solve (no kernel). A body is selected by a click, moved with its handle

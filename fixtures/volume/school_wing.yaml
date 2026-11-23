@@ -1,0 +1,125 @@
+name: school_wing
+spaces:
+- name: class_1
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_2
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: class_3
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: staff
+  w: 6.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: wc_0
+  w: 3.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 0
+- name: class_4
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_5
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: class_6
+  w: 8.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: library
+  w: 9.0
+  l: 7.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: wc_1
+  w: 3.0
+  l: 5.0
+  h: 3.5
+  program: room
+  wishes:
+    level: 1
+contacts:
+- - spine
+  - class_1
+- - spine
+  - class_2
+- - spine
+  - class_3
+- - spine
+  - staff
+- - spine
+  - wc_0
+- - spine
+  - class_4
+- - spine
+  - class_5
+- - spine
+  - class_6
+- - spine
+  - library
+- - spine
+  - wc_1
+levels: 2
+level_height: 3.5
+paths:
+- name: spine
+  width: 2.4
+  points:
+  - - 0.5
+    - 7.0
+  - - 24.3
+    - 7.0
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 24.8
+      - 0
+    - - 24.8
+      - 14.0
+    - - 0
+      - 14.0
+    levels:
+    - 0
+    - 1

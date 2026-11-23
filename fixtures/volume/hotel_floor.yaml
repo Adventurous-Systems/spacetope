@@ -1,0 +1,131 @@
+name: hotel_floor
+spaces:
+- name: room_01
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_02
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_03
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_04
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_05
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_06
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_07
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_08
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_09
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: room_10
+  w: 4.0
+  l: 6.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: lobby
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+- name: linen
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+contacts:
+- - spine
+  - room_01
+- - spine
+  - room_02
+- - spine
+  - room_03
+- - spine
+  - room_04
+- - spine
+  - room_05
+- - spine
+  - room_06
+- - spine
+  - room_07
+- - spine
+  - room_08
+- - spine
+  - room_09
+- - spine
+  - room_10
+- - spine
+  - lobby
+- - spine
+  - linen
+levels: 1
+level_height: 3.0
+paths:
+- name: spine
+  width: 1.8
+  points:
+  - - 0.5
+    - 6.25
+  - - 30.7
+    - 6.25
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 31.2
+      - 0
+    - - 31.2
+      - 12.5
+    - - 0
+      - 12.5
+    levels:
+    - 0
+    - 0

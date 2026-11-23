@@ -1,0 +1,103 @@
+name: eight_rooms_hard
+spaces:
+- name: office_a
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: office_b
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: office_c
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: office_d
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    exterior: true
+- name: meeting
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+- name: kitchen
+  w: 3.0
+  l: 3.0
+  h: 3.0
+  program: room
+- name: wc
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+- name: storage
+  w: 2.0
+  l: 2.0
+  h: 3.0
+  program: room
+contacts:
+- - spine
+  - office_a
+- - spine
+  - office_b
+- - spine
+  - office_c
+- - spine
+  - office_d
+- - spine
+  - meeting
+- - spine
+  - kitchen
+- - spine
+  - wc
+- - spine
+  - storage
+- - kitchen
+  - meeting
+level_height: 3.0
+affinities:
+- between:
+  - storage
+  - wc
+  kind: touch
+  strength: must
+- between:
+  - wc
+  - meeting
+  kind: apart
+  strength: must
+paths:
+- name: spine
+  width: 1.8
+  points:
+  - - 0.5
+    - 5.0
+  - - 12.7
+    - 5.0
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 13.2
+      - 0
+    - - 13.2
+      - 10.0
+    - - 0
+      - 10.0
+    levels:
+    - 0
+    - 0

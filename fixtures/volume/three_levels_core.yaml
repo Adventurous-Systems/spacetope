@@ -1,0 +1,123 @@
+name: three_levels_core
+spaces:
+- name: office_a
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: office_b
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: kitchen
+  w: 3.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+- name: wc_0
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 0
+- name: office_c
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: meeting
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 1
+- name: wc_1
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 1
+- name: studio
+  w: 6.0
+  l: 4.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 2
+    exterior: true
+- name: quiet
+  w: 2.5
+  l: 2.5
+  h: 3.0
+  program: room
+  wishes:
+    level: 2
+- name: wc_2
+  w: 2.0
+  l: 3.0
+  h: 3.0
+  program: room
+  wishes:
+    level: 2
+contacts:
+- - spine
+  - office_a
+- - spine
+  - office_b
+- - spine
+  - kitchen
+- - spine
+  - wc_0
+- - spine
+  - office_c
+- - spine
+  - meeting
+- - spine
+  - wc_1
+- - office_c
+  - meeting
+- - spine
+  - studio
+- - spine
+  - quiet
+- - spine
+  - wc_2
+levels: 3
+level_height: 3.0
+paths:
+- name: spine
+  width: 1.8
+  points:
+  - - 0.5
+    - 3.4
+  - - 8.9
+    - 3.4
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 9.4
+      - 0
+    - - 9.4
+      - 6.8
+    - - 0
+      - 6.8
+    levels:
+    - 0
+    - 2

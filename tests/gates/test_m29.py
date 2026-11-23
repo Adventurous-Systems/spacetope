@@ -161,3 +161,49 @@ def test_the_sketch_builds_free_cells(stepped, sweep):
     assert sk["faces"]["sloping"] > 0, "a sketch: walls slope, and the report says how many"
     cc, built = volume.realise_free(sk)
     assert len(built) == len(sk["pieces"]) and len(Topology.Cells(cc)) == len(built)
+
+
+# ----------------------------------------------------------------------------- every box brief as a volume brief
+
+def _box_briefs(fixtures_dir):
+    return sorted(list(fixtures_dir.glob("*.yaml")) + list((fixtures_dir / "site").glob("*.yaml")))
+
+
+def _volume_name(p) -> str:
+    return ("site_" if p.parent.name == "site" else "") + p.stem
+
+
+def test_every_box_brief_has_its_volume_brief_on_file(fixtures_dir):
+    for p in _box_briefs(fixtures_dir):
+        made = volume.from_brief(load(p)).to_dict()
+        made["name"] = _volume_name(p)
+        on_file = load(fixtures_dir / "volume" / f"{_volume_name(p)}.yaml").to_dict()
+        assert on_file == Brief.from_dict(made).to_dict(), f"{p.name}: rerun `spacetope volume {p} --write fixtures/volume/{_volume_name(p)}.yaml`"
+
+
+def test_a_converted_brief_keeps_rooms_levels_and_wishes(fixtures_dir):
+    box = load(fixtures_dir / "school_wing.yaml")
+    v = volume.from_brief(box)
+    rooms = [s for s in box.spaces if s.program == "room"]
+    assert [s.name for s in v.spaces] == [s.name for s in rooms] and all(s.program == "room" for s in v.spaces)
+    assert len(v.paths) == 1 and v.paths[0]["width"] == box.circulation["corridor"]["w"]
+    assert len(v.void["blocks"]) == 1 and v.void["blocks"][0]["levels"] == [0, box.levels - 1]
+    r = volume.solve(v, "power", 0)
+    assert all(r["room_levels"][s.name] == s.wishes["level"] for s in rooms), "a level written in the brief is kept"
+    assert 1.1 < r["fill"] < 1.45, "the void is sized to the rooms, so filling it does not bloat them"
+    assert volume.from_brief(v) is v, "a brief that already has a void is left alone"
+
+
+def test_all_converted_briefs_float_and_most_pass(fixtures_dir):
+    solved, passing, short = 0, [], {}
+    for p in sorted((fixtures_dir / "volume").glob("*.yaml")):
+        r = volume.solve(load(p), "power", 0)
+        solved += 1
+        assert r["checks"]["complete"]["passed"] and r["checks"]["no_overlaps"]["passed"], (p.stem, r["checks"])
+        if r["ok"]:
+            passing.append(p.stem)
+        else:
+            short[p.stem] = r["scores"]["vertical"]
+    assert solved == 21
+    assert len(passing) >= 13, f"{len(passing)} of {solved} pass every check at seed 0 (measured 15 on 2026-11-23): {sorted(short)}"
+    assert all(v >= 0.85 for v in short.values()), short     # the rest have nearly every room on the path

@@ -43,7 +43,7 @@ the engine.
 | M26 | Five tessellations and one way into topologic (`tessellate.py`, `cells.py`) | done | 24 |
 | M27 | Field briefs: site outline, paths, relaxation, stack-up, options per aspect (`field.py`) | done | 10 |
 | M28 | Live field canvas and `/api/field/*` | done | 4 browser tests |
-| M29 | Bodies on springs in a 3D void: storey cells, free-cell sketch (`volume.py`), `volume` canvas mode | done | 16, and 4 browser tests |
+| M29 | Bodies on springs in a 3D void: storey cells, free-cell sketch (`volume.py`), `volume` canvas mode | done | 19, and 4 browser tests |
 
 **430 tests** collected in total, 176 of them fast (2026-11-15, after M21). Every gate was rerun green after M20; after M21 the fast suite and the M1, M5, M7, M10, M19, M20 and M21 gates were rerun green. All green as of 2026-10-04 on topologicpy 0.9.71; on 2026-11-15
 M19 added 66 (35 fast unit tests, 31 in the gate), and the fast suite and the M1, M3, M7, M8, M10, M11, M15 and M17
@@ -86,7 +86,9 @@ stacked blocks. Storeys emerge, each is cut into cells with the M26 tessellation
 room twice the storey height stands through two. A body can be dragged, sent up a storey or inflated, and the
 rest answer in about 0.2 s. On the stepped fixture 19 of 20 solves pass and no storey is asked more than 6 % over
 its ground. Free polyhedral cells from the same bodies are a sketch mode: real topologic cells, 39 % of faces
-sloping, not scored. `docs/PLAN.md` §4.11.
+sloping, not scored. Every existing box brief has a volume brief in `fixtures/volume/` (its corridor becomes a path,
+its envelope a void sized to the rooms): 18 of 20 have a passing solve, the two three-level schools reach 95 % of
+their rooms. `docs/PLAN.md` §4.11.
 
 2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
 drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is

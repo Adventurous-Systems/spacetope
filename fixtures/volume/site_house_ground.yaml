@@ -1,0 +1,101 @@
+name: site_house_ground
+spaces:
+- name: living
+  w: 5.0
+  l: 4.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: dining
+  w: 4.0
+  l: 3.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: kitchen
+  w: 3.5
+  l: 3.5
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: W
+    strength: should
+- name: study
+  w: 3.0
+  l: 3.0
+  h: 2.8
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: N
+    strength: should
+- name: utility
+  w: 2.0
+  l: 2.5
+  h: 2.8
+  program: room
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: wc
+  w: 1.5
+  l: 2.0
+  h: 2.8
+  program: room
+contacts:
+- - spine
+  - living
+- - spine
+  - dining
+- - spine
+  - kitchen
+- - spine
+  - study
+- - spine
+  - utility
+- - spine
+  - wc
+- - living
+  - dining
+- - kitchen
+  - dining
+- - kitchen
+  - utility
+levels: 1
+level_height: 2.8
+site:
+  north: 180
+  hemisphere: N
+paths:
+- name: spine
+  width: 1.5
+  points:
+  - - 0.5
+    - 4.35
+  - - 10.9
+    - 4.35
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 11.4
+      - 0
+    - - 11.4
+      - 8.7
+    - - 0
+      - 8.7
+    levels:
+    - 0
+    - 0

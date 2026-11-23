@@ -1,0 +1,97 @@
+name: gallery_rich
+spaces:
+- name: gallery_a
+  w: 6.0
+  l: 6.0
+  h: 4.0
+  program: room
+- name: gallery_b
+  w: 6.0
+  l: 6.0
+  h: 4.0
+  program: room
+- name: gallery_c
+  w: 5.0
+  l: 6.0
+  h: 4.0
+  program: room
+- name: gallery_d
+  w: 5.0
+  l: 6.0
+  h: 4.0
+  program: room
+- name: shop
+  w: 4.0
+  l: 4.0
+  h: 4.0
+  program: room
+  wishes:
+    exterior: true
+- name: cafe
+  w: 5.0
+  l: 4.0
+  h: 4.0
+  program: room
+  wishes:
+    exterior: true
+- name: wc
+  w: 2.5
+  l: 3.0
+  h: 4.0
+  program: room
+- name: store
+  w: 3.0
+  l: 3.0
+  h: 4.0
+  program: room
+contacts:
+- - spine
+  - gallery_a
+- - spine
+  - gallery_b
+- - spine
+  - gallery_c
+- - spine
+  - gallery_d
+- - spine
+  - shop
+- - spine
+  - cafe
+- - spine
+  - wc
+- - spine
+  - store
+- - gallery_a
+  - gallery_c
+- - gallery_b
+  - gallery_d
+- - gallery_c
+  - gallery_d
+- - shop
+  - cafe
+- - cafe
+  - store
+levels: 1
+level_height: 4.0
+paths:
+- name: spine
+  width: 3.0
+  points:
+  - - 0.5
+    - 7.45
+  - - 18.9
+    - 7.45
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 19.4
+      - 0
+    - - 19.4
+      - 14.9
+    - - 0
+      - 14.9
+    levels:
+    - 0
+    - 0

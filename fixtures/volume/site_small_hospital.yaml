@@ -1,0 +1,556 @@
+name: site_small_hospital
+spaces:
+- name: emergency_entrance
+  w: 7.0
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: emergency_reception
+  w: 4.0
+  l: 3.5
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: waiting
+  w: 8.0
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: triage
+  w: 4.0
+  l: 3.5
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: treatment_bay_1
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: treatment_bay_2
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: treatment_bay_3
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: treatment_bay_4
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: resus
+  w: 6.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: imaging
+  w: 7.0
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: xray
+  w: 6.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: imaging_control
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: laboratory
+  w: 7.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: S
+    strength: should
+- name: pharmacy
+  w: 6.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+- name: pharmacy_store
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: admin
+  w: 6.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: records
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: staff_room_0
+  w: 6.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+    exterior: true
+- name: wc_public_0
+  w: 3.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: wc_staff_0
+  w: 2.5
+  l: 2.5
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: clean_utility_0
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: dirty_utility_0
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  tags:
+  - wet
+- name: store_0
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 0
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: patient_room_01
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_02
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_03
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_04
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_05
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_06
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_07
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_08
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_09
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_10
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_11
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: patient_room_12
+  w: 4.5
+  l: 6.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: nurse_station
+  w: 6.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+- name: treatment_room
+  w: 5.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+- name: doctors_office
+  w: 4.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+- name: day_room
+  w: 7.0
+  l: 5.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+  affinities:
+  - facade: sun
+    strength: should
+- name: staff_room_1
+  w: 5.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+    exterior: true
+- name: wc_patients_1
+  w: 3.0
+  l: 4.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: wc_staff_1
+  w: 2.5
+  l: 2.5
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: clean_utility_1
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: dirty_utility_1
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  tags:
+  - wet
+- name: linen
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  affinities:
+  - facade: sun
+    strength: avoid
+- name: store_1
+  w: 3.0
+  l: 3.0
+  h: 3.6
+  program: room
+  wishes:
+    level: 1
+  affinities:
+  - facade: sun
+    strength: avoid
+contacts:
+- - spine
+  - emergency_entrance
+- - spine
+  - emergency_reception
+- - emergency_entrance
+  - emergency_reception
+- - spine
+  - waiting
+- - spine
+  - triage
+- - spine
+  - treatment_bay_1
+- - spine
+  - treatment_bay_2
+- - spine
+  - treatment_bay_3
+- - spine
+  - treatment_bay_4
+- - spine
+  - resus
+- - spine
+  - imaging
+- - spine
+  - xray
+- - imaging
+  - xray
+- - spine
+  - imaging_control
+- - xray
+  - imaging_control
+- - spine
+  - laboratory
+- - spine
+  - pharmacy
+- - spine
+  - pharmacy_store
+- - pharmacy
+  - pharmacy_store
+- - spine
+  - admin
+- - spine
+  - records
+- - admin
+  - records
+- - spine
+  - staff_room_0
+- - spine
+  - wc_public_0
+- - spine
+  - wc_staff_0
+- - spine
+  - clean_utility_0
+- - spine
+  - dirty_utility_0
+- - spine
+  - store_0
+- - spine
+  - patient_room_01
+- - spine
+  - patient_room_02
+- - spine
+  - patient_room_03
+- - spine
+  - patient_room_04
+- - spine
+  - patient_room_05
+- - spine
+  - patient_room_06
+- - spine
+  - patient_room_07
+- - spine
+  - patient_room_08
+- - spine
+  - patient_room_09
+- - spine
+  - patient_room_10
+- - spine
+  - patient_room_11
+- - spine
+  - patient_room_12
+- - spine
+  - nurse_station
+- - spine
+  - treatment_room
+- - spine
+  - doctors_office
+- - spine
+  - day_room
+- - spine
+  - staff_room_1
+- - spine
+  - wc_patients_1
+- - spine
+  - wc_staff_1
+- - spine
+  - clean_utility_1
+- - spine
+  - dirty_utility_1
+- - spine
+  - linen
+- - spine
+  - store_1
+levels: 2
+level_height: 3.6
+affinities:
+- tag: wet
+  rule: stack
+  strength: should
+- tag: wet
+  rule: cluster
+  strength: should
+site:
+  north: 180
+  hemisphere: S
+paths:
+- name: spine
+  width: 2.4
+  points:
+  - - 0.5
+    - 4.8
+  - - 36.5
+    - 4.8
+  - - 36.5
+    - 14.4
+  - - 0.5
+    - 14.4
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 41.6
+      - 0
+    - - 41.6
+      - 19.4
+    - - 0
+      - 19.4
+    levels:
+    - 0
+    - 1

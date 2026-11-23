@@ -1,0 +1,137 @@
+name: site_clinic
+spaces:
+- name: waiting
+  w: 6.0
+  l: 5.0
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: reception
+  w: 3.0
+  l: 3.0
+  h: 3.2
+  program: room
+- name: consult_1
+  w: 3.5
+  l: 3.0
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_2
+  w: 3.5
+  l: 3.0
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_3
+  w: 3.5
+  l: 3.0
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_4
+  w: 3.5
+  l: 3.0
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: treatment
+  w: 4.0
+  l: 3.5
+  h: 3.2
+  program: room
+  affinities:
+  - facade: N
+    strength: should
+- name: wc_public
+  w: 2.0
+  l: 2.5
+  h: 3.2
+  program: room
+- name: wc_staff
+  w: 2.0
+  l: 2.0
+  h: 3.2
+  program: room
+- name: store
+  w: 2.0
+  l: 2.0
+  h: 3.2
+  program: room
+  affinities:
+  - facade: S
+    strength: avoid
+contacts:
+- - spine
+  - waiting
+- - spine
+  - reception
+- - spine
+  - consult_1
+- - spine
+  - consult_2
+- - spine
+  - consult_3
+- - spine
+  - consult_4
+- - spine
+  - treatment
+- - spine
+  - wc_public
+- - spine
+  - wc_staff
+- - spine
+  - store
+- - reception
+  - waiting
+- - treatment
+  - consult_1
+- - waiting
+  - wc_public
+levels: 1
+level_height: 3.2
+site:
+  north: 30
+  hemisphere: N
+paths:
+- name: spine
+  width: 2.0
+  points:
+  - - 0.5
+    - 5.05
+  - - 16.3
+    - 5.05
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 16.8
+      - 0
+    - - 16.8
+      - 10.1
+    - - 0
+      - 10.1
+    levels:
+    - 0
+    - 0

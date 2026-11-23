@@ -54,6 +54,75 @@ def bodies(f: Field, scales: dict | None = None) -> tuple[list[Space], np.ndarra
     return rooms, asked, np.sqrt(asked * fill / math.pi), st, fill
 
 
+def from_brief(brief: Brief, cover: float = 0.8) -> Brief:
+    """A box brief as a volume brief. Rooms keep their sizes, tags, affinities and level wishes. The corridor, written
+    as a space or in the circulation section, becomes one path on every storey (a spine down the long middle, or a U
+    where the rooms want more frontage than a spine has), and a contact
+    with it a contact with that path; stairs and lifts go, because a path on several levels brings its own stair.
+    The void has the envelope's proportions where the brief has one, and in either case is sized so the rooms fill
+    `cover` of each storey beside the path."""
+    if brief.void:
+        return brief
+    rooms = [s for s in brief.spaces if s.program in ("room", "void")]
+    n = int(brief.levels or 1)
+    circ = (brief.circulation or {}).get("corridor") or {}
+    corridors = [s for s in brief.spaces if s.program == "corridor"]
+    width = float(circ.get("w") or max((min(s.w, s.l) for s in corridors), default=0.0))
+    area = sum(s.w * s.l for s in rooms) / n / cover          # ground a storey needs for its rooms
+    if brief.envelope:      # the envelope's proportions, no larger than the rooms need: a loose envelope would bloat them
+        W, L = float(brief.envelope["w"]), float(brief.envelope["l"])
+        long, short = max(W, L), min(W, L)
+        k = min(1.0, (width * long + math.sqrt((width * long) ** 2 + 4 * long * short * area)) / (2 * long * short))
+        W, L = round(W * k, 1), round(L * k, 1)
+    else:
+        length = max((max(s.w, s.l) for s in corridors), default=0.0)
+        W = max(length, math.sqrt(1.6 * area))
+        L = area / W + width
+        W, L = round(W, 1), round(L, 1)
+    d = brief.to_dict()
+    d.pop("circulation", None)
+    d.pop("envelope", None)
+    d.pop("expanded", None)
+    d["spaces"] = [s.to_dict() for s in rooms]
+    d["level_height"] = float(brief.level_height or max(s.h for s in rooms))
+    d["void"] = {"blocks": [{"boundary": [[0, 0], [W, 0], [W, L], [0, L]], "levels": [0, n - 1]}]}
+    names = {s.name for s in rooms}
+    gone = {s.name for s in brief.spaces} - names
+    spine = "spine"
+    while spine in names:
+        spine += "_"
+    contacts = []
+    for a, b in brief.contacts:
+        a2, b2 = (a if a in names else spine if a.startswith("corridor") or a in {c.name for c in corridors} else None,
+                  b if b in names else spine if b.startswith("corridor") or b in {c.name for c in corridors} else None)
+        if a2 and b2 and a2 != b2 and width > 0 or (a2 in names and b2 in names):
+            if [a2, b2] not in contacts and [b2, a2] not in contacts:
+                contacts.append([a2, b2])
+    d["contacts"] = contacts
+    if width > 0:
+        end = 0.5
+        need = sum(1.6 * math.sqrt(s.w * s.l / math.pi) for s in rooms) / n     # frontage a storey's rooms want, side by side
+        for _ in range(2):          # the second pass is on a void grown to hold the path as well as the rooms
+            a, b = (W, L) if W >= L else (L, W)                   # a: along the path, b: across
+            if need <= 2 * (a - 2 * end):
+                pts = [[end, b / 2], [a - end, b / 2]]            # one spine, rooms on both sides
+            else:                                                # too many rooms for one spine: out, across and back
+                pts = [[end, b / 4], [a - b / 4, b / 4], [a - b / 4, 3 * b / 4], [end, 3 * b / 4]]
+            run = sum(math.dist(p, q) for p, q in zip(pts, pts[1:]))
+            grow = math.sqrt((area + run * width) / (W * L))
+            if grow <= 1.001:
+                break
+            W, L = round(W * grow, 1), round(L * grow, 1)
+        d["void"] = {"blocks": [{"boundary": [[0, 0], [W, 0], [W, L], [0, L]], "levels": [0, n - 1]}]}
+        d["paths"] = [{"name": spine, "width": width, "points": [[round(u, 2), round(v, 2)] if W >= L else [round(v, 2), round(u, 2)] for u, v in pts]}]
+    for sp in d["spaces"]:      # an affinity or wish that names a space that is gone cannot be kept
+        sp["affinities"] = [a for a in sp.get("affinities", []) if not (set(map(str, a.values())) & gone)] if sp.get("affinities") else []
+        if not sp["affinities"]:
+            sp.pop("affinities")
+    d["affinities"] = [a for a in d.get("affinities", []) if not (set(a.get("between", [])) & gone)]
+    return Brief.from_dict(d)
+
+
 def springs_from_assembly(ag) -> list[tuple[str, str, str]]:
     """(a, side of a, b) for every contact edge of an AssemblyGraph: the wall-node springs of a box option."""
     return [(c.a, c.side_a, c.b) for c in ag.contacts()]
@@ -100,6 +169,9 @@ def relax(f: Field, seed: int = 0, start: dict | None = None, pins: tuple[str, .
                     stack[i, idx[o]] = stack[idx[o], i] = strong
         elif af.kind in ("ground", "top") and af.strength == "must":
             level_pin[i] = 0 if af.kind == "ground" else top[i]
+    for i, sp in enumerate(rooms):          # a level written in the brief is kept
+        if "level" in sp.wishes:
+            level_pin[i] = int(np.clip(int(sp.wishes["level"]), 0, top[i]))
     side_springs = [(idx[x], np.array(NORMAL[sd], dtype=float), idx[y]) for x, sd, y in sided if x in idx and y in idx]
 
     def into(i: int, q: np.ndarray, k: int) -> np.ndarray:
@@ -168,6 +240,8 @@ def relax(f: Field, seed: int = 0, start: dict | None = None, pins: tuple[str, .
         for _ in range(4 * n):
             over = over_of(lev)
             now = unrest(lev).sum()
+            if over.sum() <= 0 and now <= 0:
+                return
             best = None                                   # (overfill after, unrest after) must go down; least first
             here = (float(over.sum()), float(now))
             for u in free_units:

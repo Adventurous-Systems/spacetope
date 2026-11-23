@@ -373,6 +373,9 @@ spaces:
   - {name: hall, area: 140, h: 7.2}        # twice the storey height: it stands through two storeys
 ```
 
+Any ordinary brief works too: its corridor becomes a path and its envelope a void sized to the rooms, and
+`--write F.yaml` saves the converted brief (all the fixtures are in `fixtures/volume/`).
+
 `spacetope volume BRIEF --svg plans.svg` solves it; `--scales '{"gym": 2}'` inflates a room and the rest make
 way. In the browser, **volume** shows the bodies, the springs and the cells: click a body, drag it, send it
 up a storey or change its size. *Free cells* builds a sculptural version with sloping walls, as a sketch.

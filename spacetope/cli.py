@@ -239,6 +239,12 @@ def cmd_volume(args) -> int:
     brief = load(args.brief)
     kinds = tuple(args.kind.split(",")) if args.kind != "all" else KINDS
     scales = json.loads(args.scales) if args.scales else None
+    if not brief.void:      # a box brief: its envelope becomes the void and its corridor a path
+        brief = volume.from_brief(brief)
+    if args.write:
+        from pathlib import Path
+        Path(args.write).parent.mkdir(parents=True, exist_ok=True)
+        Path(args.write).write_text(brief.to_yaml())
     try:
         solves = [volume.solve(brief, k, args.seed, scales=scales) for k in kinds]
         out = {"solves": [{k: v for k, v in r.items() if k not in ("cells", "positions", "ground", "bodies", "springs")} for r in solves]}
@@ -317,6 +323,7 @@ def main(argv=None) -> int:
     vo.add_argument("--seed", type=int, default=0)
     vo.add_argument("--scales", help="JSON dict inflating rooms, e.g. '{\"gym\": 2}'")
     vo.add_argument("--svg", help="write plan drawings of the solves here")
+    vo.add_argument("--write", help="write the volume brief here (a box brief is converted first)")
     vo.add_argument("--free", action="store_true", help="also build the free-cell sketch in topologic and report it")
     vo.set_defaults(fn=cmd_volume)
     args = ap.parse_args(argv)

@@ -1,0 +1,37 @@
+name: three_rooms
+spaces:
+- name: living
+  w: 5.0
+  l: 4.0
+  h: 3.0
+  program: room
+- name: kitchen
+  w: 3.0
+  l: 4.0
+  h: 3.0
+  program: room
+- name: bedroom
+  w: 4.0
+  l: 3.0
+  h: 3.0
+  program: room
+contacts:
+- - living
+  - kitchen
+- - living
+  - bedroom
+level_height: 3.0
+void:
+  blocks:
+  - boundary:
+    - - 0
+      - 0
+    - - 9.4
+      - 0
+    - - 9.4
+      - 5.9
+    - - 0
+      - 5.9
+    levels:
+    - 0
+    - 0
