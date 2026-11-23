@@ -1,0 +1,25 @@
+name: pavilion
+level_height: 3.3
+levels: 2
+site:
+  north: 0
+  boundary: [[0, 0], [36, 0], [36, 22], [0, 22]]
+  setback: 1
+paths:
+  # along the ground, up a stair, back along the upper level: a path through the volume
+  - {name: route, width: 2.2, points: [[3, 8, 0], [22, 8, 0], [28, 8, 1], [28, 16, 1], [8, 16, 1]]}
+spaces:
+  - {name: foyer, area: 45, affinities: [{ground: true, strength: must}]}
+  - {name: cafe, area: 50, affinities: [{ground: true, strength: must}, {facade: S, strength: should}]}
+  - {name: shop, area: 30, affinities: [{ground: true, strength: must}]}
+  - {name: store, area: 20, affinities: [{ground: true, strength: must}]}
+  - {name: gallery_a, area: 60, tags: [show], affinities: [{top: true, strength: must}]}
+  - {name: gallery_b, area: 60, tags: [show], affinities: [{top: true, strength: must}]}
+  - {name: studio, area: 40, affinities: [{top: true, strength: must}, {facade: N, strength: should}]}
+  - {name: office, area: 25, affinities: [{top: true, strength: must}]}
+contacts:
+  - [foyer, route]
+affinities:
+  - {between: [foyer, cafe], kind: touch, strength: should}
+  - {tag: show, rule: cluster, strength: should}
+  - {between: [cafe, store], kind: near, strength: should}

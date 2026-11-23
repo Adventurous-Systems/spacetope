@@ -39,6 +39,11 @@ the engine.
 | M19 | Affinity: vocabulary, expansion and measurement | done | 27 (4 retired by M20) |
 | M20 | Affinity in the generators: hard rules checked, soft wishes searched and ranked | done | 17 |
 | M21 | Site orientation and sun: `site:` block, `facade: sun`, turn-or-mirror pass | done | 34 |
+| M25 | One measure for boxes and cells (`layout.py`) | done | 23 |
+| M26 | Five tessellations and one way into topologic (`tessellate.py`, `cells.py`) | done | 24 |
+| M27 | Field briefs: site outline, paths, relaxation, stack-up, options per aspect (`field.py`) | done | 10 |
+| M28 | Live field canvas and `/api/field/*` | done | 4 browser tests |
+| M29 | Bodies on springs in a 3D void: storey cells, free-cell sketch (`volume.py`), `volume` canvas mode | done | 16, and 4 browser tests |
 
 **430 tests** collected in total, 176 of them fast (2026-11-15, after M21). Every gate was rerun green after M20; after M21 the fast suite and the M1, M5, M7, M10, M19, M20 and M21 gates were rerun green. All green as of 2026-10-04 on topologicpy 0.9.71; on 2026-11-15
 M19 added 66 (35 fast unit tests, 31 in the gate), and the fast suite and the M1, M3, M7, M8, M10, M11, M15 and M17
@@ -63,6 +68,25 @@ turned or mirrored to the envelope-fitting symmetry that best meets its facade w
 `fixtures/site/`: school 0.19 → 0.81, hospital 0.44 → 0.60, house 0.82 → 0.97, clinic 0.51 → 0.60. On corridor
 plans the pass only chooses the side of the corridor; moving rooms across it is not built. Mirror images count
 as duplicates, so a brief can return fewer distinct options.
+
+2026-11-23, M25–M28 (branch `m25-field`): a second kind of brief. A **field
+brief** gives a site outline, one or more paths and a schedule of rooms with areas and affinities; contacts are
+not written. Rooms settle as discs beside the path, each level's ground is tessellated among them (`voronoi`,
+`power`, `slice`, `grid` or `hex`), and the result is a cell complex of planar-faced prisms. One measure
+(`spacetope/layout.py`) now reads boxes and cells alike: on 76 box placements its affinity report equals
+`affinity.measure` as a dictionary, and seven scores equal `cheap_scores`. A solve takes 0.07–0.35 s without the
+kernel, so the canvas re-solves on every drag of a room or of the path; a kernel build takes 4–10 s and is done
+only for the options chosen, one per aspect of the volume. On the club brief (22 rooms, two levels) 12 of 30
+solves pass every check and every failure is a named room with no door-wide wall on the path; on the pavilion (a
+path that climbs a stair) 20 of 20 pass. Design, gates and limits in `docs/PLAN.md` §4.11.
+
+2026-11-23, M29: the original graph afloat. Each space node is the centre of a lens-shaped body, contacts and
+affinities are springs (a spring between two wall nodes has a direction), and the bodies float in a void given as
+stacked blocks. Storeys emerge, each is cut into cells with the M26 tessellations so that the void is full, and a
+room twice the storey height stands through two. A body can be dragged, sent up a storey or inflated, and the
+rest answer in about 0.2 s. On the stepped fixture 19 of 20 solves pass and no storey is asked more than 6 % over
+its ground. Free polyhedral cells from the same bodies are a sketch mode: real topologic cells, 39 % of faces
+sloping, not scored. `docs/PLAN.md` §4.11.
 
 2026-10-16: the canvas opacity slider had no effect on large briefs (`school_three_levels`). A material first
 drawn opaque keeps an opaque shader, and on a large GLB that first frame comes before the slider value is
@@ -89,7 +113,8 @@ turns that into concrete spaces; validation reports problems in plain sentences 
 verification checks, scores, and a ranking. Options are exported as GLB, BREP with a selector sidecar, OBJ,
 JSON, and (since M14) a single TPY archive that keeps dictionaries and doors.
 
-**Interfaces**: `spacetope generate|realise|floors|export|programme`, a FastAPI backend, and a React canvas.
+**Interfaces**: `spacetope generate|realise|floors|export|programme|field|volume`, a FastAPI backend, and a React canvas
+with `rooms`, `field` and `volume` modes.
 
 **Programmes** (`docs/PROGRAMMES.md`) describe a *kind* of building rather than one building: office, secondary
 school, clinic and housing ship with the project. `spacetope programme clinic --seeds 0-99 --out dir` draws a
@@ -138,6 +163,9 @@ These are measured and gated, not suspicions.
 - **`seqpair` is not registered.** Bottom-left packing pulls rooms off the corridor they must touch, so it
   returns nothing past about ten spaces on a corridor.
 - **M6's learned scorers** never beat the hand-tuned beam and are not in the pipeline.
+- **Field briefs** (M27): one path gives a double-loaded plan, and a room in a second row fails `reach` until the
+  architect draws a branch. Doors are not placed on cells yet. `hex` cannot promise a 0.9 m straight shared wall.
+  Upper levels may overhang lower ones. The emergent contacts are not yet handed to `beam` or `cpsat`.
 
 ---
 

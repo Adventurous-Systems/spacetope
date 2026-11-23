@@ -197,6 +197,66 @@ def cmd_programme(args) -> int:
     return 0 if (rows or written) else 1
 
 
+def cmd_field(args) -> int:
+    """M27: a field brief (site outline, paths, a schedule with areas). One solve per tessellation, or the options
+    that each do one aspect of the volume best, built and verified in topologic."""
+    from pathlib import Path
+    from . import field
+    from .tessellate import KINDS
+    brief = load(args.brief)
+    kinds = tuple(args.kind.split(",")) if args.kind != "all" else KINDS
+    try:
+        if args.options:
+            opts, info = field.options(brief, kinds=kinds, seeds=tuple(range(args.seed, args.seed + args.seeds)),
+                                       polish_steps=args.polish, verify=not args.no_verify)
+            out = {"info": info, "options": [{k: v for k, v in o.to_dict().items() if k not in ("layout", "positions")} for o in opts]}
+            if args.out:
+                d = Path(args.out)
+                d.mkdir(parents=True, exist_ok=True)
+                for i, o in enumerate(opts):
+                    (d / f"field_{i:02d}.json").write_text(json.dumps(o.to_dict(), indent=1))
+                    if o.report is not None and o.report.realised is not None:
+                        from .io.glb import write_glb
+                        write_glb(o.report.realised, d / f"field_{i:02d}.glb", source="topology")
+                out["out"] = str(d)
+        else:
+            solves = [field.solve(brief, k, args.seed) for k in kinds]
+            out = {"solves": [{k: v for k, v in r.items() if k not in ("cells", "positions", "ground")} for r in solves]}
+            if args.svg:
+                from .viz.plan import write_svg
+                out["svg"] = str(write_svg(solves, args.svg))
+    except field.FieldInvalid as e:
+        print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1))
+        return 2
+    print(json.dumps(out, indent=1))
+    return 0
+
+
+def cmd_volume(args) -> int:
+    """M29: float a schedule as bodies on springs in a void of stacked blocks, and cut storey cells from them."""
+    from . import field, volume
+    from .tessellate import KINDS
+    brief = load(args.brief)
+    kinds = tuple(args.kind.split(",")) if args.kind != "all" else KINDS
+    scales = json.loads(args.scales) if args.scales else None
+    try:
+        solves = [volume.solve(brief, k, args.seed, scales=scales) for k in kinds]
+        out = {"solves": [{k: v for k, v in r.items() if k not in ("cells", "positions", "ground", "bodies", "springs")} for r in solves]}
+        if args.svg:
+            from .viz.plan import write_svg
+            out["svg"] = str(write_svg(solves, args.svg))
+        if args.free:
+            f = field.prepare(brief, args.seed)
+            sketch = volume.free(f, {n: tuple(v) for n, v in solves[0]["positions"].items()}, scales)
+            cc, cells = volume.realise_free(sketch)
+            out["free"] = {k: v for k, v in sketch.items() if k != "pieces"} | {"pieces": len(sketch["pieces"]), "cells_built": len(cells)}
+    except field.FieldInvalid as e:
+        print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1))
+        return 2
+    print(json.dumps(out, indent=1))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="spacetope")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -240,6 +300,25 @@ def main(argv=None) -> int:
     pr.add_argument("--params", help="JSON dict of generator params")
     pr.add_argument("--per-brief", type=int, default=None, help="cap the rows kept per brief")
     pr.set_defaults(fn=cmd_programme)
+    fl = sub.add_parser("field", help="tessellate a field brief (site, paths, areas); --options picks the best per aspect (M27)")
+    fl.add_argument("brief")
+    fl.add_argument("--kind", default="all", help="voronoi, power, slice, grid, hex, a comma list, or all")
+    fl.add_argument("--seed", type=int, default=0)
+    fl.add_argument("--seeds", type=int, default=3, help="how many seeds --options tries, from --seed up")
+    fl.add_argument("--options", action="store_true", help="choose one option per aspect and verify each in topologic")
+    fl.add_argument("--polish", type=int, default=6, help="hill-climbing steps per aspect")
+    fl.add_argument("--no-verify", action="store_true", help="skip the kernel build of the chosen options")
+    fl.add_argument("--svg", help="write plan drawings of the solves here")
+    fl.add_argument("--out", help="directory for the chosen options (JSON and GLB)")
+    fl.set_defaults(fn=cmd_field)
+    vo = sub.add_parser("volume", help="float a schedule as bodies on springs in a void and cut storey cells (M29)")
+    vo.add_argument("brief")
+    vo.add_argument("--kind", default="power", help="voronoi, power, slice, grid, hex, a comma list, or all")
+    vo.add_argument("--seed", type=int, default=0)
+    vo.add_argument("--scales", help="JSON dict inflating rooms, e.g. '{\"gym\": 2}'")
+    vo.add_argument("--svg", help="write plan drawings of the solves here")
+    vo.add_argument("--free", action="store_true", help="also build the free-cell sketch in topologic and report it")
+    vo.set_defaults(fn=cmd_volume)
     args = ap.parse_args(argv)
     return args.fn(args)
 

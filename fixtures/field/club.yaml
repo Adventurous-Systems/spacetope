@@ -1,0 +1,42 @@
+name: club
+level_height: 3.6
+site:
+  north: 20
+  hemisphere: N
+  setback: 3
+  boundary: [[0, 0], [40, 6], [46, 38], [32, 60], [22, 56], [14, 36], [3, 30]]
+paths:
+  - {name: walk, width: 2.4, points: [[6, 6], [24, 26], [30, 52]]}
+spaces:
+  - {name: reception, area: 60, tags: [front], affinities: [{ground: true, strength: must}]}
+  - {name: convenience, area: 40, tags: [front], affinities: [{ground: true, strength: should}]}
+  - {name: hall, area: 140, tags: [loud]}
+  - {name: gym, area: 120, tags: [loud], affinities: [{facade: N, strength: should}]}
+  - {name: dance, area: 70, tags: [loud]}
+  - {name: yoga, area: 60, tags: [quiet], affinities: [{facade: sun, strength: should, weight: 2}]}
+  - {name: badminton, area: 110, tags: [loud]}
+  - {name: squash, area: 65, tags: [loud]}
+  - {name: indoor_games, area: 70, tags: [loud]}
+  - {name: snooker, area: 55}
+  - {name: digital_games, area: 45}
+  - {name: music, area: 35, tags: [loud]}
+  - {name: pool_changing, area: 60, tags: [wet]}
+  - {name: spa, area: 55, tags: [wet, quiet]}
+  - {name: jacuzzi, area: 30, tags: [wet]}
+  - {name: salon, area: 35}
+  - {name: creche, area: 60, tags: [quiet], affinities: [{ground: true, strength: must}, {facade: sun, strength: should, weight: 2}]}
+  - {name: kids_study, area: 40, tags: [quiet]}
+  - {name: business_centre, area: 80, tags: [quiet]}
+  - {name: reading_lounge, area: 60, tags: [quiet], affinities: [{exterior: true, strength: should}]}
+  - {name: working_lounge, area: 70, tags: [quiet], affinities: [{exterior: true, strength: should}]}
+  - {name: guest_rooms, area: 90, tags: [quiet], affinities: [{top: true, strength: should}]}
+contacts:
+  - [reception, walk]
+  - [reception, convenience]
+  - [hall, walk]
+affinities:
+  - {tag: wet, rule: cluster, strength: should, weight: 2}
+  - {tags: [quiet, loud], rule: apart, strength: should}
+  - {between: [spa, jacuzzi], kind: touch, strength: must}
+  - {between: [creche, kids_study], kind: near, strength: should}
+  - {between: [reading_lounge, working_lounge], kind: touch, strength: should}

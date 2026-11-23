@@ -6,6 +6,7 @@ html, body, #root { height: 100%; margin: 0; background: var(--bg); color: var(-
 .app__brand { font-weight: 700; letter-spacing: 1px; color: var(--accent); }
 .app__status { color: var(--muted); font-size: 12px; }
 .app__body { flex: 1; display: grid; grid-template-columns: 340px 1fr 320px; min-height: 0; }
+.app__body--field { grid-template-columns: 1fr 320px; }
 .app__left, .app__right { overflow: auto; border-right: 1px solid var(--line); background: var(--panel); padding: 10px; }
 .app__right { border-right: none; border-left: 1px solid var(--line); }
 .app__canvas { position: relative; min-width: 0; overflow: hidden; }

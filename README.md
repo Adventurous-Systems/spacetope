@@ -213,6 +213,8 @@ Small briefs return options in seconds. The 64-space three-level school takes ab
 | `spacetope floors BRIEF [--generator beam\|cpsat]` | Find how many floors a brief needs within its envelope. |
 | `spacetope export --stem STEM --obj F.obj --json F.json` | Write OBJ and JSON of an option saved with `--save`. |
 | `spacetope programme NAME --seeds 0-99 --out DIR` | Draw briefs from a building programme (see below). `--dataset rows.jsonl` writes training rows instead. |
+| `spacetope field BRIEF [--kind power,slice] [--svg F.svg]` | Solve a field brief (site, paths, areas) with each tessellation and draw the plans. `--options --out DIR` picks the best option per aspect and builds each in topologic. |
+| `spacetope volume BRIEF [--kind power] [--scales JSON] [--free]` | Float a schedule as bodies on springs in a void and cut storey cells. `--free` also builds the free-cell sketch. |
 | `python bench.py --out bench/scoreboard.csv` | Scoreboard over every generator, brief and seed. |
 
 ## Writing a brief
@@ -320,6 +322,61 @@ placement.
 | `three_levels_core`, `apartments_four_levels` | 15, 14 | 3, 4 |
 | `small_hospital`, `school_three_levels` | 51, 64 | 2, 3 |
 
+### Field briefs: a site, a path and a schedule
+
+A field brief does not list contacts. It gives the site, one or more paths through it, and rooms with areas
+and affinities; which rooms end up as neighbours is the result.
+
+```yaml
+name: pavilion
+level_height: 3.3
+levels: 2                                  # leave out and the schedule stacks up when the ground runs out
+site: {boundary: [[0, 0], [36, 0], [36, 22], [0, 22]], setback: 1, north: 0}
+paths:
+  # [x, y] runs on every level; [x, y, level] goes where it says, and a leg between two levels is a stair
+  - {name: route, width: 2.2, points: [[3, 8, 0], [22, 8, 0], [28, 8, 1], [28, 16, 1], [8, 16, 1]]}
+spaces:
+  - {name: foyer, area: 45, affinities: [{ground: true, strength: must}]}
+  - {name: gallery_a, area: 60, tags: [show], affinities: [{top: true, strength: must}]}
+contacts:
+  - [foyer, route]                         # the foyer must open onto the path
+```
+
+Rooms settle beside the path, then each level's ground is divided among them by one of five tessellations:
+
+| Kind | Rooms come out |
+|---|---|
+| `voronoi` | faceted, areas as they fall |
+| `power` | faceted, areas close to the schedule |
+| `slice` | orthogonal, areas exact |
+| `grid` | rectangles on a square module |
+| `hex` | honeycomb |
+
+Every result is a cell complex of planar-faced cells, checked the same way: the pairs of cells topologic joins
+by a face must be the pairs the measure says share a wall. In the browser, switch to **field**, pick a brief,
+and drag a room or a point of the path: the plan and its scores follow in about a third of a second. *Best
+option per aspect* builds, in topologic, the option that is most compact, has the truest areas, meets the
+most wishes, and so on. Fixtures are in `fixtures/field/`; the design and its limits are in `docs/PLAN.md` §4.11.
+
+### A void to fill: bodies on springs
+
+Add a `void` and the schedule floats in three dimensions. Each room is a lens-shaped body round its node,
+contacts and affinities are springs, and the bodies settle onto storeys. Each storey is then cut into cells
+so that the void is full.
+
+```yaml
+void:
+  blocks:
+    - {boundary: [[0, 0], [38, 0], [38, 24], [0, 24]], levels: [0, 0]}     # a podium
+    - {boundary: [[0, 4], [16, 4], [16, 20], [0, 20]], levels: [1, 3]}     # a tower on it
+spaces:
+  - {name: hall, area: 140, h: 7.2}        # twice the storey height: it stands through two storeys
+```
+
+`spacetope volume BRIEF --svg plans.svg` solves it; `--scales '{"gym": 2}'` inflates a room and the rest make
+way. In the browser, **volume** shows the bodies, the springs and the cells: click a body, drag it, send it
+up a storey or change its size. *Free cells* builds a sculptural version with sloping walls, as a sketch.
+
 ### Programmes: families of buildings
 
 A **programme** (`programmes/*.yaml`) describes a kind of building rather than one building: room types with
@@ -360,6 +417,8 @@ REAL_BACKEND=1 npx playwright test     # against the real API on port 8000
 - `cpsat` is not seed-deterministic: two runs can give different, equally valid plans.
 - Once a corridor is chained, two shafts no longer guarantee two independent routes between levels. The
   option analysis reports the number of routes.
+- Field briefs: a single path gives a double-loaded plan, and a room left in a second row fails the `reach`
+  check until a branch is drawn. Doors are not yet placed on tessellated cells.
 - A learned move scorer (M6) and a sequence-pair generator (M16) were built and measured, and did not beat
   the hand-tuned beam. They are recorded in `docs/PLAN.md` and are not used by the engine.
 

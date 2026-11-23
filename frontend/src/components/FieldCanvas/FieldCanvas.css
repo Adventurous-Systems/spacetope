@@ -1,0 +1,23 @@
+.field { position: absolute; inset: 0; display: flex; flex-direction: column; background: #ece5da; }
+.field__bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 8px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.field__bar label { color: var(--muted); font-size: 12px; }
+.field__ms { margin-left: auto; color: var(--muted); font-size: 12px; min-width: 60px; text-align: right; }
+.field__svg { flex: 1; min-height: 0; width: 100%; touch-action: none; user-select: none; }
+.field__model { flex: 1; min-height: 0; background: #1a1a2e; }
+.field__site { fill: none; stroke: #8a8378; stroke-width: 0.15; }
+.field__ground { fill: none; stroke: #1c1814; stroke-width: 0.22; }
+.field__below { fill: none; stroke: #b3a999; stroke-width: 0.1; stroke-dasharray: 0.5 0.4; }
+.field__cell { stroke: #3a2a20; stroke-width: 0.12; }
+.field__path { fill: none; stroke: #0d5c66; stroke-width: 0.25; stroke-dasharray: 0.8 0.5; pointer-events: none; }
+.field__handle { fill: #fff; stroke: #0d5c66; stroke-width: 0.25; cursor: grab; }
+.field__seed { fill: #1c1814; stroke: #ece5da; stroke-width: 0.12; cursor: grab; }
+.field__seed--pinned { fill: #e94560; }
+.field__label { font-size: 1.15px; fill: #1c1814; pointer-events: none; font-family: -apple-system, Helvetica, Arial, sans-serif; }
+.field__empty { margin: auto; color: #6b6257; max-width: 320px; text-align: center; }
+.field__error { padding: 6px 10px; background: #5a1f2b; color: #fff; font-size: 12px; }
+.app__mode { display: flex; gap: 4px; }
+.field--dark { background: #1a1a2e; }
+.field__slider { display: block; margin: 6px 0; font-size: 12px; color: var(--muted); }
+.field__slider input { width: 100%; }
+.field__names { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; }
+.field__names button { font-size: 11px; padding: 2px 6px; }

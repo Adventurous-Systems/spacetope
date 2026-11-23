@@ -1,0 +1,40 @@
+name: stepped
+level_height: 3.6
+site: {north: 20, hemisphere: N}
+void:
+  blocks:
+    - {boundary: [[0, 0], [38, 0], [38, 24], [0, 24]], levels: [0, 0]}      # a podium
+    - {boundary: [[0, 0], [26, 0], [26, 24], [0, 24]], levels: [1, 1]}      # a block stepping back
+    - {boundary: [[0, 4], [16, 4], [16, 20], [0, 20]], levels: [2, 3]}      # a small tower
+spaces:
+  - {name: reception, area: 60, affinities: [{ground: true, strength: must}]}
+  - {name: convenience, area: 40, affinities: [{ground: true, strength: should}]}
+  - {name: hall, area: 140, h: 7.2, tags: [loud], affinities: [{ground: true, strength: must}]}   # double height
+  - {name: gym, area: 120, tags: [loud], affinities: [{facade: N, strength: should}]}
+  - {name: dance, area: 70, tags: [loud]}
+  - {name: yoga, area: 60, tags: [quiet], affinities: [{facade: sun, strength: should, weight: 2}]}
+  - {name: badminton, area: 110, tags: [loud]}
+  - {name: squash, area: 65, tags: [loud]}
+  - {name: indoor_games, area: 70, tags: [loud]}
+  - {name: snooker, area: 55}
+  - {name: digital_games, area: 45}
+  - {name: music, area: 35, tags: [loud]}
+  - {name: pool_changing, area: 60, tags: [wet]}
+  - {name: spa, area: 55, tags: [wet, quiet]}
+  - {name: jacuzzi, area: 30, tags: [wet]}
+  - {name: salon, area: 35}
+  - {name: creche, area: 60, tags: [quiet], affinities: [{ground: true, strength: must}]}
+  - {name: kids_study, area: 40, tags: [quiet]}
+  - {name: business_centre, area: 80, tags: [quiet]}
+  - {name: reading_lounge, area: 60, tags: [quiet], affinities: [{exterior: true, strength: should}]}
+  - {name: working_lounge, area: 70, tags: [quiet], affinities: [{exterior: true, strength: should}]}
+  - {name: guest_rooms, area: 90, tags: [quiet], affinities: [{top: true, strength: should}]}
+contacts:
+  - [reception, convenience]
+  - [reception, hall]
+affinities:
+  - {tag: wet, rule: cluster, strength: should, weight: 2}
+  - {tag: wet, rule: stack, strength: should}
+  - {tags: [quiet, loud], rule: apart, strength: should}
+  - {between: [spa, jacuzzi], kind: touch, strength: must}
+  - {between: [reading_lounge, working_lounge], kind: touch, strength: should}
