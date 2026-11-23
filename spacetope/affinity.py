@@ -29,7 +29,7 @@ RULES = ("stack", "cluster", "same_level", "apart", "near")
 SIDES = {"N": "+y", "E": "+x", "S": "-y", "W": "-x"}   # the box side of each compass side when the site north is 0
 BEARING = {"+y": 0, "+x": 90, "-y": 180, "-x": 270}     # box side -> degrees clockwise from plan +y
 COMPASS = {"N": 0, "E": 90, "S": 180, "W": 270}
-SITE_KEYS = ("north", "hemisphere")
+SITE_KEYS = ("north", "hemisphere", "boundary", "setback")   # the last two are read by `field` (M27)
 HSIDES = ("+x", "-x", "+y", "-y")
 ALL_SIDES = HSIDES + ("ceiling", "floor")
 DEFAULTS = {"touch": {"min": 0.9}, "near": {"depth": 2}, "stack": {"overlap": 0.5},
@@ -384,6 +384,15 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
             return b.z == 0, lv[0], 0, "level"
         return lv[1] == top, lv[1], top, "level"
 
+    return report(brief, placement, pair, site, strengths=strengths, kinds=kinds)
+
+
+def report(brief: Brief, present, pair, site, *, strengths: tuple[str, ...] | None = None,
+           kinds: tuple[str, ...] | None = None) -> dict:
+    """The affinity report for any geometry (M25). `present` holds the names that were placed; `pair(af, a, o)` and
+    `site(af, a)` return (satisfied, value, target, unit), or None when the item cannot be judged. `measure` passes
+    readings of integer boxes, `layout.affinity` readings of walls; items, tallies and score are built here once."""
+    north, hemi = site_of(brief)
     items = []
     for af in expand(brief):
         if (strengths is not None and af.strength not in strengths) or (kinds is not None and af.kind not in kinds):
@@ -392,9 +401,9 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
                 "met": None, "value": None, "target": None, "unit": None, "by": None, "source": af.source}
         if af.kind == "facade":
             item.update(side=af.params["side"], faces=compass_faces(af.params["side"], north, hemi))
-        if af.a in placement:
+        if af.a in present:
             if af.kind in PAIR_KINDS:
-                parts = [(o, r) for o in af.others if o in placement for r in [pair(af, af.a, o)] if r is not None]
+                parts = [(o, r) for o in af.others if o in present for r in [pair(af, af.a, o)] if r is not None]
             else:
                 r = site(af, af.a)
                 parts = [(None, r)] if r is not None else []
@@ -418,11 +427,11 @@ def measure(brief: Brief, placement: dict[str, Box], *, strengths: tuple[str, ..
     soft = [i for i in items if i["met"] is not None and i["strength"] not in HARD]
     wsum = sum(i["weight"] for i in soft)
     score = round(sum(i["weight"] for i in soft if i["met"]) / wsum, 6) if wsum else 1.0
-    report = {"score": score, "soft": tally(False), "hard": tally(True),
-              "unmeasured": sum(1 for i in items if i["met"] is None), "items": items}
+    out = {"score": score, "soft": tally(False), "hard": tally(True),
+           "unmeasured": sum(1 for i in items if i["met"] is None), "items": items}
     if brief.site is not None:
-        report["site"] = {"north": north, "hemisphere": hemi}
-    return report
+        out["site"] = {"north": north, "hemisphere": hemi}
+    return out
 
 
 # ----------------------------------------------------------------------------- what the generators and checks use

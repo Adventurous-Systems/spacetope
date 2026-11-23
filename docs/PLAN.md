@@ -670,6 +670,132 @@ de-duplication can return fewer distinct options (house, seed 0: 7 → 5); the g
 Iteration: three rounds on line 3 or 6. If the margin is missed, the number is recorded and the scope
 re-decided; the threshold is not moved.
 
+### 4.11 Field programme M25–M28 (started 2026-11-23)
+
+Built on branch `m25-field`, off `m19-affinity`. Until now a brief placed boxes. A **field brief** is a schedule
+of spaces with areas and affinities, a site outline and one or more paths drawn through it; contacts are not
+written, they emerge, and a space is any plan polygon. M22–M24 (curves) keep their numbers; M18a/M18b are still
+not built, and the site outline here is the first polygon the engine accepts (`site.boundary`, additive).
+
+| # | Milestone | Status |
+|---|---|---|
+| M25 | One measure for boxes and cells (`spacetope/layout.py`) | **done 2026-11-23**, gate 23 green |
+| M26 | Five tessellations and one way into topologic (`tessellate.py`, `cells.py`) | **done 2026-11-23**, gate 24 green |
+| M27 | Field briefs: site, paths, relaxation, stack-up, options per aspect (`field.py`) | **done 2026-11-23**, gate 10 green |
+| M28 | Live canvas: field mode, `/api/field/solve`, `/api/field/options` | **done 2026-11-23**, `e2e/tests/field.spec.js` 4 green |
+
+#### M25 — One measure for boxes and cells
+
+**The common form.** A `Prism` is a plan polygon in whole millimetres between two heights; a `Layout` maps
+space names to prisms. A box is a rectangle prism (`from_placement`), so nothing is lost. `conform` rounds
+every vertex to a millimetre and puts each vertex that lies on a neighbour's wall into that wall (a neighbour
+is a prism whose height range overlaps; the pass repeats, because a shaft carries a vertex from one level to
+the next). After it, **a wall two spaces share is one edge that both rings hold**, and `Table` indexes every
+edge once.
+
+**Readings**, all off that index: longest shared straight wall and shared height (`touch`); contact area
+(walls plus the plan overlap where one's ceiling is the other's floor); uncovered wall per wall line with the
+bearing of its outward normal; the walk graph (the door rules of M7, the legacy access rule, or the path rule
+below). A *wall* is the set of collinear edges facing one way, compared exactly on integers, so a box side is
+one wall and `facade` is "an uncovered wall whose normal is within 45° of the side", the M21 rule with no
+special case for the tie. `affinity.measure` was split: `affinity.report` builds items, tallies and score
+from two readers, and both geometries call it.
+
+**Gate** (`tests/gates/test_m25.py`): on every fixture that validates and the four site briefs, beam seed 0,
+four placements each (76 placements): the affinity report is **equal as a dictionary** to `affinity.measure`;
+`adjacency`, `compactness`, `circulation`, `vertical`, `envelope_fit`, `daylight` and `affinity` equal
+`score.cheap_scores` to 1e-6; the walk graph has the same edges as `plan_doors`/`access_graph`. Hand cases for
+cells that are not boxes (a slanted shared wall, a turned north). 64 spaces on three levels read in under a
+quarter of a second (measured about 10 ms). `deviation` and `stacking` are box readings and are **not** carried
+over; cells report `area_deviation`, `exposure`, `regularity` and `path_depth` instead.
+
+#### M26 — Tessellations and the way into topologic
+
+`tessellate(kind, region, seeds)` divides a plan region among seeds that each ask an area, and returns one
+simple polygon per seed. Areas are shares of the region.
+
+| Kind | How | Character (club brief, six seeds) |
+|---|---|---|
+| `voronoi` | nearest seed owns the ground | free areas (mean area off 0.24), faceted |
+| `power` | weighted Voronoi; weights move until each cell has its share (Aurenhammer; Voronoi treemaps) | areas within 0.16 here, 0.03 on the pavilion |
+| `slice` | straight cuts by area, across the side where the seeds part most cleanly | exact areas (0.03), the most regular rooms (0.86) |
+| `grid` | rooms grow as rectangles on a square module (Lopes et al. 2010), leftovers filled cell by cell | boxy rooms, areas off by a third |
+| `hex` | cell-by-cell growth on a hexagonal module, then a pass that drains surplus between neighbours | honeycomb walls, areas within 0.11 |
+
+A region in several parts is divided part by part; ground no seed was given goes to the neighbour it touches
+most; a cell cut in pieces keeps the piece its seed is in. All kinds are covered by one partition test
+(coverage and no overlap to 0.2 %) on a concave site.
+
+**The way in** (`cells.py`) is the same for every kind and for boxes: conformed layout → one `Cell` per space
+built face by face (floor, ceiling, one quad per wall edge, holes allowed) → `CellComplex.ByCells` (the kernel
+imprints one level's plan on the next) → dictionaries by selector → read back. Cells are planar-faced, so
+none of the curved-contact trouble of M22–M24 applies. The kernel is given rings without the collinear
+vertices `conform` adds (it imprints neighbours itself). `verify_layout` runs nine checks; the one that
+matters is `contacts`: **the pairs of cells the kernel joins by a face must be the pairs the measure says
+share a wall, floor or ceiling** (contacts under 0.01 m² and faces of no width are not insisted on).
+
+**Gate** (`tests/gates/test_m26.py`): partition and area lines above; every kind on both field fixtures builds
+with `built`, `cell_count`, `no_slivers`, `contacts` and `dictionaries` green (10 builds); a box placement goes
+through the same door and passes the same five checks.
+
+#### M27 — Field briefs
+
+    site:   {boundary: [[x, y], ...], setback: 3, north: 20}
+    paths:  [{name: walk, width: 2.4, points: [[x, y] | [x, y, level], ...]}]
+    spaces: [{name: gym, area: 120, tags: [loud], affinities: [...]}]     # `area` instead of w and l
+
+- **Path cells.** A path with plain points runs on every level, with a stair over its first metres. A path
+  whose points carry a level runs where they say, and a leg between two levels is a stair that stands on both:
+  a path through the volume. A contact with a path becomes a contact with its cell on the room's level.
+- **Stack up.** With no `levels`, the count is the fewest on which the rooms fit in 85 % of the ground left by
+  the paths. Rooms that must share a wall share a level.
+- **Relaxation.** Rooms are discs. Discs on a level do not overlap; contacts and `touch`/`near` draw together,
+  `apart` pushes off, `stack` lines up across levels, `facade`/`exterior` lean on the outline. Every room stays
+  in the band beside its level's path and slides along it (`front`, on by default), and because rooms cannot
+  pass each other there, they may trade places when that brings wished neighbours together. Deterministic per
+  seed; pinned rooms do not move.
+- **Mass.** The path's centre line, run on to the outline, cuts the ground into sides. On each side the ground
+  the rooms divide is the mass round their discs, grown until it holds their areas (`voronoi`, `power`, `hex`),
+  or a band of even depth along the path (`slice`, `grid`).
+- **Walking.** A room opens onto a path cell through a door-wide wall; path cells open onto each other; two
+  rooms are joined only where the brief asks that contact. `reach` fails, by room name, when a room has no such
+  wall.
+- **Options, the spacetope way.** Candidates over seeds × kinds are read without the kernel; for each aspect
+  (`affinity`, `compact`, `daylight`, `true areas`, `regular rooms`, `short walks`, `lean circulation`,
+  `open ground`) the best passing candidate is climbed a few steps further and chosen, plus the best balance;
+  only the chosen are built and verified in topologic.
+
+**Measured** (2026-11-23). Club (22 rooms, 1450 m² on 1300 m², two levels): a solve takes 0.2–0.35 s; 12 of 30
+solves (five kinds × six seeds) pass every kernel-free check, every failure being `reach`; a kernel build takes
+about 4 s (hex 10 s). Pavilion (8 rooms, a path that climbs): 20 of 20 pass, a solve takes 0.07 s.
+
+**Gate** (`tests/gates/test_m27.py`): the brief round-trips; stack-up, path cells and the must-touch level
+rule; bad briefs are named; the climbing path joins both levels on every kind; every solve is complete and
+free of overlaps, and keeps the hard wishes on every kind but `hex`; at least 10 of 30 club solves pass
+everything and every failure names its rooms; areas and regularity order the kinds as the table says; same
+seed, same plan, under 1.5 s; a pinned room stays; moving the path moves the mass; the options carry one
+champion per aspect, each at least as good as every passing candidate and each verified in the kernel.
+
+#### M28 — Live canvas
+
+`POST /api/field/solve` is stateless and kernel-free: brief, kind, seed, positions and pins in; positions,
+cells, scores, affinity report and checks out. The canvas has a `field` mode: site and setback, the path with
+a handle per point, a seed per room, cells per level. Dragging a room pins it; while the pointer moves the
+plan is re-tessellated without relaxing, and on release the other rooms settle. Dragging a path handle does
+the same with the path. Only the newest request counts. `POST /api/field/options` returns the chosen options
+with a GLB meshed from the built cells; an option is shown in plan or in 3D.
+
+**Limits, stated up front.**
+- A single path gives a double-loaded plan: every room lines it. A second row needs a branch, which the
+  architect draws; the engine does not invent one.
+- `reach` is met on about four seeds in ten on the club brief; the options stage chooses among those.
+- `hex` walls are one module side long, so a 0.9 m straight shared wall is not certain (met on four seeds in
+  six or more); `grid` trades area for boxy rooms.
+- Doors are not placed as apertures on cells yet; `reach` proves a door-wide wall exists.
+- Upper levels are not held inside lower ones (no overhang rule), and room heights are the level height.
+- A should-wish between rooms on opposite sides of the path cannot be met and is reported as missed.
+- The field route does not hand its emergent contacts to `beam`/`cpsat` yet; that bridge is the next step.
+
 ## 5. Decisions (with why)
 
 | Date | Decision | Why |
@@ -758,6 +884,7 @@ re-decided; the threshold is not moved.
 | 2026-11-15 | Full rerun after M20, one marker per process: M0 17, M1 12, M2 26, M3 6, M4 4, M5 8, M7 47, M8 12, M9 10, M10 11, M11 4, M12 11, M13 4, M14 5, M15 17, M16 14, M17 14, M19 27, M20 17; fast suite 129; 349 collected. M19's gate is 27, not 31: its "generators untouched" tests are retired by M20 line 5. **M5 had one failure not caused by M20:** its leftover-word check (`strand`) matched a local variable `stranded` in `spacetope/solve/seqpair.py`, there since M16; the variable is renamed `unreached`, the check is unchanged | The M5 check was not loosened; the rename changes no behaviour (M5 and M16 rerun green). It had gone unnoticed because M5 was not rerun after M16. |
 | 2026-11-15 | **M21 designed from measurements; margin proposed.** A `site` block (north angle, hemisphere), `facade: sun` as the equator-facing side, and a generator-agnostic pass that picks the best envelope-fitting symmetry of each finished option. Floors for the gate are the measured best-of-symmetries figures (school 0.80, hospital 0.59, house 0.97, clinic 0.59, against 0.19, 0.44, 0.52, 0.51 as generated). No search term in the beam and no room-swap pass in M21 | The outline is unknown mid-search, so the beam cannot judge a facade; a finished plan can be turned for free, and 95 placements × 8 symmetries changed no check but the envelope under quarter turns. The school's as-generated score equals its worst symmetry on all 24 options, so most of its gain undoes a fixed side bias in the beam, and the margin is reported against the worst as well as the as-generated figure. `sun` is orientation only and is named so, since a cosine or "insolation" credit would be a proxy passed off as a sun study. |
 | 2026-11-15 | **M21 built and gated (34 tests, all six lines).** `site` on the brief, the compass resolved from it, `facade: sun` measured as the equator-facing side, `spacetope/orient.py` and the pass in `pipeline.generate`. Facade score, beam seeds 0–2, as generated → after the pass (floor): school 0.194 → 0.806 (0.80), hospital 0.439 → 0.596 (0.59), house 0.817 → 0.974 (0.97), clinic 0.506 → 0.595 (0.59); no option ends worse; verified counts per seed equal with and without the pass on all 12 rows; pass time 2.1 % of beam `t_gen` on the school (limit 5 %). Distinct signatures lost: 2, both on the house, seed 0 (7 → 5). **Notes:** (1) the floors hold on the mean over seeds, as the gate says; single seeds fall under them (school seed 0 0.794, hospital seed 2 0.579), so the headroom is thin. (2) The house fixture is the mirror image of the brief the floor was measured on, so its as-generated figure is 0.82, not 0.52; its best is unchanged. (3) The school's as-generated score equals its worst symmetry on every seed. (4) The chosen symmetries are almost all the half turn; a mirror or quarter turn is chosen four times, all on the house. (5) `facade: sun` with no `site` now measures as S, where M19 and M20 reported it unmeasured; one M19 unit test was rewritten to say so. (6) The pass also runs on placements that later fail `preverify`. (7) No north arrow in the 3D viewer, only on the option card | The margin was set from measurements before the build and met without loosening. (1)–(4) are recorded so the size of the result is not overstated: on corridor plans this is a choice of side, and the room-swap pass is the next step if more is wanted. (7) The viewer's plan-to-screen mapping was not verified, and a wrong arrow is worse than none. |
+| 2026-11-23 | Field programme M25–M28 built on `m25-field`. A space is a plan polygon between two heights (`layout.Prism`); boxes and tessellated cells share one measure, one verifier route and one option tradition. Five tessellations behind one call. The canvas talks to a stateless, kernel-free solve; the kernel builds only the options that were chosen | The measure had to be provably the same on boxes (76 placements, reports equal as dictionaries) before anything new was read with it. Planar-faced prisms merge in the pinned kernel (0.9.71) with no curved-contact work. A solve is 0.07–0.35 s and a build 4–10 s, so the kernel cannot be in the drag loop. `deviation` and `stacking` stay box readings. `site.boundary`, `paths` and `area` are additive keys |
 
 ## 6. Open questions (answer as they become blocking)
 

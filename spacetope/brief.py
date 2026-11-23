@@ -115,7 +115,9 @@ class Brief:
     circulation: dict[str, Any] | None = None  # compact corridor/stairs/lifts/doors section (M7)
     door_pairs: list[tuple[str, str]] = field(default_factory=list)  # contacts explicitly marked {door: true}
     affinities: list[dict] = field(default_factory=list)  # brief-level affinities as written (M19)
-    site: dict | None = None  # {north: degrees clockwise from plan +y, hemisphere: N|S}, as written (M21)
+    site: dict | None = None  # {north: degrees clockwise from plan +y, hemisphere: N|S}, as written (M21);
+    #                           field briefs add boundary: [[x, y], ...] in metres and setback (M27)
+    paths: list[dict] = field(default_factory=list)  # routes through the site, as written (M27); read by `field`
     expanded: bool = False  # True once circulation has been expanded into concrete spaces
 
     def __post_init__(self) -> None:
@@ -134,6 +136,7 @@ class Brief:
             if self.level_height <= 0:
                 raise BriefError("level_height must be positive")
         known = set(names) | (set() if self.expanded else set(generated_names(self)))
+        known |= {str(p["name"]) for p in self.paths if isinstance(p, dict) and "name" in p}  # a contact may name a path
         norm: list[tuple[str, str]] = []
         for a, b in self.contacts:
             if a not in known or b not in known:
@@ -182,6 +185,9 @@ class Brief:
             tags = s.get("tags") or ()
             tags = (str(tags),) if isinstance(tags, str) else tuple(str(t) for t in tags)
             affs = tuple(dict(a) if isinstance(a, dict) else a for a in (s.get("affinities") or ()))
+            if "area" in s and "w" not in s and "l" not in s:   # a schedule row: an area, no shape yet (M27)
+                s["w"] = s["l"] = round(float(s["area"]) ** 0.5, 3)
+            s.setdefault("h", d.get("level_height") or 3.0)
             spaces.append(Space(name=str(s["name"]), w=float(s["w"]), l=float(s["l"]), h=float(s["h"]),
                                 program=s.get("program", "room"), tol=tol, wishes=dict(s.get("wishes", {}) or {}),
                                 serves=(int(serves[0]), int(serves[1])) if serves is not None else None,
@@ -198,7 +204,8 @@ class Brief:
                    envelope=d.get("envelope"), levels=d.get("levels"), level_height=d.get("level_height"),
                    circulation=d.get("circulation"), door_pairs=door_pairs, expanded=bool(d.get("expanded", False)),
                    affinities=[dict(a) if isinstance(a, dict) else a for a in (d.get("affinities") or [])],
-                   site=dict(d["site"]) if isinstance(d.get("site"), dict) else d.get("site"))
+                   site=dict(d["site"]) if isinstance(d.get("site"), dict) else d.get("site"),
+                   paths=[dict(p) if isinstance(p, dict) else p for p in (d.get("paths") or [])])
 
     @classmethod
     def from_path(cls, path: str | Path) -> "Brief":
@@ -223,6 +230,8 @@ class Brief:
             d["affinities"] = [dict(a) if isinstance(a, dict) else a for a in self.affinities]
         if self.site is not None:
             d["site"] = dict(self.site) if isinstance(self.site, dict) else self.site
+        if self.paths:
+            d["paths"] = [dict(p) if isinstance(p, dict) else p for p in self.paths]
         if self.expanded:
             d["expanded"] = True
         return d

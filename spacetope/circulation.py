@@ -225,7 +225,8 @@ def expand(brief: Brief) -> Brief:
             # chained corridors: which segment a shaft lands on is the generator's choice; `doors.door_kind_for`
             # already requires a door wherever a shaft meets a corridor, and door planning places it (M15b)
     return Brief(name=brief.name, spaces=spaces, contacts=contacts, envelope=brief.envelope, levels=brief.levels,
-                 level_height=H, circulation=circ, door_pairs=doors, affinities=brief.affinities, site=brief.site, expanded=True)
+                 level_height=H, circulation=circ, door_pairs=doors, affinities=brief.affinities, site=brief.site, paths=brief.paths,
+                 expanded=True)
 
 
 # ----------------------------------------------------------------------------- validation (expanded brief)
