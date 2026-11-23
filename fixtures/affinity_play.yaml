@@ -26,4 +26,3 @@ affinities:
   - {tags: [quiet, noisy], rule: apart, strength: should}
   - {between: [office_a, office_b], kind: touch, strength: should, weight: 2}
   - {between: [kitchen, storage], kind: touch, strength: avoid}
-  - {between: [kitchen, meeting], kind: apart, strength: must}

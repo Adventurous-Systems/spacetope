@@ -22,7 +22,7 @@ from spacetope.solve.registry import GENERATORS
 
 pytestmark = [pytest.mark.gate_m19, pytest.mark.slow]
 ROOT = Path(__file__).resolve().parent.parent.parent
-M20_FIXTURES = {"eight_rooms_hard"}       # added after the M19 baseline was recorded
+M20_FIXTURES = {"eight_rooms_hard", "affinity_play"}       # added after the M19 baseline was recorded
 BASELINE = ROOT / "bench" / "history" / "2026-11-15_m19_affinity.csv"
 EDITED = ("school_three_levels", "small_hospital", "apartments_four_levels")
 
