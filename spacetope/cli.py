@@ -232,6 +232,31 @@ def cmd_field(args) -> int:
     return 0
 
 
+def cmd_volume(args) -> int:
+    """M29: float a schedule as bodies on springs in a void of stacked blocks, and cut storey cells from them."""
+    from . import field, volume
+    from .tessellate import KINDS
+    brief = load(args.brief)
+    kinds = tuple(args.kind.split(",")) if args.kind != "all" else KINDS
+    scales = json.loads(args.scales) if args.scales else None
+    try:
+        solves = [volume.solve(brief, k, args.seed, scales=scales) for k in kinds]
+        out = {"solves": [{k: v for k, v in r.items() if k not in ("cells", "positions", "ground", "bodies", "springs")} for r in solves]}
+        if args.svg:
+            from .viz.plan import write_svg
+            out["svg"] = str(write_svg(solves, args.svg))
+        if args.free:
+            f = field.prepare(brief, args.seed)
+            sketch = volume.free(f, {n: tuple(v) for n, v in solves[0]["positions"].items()}, scales)
+            cc, cells = volume.realise_free(sketch)
+            out["free"] = {k: v for k, v in sketch.items() if k != "pieces"} | {"pieces": len(sketch["pieces"]), "cells_built": len(cells)}
+    except field.FieldInvalid as e:
+        print(json.dumps({"invalid_brief": [p.to_dict() for p in e.problems]}, indent=1))
+        return 2
+    print(json.dumps(out, indent=1))
+    return 0
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="spacetope")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -286,6 +311,14 @@ def main(argv=None) -> int:
     fl.add_argument("--svg", help="write plan drawings of the solves here")
     fl.add_argument("--out", help="directory for the chosen options (JSON and GLB)")
     fl.set_defaults(fn=cmd_field)
+    vo = sub.add_parser("volume", help="float a schedule as bodies on springs in a void and cut storey cells (M29)")
+    vo.add_argument("brief")
+    vo.add_argument("--kind", default="power", help="voronoi, power, slice, grid, hex, a comma list, or all")
+    vo.add_argument("--seed", type=int, default=0)
+    vo.add_argument("--scales", help="JSON dict inflating rooms, e.g. '{\"gym\": 2}'")
+    vo.add_argument("--svg", help="write plan drawings of the solves here")
+    vo.add_argument("--free", action="store_true", help="also build the free-cell sketch in topologic and report it")
+    vo.set_defaults(fn=cmd_volume)
     args = ap.parse_args(argv)
     return args.fn(args)
 

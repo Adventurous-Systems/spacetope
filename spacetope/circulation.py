@@ -226,7 +226,7 @@ def expand(brief: Brief) -> Brief:
             # already requires a door wherever a shaft meets a corridor, and door planning places it (M15b)
     return Brief(name=brief.name, spaces=spaces, contacts=contacts, envelope=brief.envelope, levels=brief.levels,
                  level_height=H, circulation=circ, door_pairs=doors, affinities=brief.affinities, site=brief.site, paths=brief.paths,
-                 expanded=True)
+                 void=brief.void, expanded=True)
 
 
 # ----------------------------------------------------------------------------- validation (expanded brief)

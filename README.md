@@ -214,6 +214,7 @@ Small briefs return options in seconds. The 64-space three-level school takes ab
 | `spacetope export --stem STEM --obj F.obj --json F.json` | Write OBJ and JSON of an option saved with `--save`. |
 | `spacetope programme NAME --seeds 0-99 --out DIR` | Draw briefs from a building programme (see below). `--dataset rows.jsonl` writes training rows instead. |
 | `spacetope field BRIEF [--kind power,slice] [--svg F.svg]` | Solve a field brief (site, paths, areas) with each tessellation and draw the plans. `--options --out DIR` picks the best option per aspect and builds each in topologic. |
+| `spacetope volume BRIEF [--kind power] [--scales JSON] [--free]` | Float a schedule as bodies on springs in a void and cut storey cells. `--free` also builds the free-cell sketch. |
 | `python bench.py --out bench/scoreboard.csv` | Scoreboard over every generator, brief and seed. |
 
 ## Writing a brief
@@ -356,6 +357,25 @@ by a face must be the pairs the measure says share a wall. In the browser, switc
 and drag a room or a point of the path: the plan and its scores follow in about a third of a second. *Best
 option per aspect* builds, in topologic, the option that is most compact, has the truest areas, meets the
 most wishes, and so on. Fixtures are in `fixtures/field/`; the design and its limits are in `docs/PLAN.md` §4.11.
+
+### A void to fill: bodies on springs
+
+Add a `void` and the schedule floats in three dimensions. Each room is a lens-shaped body round its node,
+contacts and affinities are springs, and the bodies settle onto storeys. Each storey is then cut into cells
+so that the void is full.
+
+```yaml
+void:
+  blocks:
+    - {boundary: [[0, 0], [38, 0], [38, 24], [0, 24]], levels: [0, 0]}     # a podium
+    - {boundary: [[0, 4], [16, 4], [16, 20], [0, 20]], levels: [1, 3]}     # a tower on it
+spaces:
+  - {name: hall, area: 140, h: 7.2}        # twice the storey height: it stands through two storeys
+```
+
+`spacetope volume BRIEF --svg plans.svg` solves it; `--scales '{"gym": 2}'` inflates a room and the rest make
+way. In the browser, **volume** shows the bodies, the springs and the cells: click a body, drag it, send it
+up a storey or change its size. *Free cells* builds a sculptural version with sloping walls, as a sketch.
 
 ### Programmes: families of buildings
 

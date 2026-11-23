@@ -118,6 +118,7 @@ class Brief:
     site: dict | None = None  # {north: degrees clockwise from plan +y, hemisphere: N|S}, as written (M21);
     #                           field briefs add boundary: [[x, y], ...] in metres and setback (M27)
     paths: list[dict] = field(default_factory=list)  # routes through the site, as written (M27); read by `field`
+    void: dict | None = None  # {blocks: [{boundary: [[x, y], ...], levels: [from, to]}]}: the volume to fill (M29)
     expanded: bool = False  # True once circulation has been expanded into concrete spaces
 
     def __post_init__(self) -> None:
@@ -205,7 +206,8 @@ class Brief:
                    circulation=d.get("circulation"), door_pairs=door_pairs, expanded=bool(d.get("expanded", False)),
                    affinities=[dict(a) if isinstance(a, dict) else a for a in (d.get("affinities") or [])],
                    site=dict(d["site"]) if isinstance(d.get("site"), dict) else d.get("site"),
-                   paths=[dict(p) if isinstance(p, dict) else p for p in (d.get("paths") or [])])
+                   paths=[dict(p) if isinstance(p, dict) else p for p in (d.get("paths") or [])],
+                   void=dict(d["void"]) if isinstance(d.get("void"), dict) else d.get("void"))
 
     @classmethod
     def from_path(cls, path: str | Path) -> "Brief":
@@ -232,6 +234,8 @@ class Brief:
             d["site"] = dict(self.site) if isinstance(self.site, dict) else self.site
         if self.paths:
             d["paths"] = [dict(p) if isinstance(p, dict) else p for p in self.paths]
+        if self.void is not None:
+            d["void"] = dict(self.void) if isinstance(self.void, dict) else self.void
         if self.expanded:
             d["expanded"] = True
         return d

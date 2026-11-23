@@ -48,9 +48,42 @@ def is_field(brief: Brief) -> bool:
 
 # ----------------------------------------------------------------------------- site and paths
 
+def void_blocks(brief: Brief) -> list[tuple[Polygon, int, int]]:
+    """The blocks of the brief's `void`: (outline in metres, first storey, last storey)."""
+    out = []
+    for i, b in enumerate((brief.void or {}).get("blocks") or []):
+        try:
+            poly = Polygon([(float(p[0]), float(p[1])) for p in b["boundary"]])
+            lo, hi = (int(b["levels"][0]), int(b["levels"][1])) if isinstance(b.get("levels"), (list, tuple)) else (int(b.get("levels", 0)),) * 2
+        except (KeyError, TypeError, ValueError, IndexError):
+            raise FieldInvalid([Problem("void", f"void.blocks[{i}] needs boundary: [[x, y], ...] and levels: [from, to]")])
+        if not poly.is_valid:
+            poly = poly.buffer(0)
+        if poly.is_empty or poly.area <= 0 or lo < 0 or hi < lo:
+            raise FieldInvalid([Problem("void", f"void.blocks[{i}] has no ground or its levels run backwards")])
+        out.append((poly, lo, hi))
+    return out
+
+
+def storey_grounds(brief: Brief) -> dict[int, Polygon]:
+    """Per storey, the ground the void gives it (the union of the blocks standing there). Empty without a void."""
+    blocks = void_blocks(brief)
+    out: dict[int, Polygon] = {}
+    for k in range(max((hi for _, _, hi in blocks), default=-1) + 1):
+        ps = [p for p, lo, hi in blocks if lo <= k <= hi]
+        if not ps:
+            raise FieldInvalid([Problem("void", f"the void has no block on storey {k}")])
+        g = shapely.union_all(ps)
+        out[k] = max(getattr(g, "geoms", [g]), key=lambda q: q.area)
+    return out
+
+
 def buildable(brief: Brief) -> Polygon:
     """The ground rooms may stand on, in metres: the site boundary moved in by the setback, or the envelope."""
     site = brief.site if isinstance(brief.site, dict) else {}
+    if brief.void:
+        g = shapely.union_all(list(storey_grounds(brief).values()))
+        return max(getattr(g, "geoms", [g]), key=lambda q: q.area)
     if site.get("boundary"):
         poly = Polygon([(float(p[0]), float(p[1])) for p in site["boundary"]])
         if not poly.is_valid:
@@ -85,6 +118,8 @@ def _level_height(brief: Brief) -> float:
 
 def level_count(brief: Brief, ground: Polygon) -> int:
     """`levels` when the brief says, else the fewest levels on which the rooms fit: no room left, stack up."""
+    if brief.void:
+        return len(storey_grounds(brief))
     if brief.levels:
         return int(brief.levels)
     rooms = sum(s.w * s.l for s in brief.spaces if s.program in ("room", "void"))
@@ -94,7 +129,7 @@ def level_count(brief: Brief, ground: Polygon) -> int:
     return max(1, top + 1, math.ceil(rooms / free))
 
 
-def path_cells(brief: Brief, ground: Polygon, n: int) -> list[PathCell]:
+def path_cells(brief: Brief, ground: Polygon, n: int, grounds: dict | None = None) -> list[PathCell]:
     """A path with plain [x, y] points runs on every level, with one stair over its first metres when there is more
     than one level. A path whose points carry a level runs where they say; a leg between two levels is a stair that
     stands on both."""
@@ -106,6 +141,8 @@ def path_cells(brief: Brief, ground: Polygon, n: int) -> list[PathCell]:
             return
         poly = line.buffer(width / 2, cap_style="flat", join_style="mitre").intersection(ground)
         for k in range(k0, k1 + 1):
+            if grounds and k in grounds:
+                poly = poly.intersection(grounds[k])
             for other in taken.get(k, []):
                 poly = poly.difference(other)
         parts = [g for g in getattr(poly, "geoms", [poly]) if g.geom_type == "Polygon" and g.area > 0.05]
@@ -193,12 +230,17 @@ class Field:
     H: float
     source: Brief = None
     fronts: dict = _field(default_factory=dict)   # room -> the path cell its brief says it must open onto
+    grounds: dict = _field(default_factory=dict)  # storey -> its own ground, when the brief has a void (M29)
+    extra: dict = _field(default_factory=dict)    # storey -> ground already taken there by a room from the storey below
+
+    def ground_at(self, k: int) -> Polygon:
+        return self.grounds.get(k, self.ground)
 
     def rooms(self, k: int | None = None) -> list[Space]:
         return [s for s in self.brief.spaces if s.program in ("room", "void") and (k is None or self.levels.get(s.name) == k)]
 
     def occupied(self, k: int):
-        ps = [c.poly for c in self.cells if c.k0 <= k <= c.k1]
+        ps = [c.poly for c in self.cells if c.k0 <= k <= c.k1] + list(self.extra.get(k, []))
         return shapely.union_all(ps) if ps else Polygon()
 
     def cuts(self, k: int) -> list[LineString]:
@@ -243,7 +285,8 @@ def prepare(brief: Brief, seed: int = 0) -> Field:
     ground = buildable(brief)
     n = level_count(brief, ground)
     H = _level_height(brief)
-    cells = path_cells(brief, ground, n)
+    grounds = storey_grounds(brief) if brief.void else {}
+    cells = path_cells(brief, ground, n, grounds)
     spaces = [s for s in brief.spaces]
     for c in cells:
         if c.program == "stair":
@@ -258,7 +301,7 @@ def prepare(brief: Brief, seed: int = 0) -> Field:
     def make(contacts: list) -> Brief:
         return Brief(name=brief.name, spaces=spaces, contacts=contacts, envelope=brief.envelope, levels=n, level_height=H,
                      door_pairs=[d for d in brief.door_pairs if tuple(d) in plain], affinities=brief.affinities,
-                     site=brief.site, paths=brief.paths, expanded=True)
+                     site=brief.site, paths=brief.paths, void=brief.void, expanded=True)
     from .levels import assign_levels
     lv = {k: int(v) for k, v in assign_levels(make(plain), seed).items()}
     together = [(a, b) for a, b in plain]          # rooms that must share a wall must share a level
@@ -281,7 +324,7 @@ def prepare(brief: Brief, seed: int = 0) -> Field:
         on = on or [c.name for c in cells if c.path == path and c.k0 <= lv.get(room, 0) <= c.k1]
         if on:
             fronts[room] = on[0]
-    return Field(make(plain + sorted(fronts.items())), ground, cells, lv, n, H, brief, fronts)
+    return Field(make(plain + sorted(fronts.items())), ground, cells, lv, n, H, brief, fronts, grounds)
 
 
 # ----------------------------------------------------------------------------- relaxation
@@ -307,8 +350,8 @@ def relax(f: Field, seed: int = 0, start: dict | None = None, pins: tuple[str, .
     lev = np.array([f.levels.get(n, 0) for n in names])
     x0, y0, x1, y1 = f.ground.bounds
     fixed = np.array([n in pins for n in names])
-    inside = [f.ground.buffer(-0.5 * r) for r in R]
-    inside = [g if not g.is_empty else f.ground for g in inside]
+    inside = [f.ground_at(int(k)).buffer(-0.5 * r) for r, k in zip(R, lev)]
+    inside = [g if not g.is_empty else f.ground_at(int(k)) for g, k in zip(inside, lev)]
     paths = {k: f.occupied(k) for k in range(f.n)}
     same = lev[:, None] == lev[None, :]
     pack = np.full(len(rooms), PACK)
@@ -386,13 +429,13 @@ def relax(f: Field, seed: int = 0, start: dict | None = None, pins: tuple[str, .
                 side = 1.0 if left else -1.0
                 off = cell.width / 2 + 0.8 * R[i]
                 cand = (line.interpolate(t).x + side * off * nx_ / d, line.interpolate(t).y + side * off * ny_ / d)
-                if f.ground.contains(Point(cand)):
+                if f.ground_at(int(lev[i])).contains(Point(cand)):
                     q = cand
                     break
         if q is None:
             for _ in range(200):
                 q = rng.uniform([x0, y0], [x1, y1])
-                if f.ground.contains(Point(q)):
+                if f.ground_at(int(lev[i])).contains(Point(q)):
                     break
         P[i] = q
     scale = float(R.mean())
@@ -493,7 +536,7 @@ def _mass(f: Field, k: int, rooms: list[Space], positions: dict, fit: str, angle
     get). The path cuts the ground into sides; on each side the mass grows until it holds the areas of
     the rooms standing there, so a room keeps its area whichever side it is on."""
     path = f.occupied(k)
-    free = f.ground.difference(path)
+    free = f.ground_at(k).difference(path)
     for line in f.cuts(k):            # a path that stops short of the outline still has two sides
         try:
             free = shapely.GeometryCollection([g for part in getattr(free, "geoms", [free]) for g in split(part, line).geoms])
@@ -575,7 +618,7 @@ def evaluate(f: Field, lay: Layout) -> dict:
     t = _layout.Table(lay, conformed=True)
     sc = _layout.scores(f.brief, t)
     ground = sum(p.area for p in lay.values() if p.z0 == 0) / 1e6
-    sc["coverage"] = round(ground / f.ground.area, 6)
+    sc["coverage"] = round(ground / f.ground_at(0).area, 6)
     checks = precheck(f.brief, t)
     out = {"scores": sc, "checks": {k: {"passed": p, "detail": d} for k, (p, d) in checks.items()},
            "ok": all(p for p, _ in checks.values())}

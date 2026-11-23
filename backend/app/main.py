@@ -303,6 +303,77 @@ async def field_options(req: FieldOptionsRequest) -> dict:
         raise HTTPException(422, {"message": "invalid brief", "problems": [p.to_dict() for p in e.problems]})
 
 
+# ----------------------------------------------------------------------------- bodies in a void (M29)
+
+VOLUME_FIXTURES = FIXTURES / "volume"
+
+
+class VolumeSolveRequest(BaseModel):
+    brief: dict[str, Any]
+    kind: str = "power"
+    seed: int = 0
+    positions: dict[str, list[float]] | None = None
+    pins: list[str] = []
+    scales: dict[str, float] | None = None
+    relax: bool = True
+
+
+@app.get("/api/volume/fixtures")
+def volume_fixtures() -> list[dict]:
+    return [{"name": Brief.from_path(p).name, "spaces": len(Brief.from_path(p).spaces)} for p in sorted(VOLUME_FIXTURES.glob("*.yaml"))]
+
+
+@app.get("/api/volume/fixtures/{name}")
+def volume_fixture(name: str) -> dict:
+    p = VOLUME_FIXTURES / f"{name}.yaml"
+    if not p.exists() or p.parent != VOLUME_FIXTURES:
+        raise HTTPException(404, "unknown fixture")
+    return Brief.from_path(p).to_dict()
+
+
+@app.post("/api/volume/solve")
+def volume_solve(req: VolumeSolveRequest) -> dict:
+    """One state of the contraption: bodies, springs, storey cells, readings. No kernel."""
+    from spacetope import field, volume
+    from spacetope.tessellate import KINDS
+    if req.kind not in KINDS:
+        raise HTTPException(422, f"unknown tessellation {req.kind}; choose from {list(KINDS)}")
+    try:
+        return volume.solve(_field_brief(req.brief), req.kind, req.seed, positions=req.positions, pins=tuple(req.pins),
+                            scales=req.scales, relaxed=req.relax)
+    except field.FieldInvalid as e:
+        raise HTTPException(422, {"message": "invalid brief", "problems": [p.to_dict() for p in e.problems]})
+
+
+@app.post("/api/volume/free")
+async def volume_free(req: VolumeSolveRequest) -> dict:
+    """The sketch mode: free polyhedral cells from the same bodies, built in topologic (a few seconds)."""
+    from types import SimpleNamespace
+    from spacetope import field, volume
+    brief = _field_brief(req.brief)
+    if not req.positions:
+        raise HTTPException(422, "send the bodies' positions")
+
+    def run() -> dict:
+        f = field.prepare(brief, req.seed)
+        sketch = volume.free(f, {n: tuple(v) for n, v in req.positions.items()}, req.scales)
+        cc, cells = volume.realise_free(sketch)
+        run_id = uuid.uuid4().hex[:12]
+        from topologicpy.Dictionary import Dictionary
+        from topologicpy.Topology import Topology
+        built = (Topology.Cells(cc) or cells) if cc is not None else cells
+        names = [Dictionary.ValueAtKey(Topology.Dictionary(c), "name") or "?" for c in built]
+        r = SimpleNamespace(brief=f.brief, cells=built, names=names, placement={}, doors=[])
+        write_glb(r, OUT / run_id / "free.glb", source="topology")
+        return {**{k: v for k, v in sketch.items() if k != "pieces"}, "pieces": len(sketch["pieces"]), "cells_built": len(built),
+                "glb_url": f"/static/{run_id}/free.glb",
+                "catalogue": [{"index": i, "name": n, "program": "room"} for i, n in enumerate(names)]}
+    try:
+        return await asyncio.to_thread(run)
+    except field.FieldInvalid as e:
+        raise HTTPException(422, {"message": "invalid brief", "problems": [p.to_dict() for p in e.problems]})
+
+
 @app.post("/api/select")
 def post_select(req: SelectRequest) -> dict:
     job = JOBS.get(req.job_id)

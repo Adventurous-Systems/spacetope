@@ -670,7 +670,7 @@ de-duplication can return fewer distinct options (house, seed 0: 7 → 5); the g
 Iteration: three rounds on line 3 or 6. If the margin is missed, the number is recorded and the scope
 re-decided; the threshold is not moved.
 
-### 4.11 Field programme M25–M28 (started 2026-11-23)
+### 4.11 Field programme M25–M29 (started 2026-11-23)
 
 Built on branch `m25-field`, off `m19-affinity`. Until now a brief placed boxes. A **field brief** is a schedule
 of spaces with areas and affinities, a site outline and one or more paths drawn through it; contacts are not
@@ -683,6 +683,7 @@ not built, and the site outline here is the first polygon the engine accepts (`s
 | M26 | Five tessellations and one way into topologic (`tessellate.py`, `cells.py`) | **done 2026-11-23**, gate 24 green |
 | M27 | Field briefs: site, paths, relaxation, stack-up, options per aspect (`field.py`) | **done 2026-11-23**, gate 10 green |
 | M28 | Live canvas: field mode, `/api/field/solve`, `/api/field/options` | **done 2026-11-23**, `e2e/tests/field.spec.js` 4 green |
+| M29 | Bodies on springs in a three-dimensional void; storey cells, and free cells as a sketch (`volume.py`) | **done 2026-11-23**, gate 16 green, `e2e/tests/volume.spec.js` 4 green |
 
 #### M25 — One measure for boxes and cells
 
@@ -785,6 +786,66 @@ plan is re-tessellated without relaxing, and on release the other rooms settle. 
 the same with the path. Only the newest request counts. `POST /api/field/options` returns the chosen options
 with a GLB meshed from the built cells; an option is shown in plan or in 3D.
 
+#### M29 — Bodies on springs in a void
+
+**Measured before the design** (a spike on the club schedule in a stepped void, 2026-11-23). One relaxation
+step for 22 bodies costs 0.55 ms, so the model can be live. Three findings shaped the rest. (1) A sphere with
+the volume of a 70 m² room is 7.8 m tall, more than two storeys: bodies must be **lenses**, plan radius from
+the area and height from the storey. (2) Bodies cannot fill a void: packed spheres leave a quarter to a third
+of it empty, and with the schedule asking 85 % of the void the bodies overlapped by up to 35 %. **The cells
+fill the void, not the bodies.** (3) Bodies do not find the empty storeys alone, because they cannot pass
+through each other: the two lower storeys were asked 15–20 % over what they hold while the tower stood half
+empty. Free polyhedral cells do merge in the kernel, but only at full precision: rounded to millimetres the
+sloping faces are no longer planar and nothing builds.
+
+**The contraption** is the original graph, afloat. A space node is the centre of a body; its six wall nodes
+sit on the body's surface; a contact is a spring. A spring between two wall nodes has a direction
+(`a.ceiling — b.floor` draws b over a, `a.+x — b.-x` puts b to the east on a's storey), and
+`springs_from_assembly` reads them off any box option. A contact with no side stated is a spring between
+centres, and affinities are weaker springs, as in M27.
+
+    void: {blocks: [{boundary: [[x, y], ...], levels: [from, to]}, ...]}
+
+- **The void** is a stack of blocks; a storey's ground is the union of the blocks standing on it.
+- **Fill.** Every body is grown by one factor so that the storey areas they ask equal the ground the void has;
+  `scales` inflates a room on top of that, and the factor falls for everyone else.
+- **Relaxation.** In plan the bodies behave as M27's discs; height is measured in a stretched space so a lens
+  acts as a sphere; a floor pull grows as the run cools. Every 25 steps the storeys are put right: bodies tied
+  to each other (must-contacts, level wall-node springs) move as one unit, and a unit goes to another storey,
+  or trades storeys with another unit, whenever that lowers first the over-asking and then the unmet wishes.
+  `must` ground and top wishes fix a storey. Deterministic per seed; a pinned body stays where it was dropped.
+- **Storey cells (the default).** Storeys are cut from the bottom up with the tessellations of M26, over the
+  whole storey ground. A room that stands through several storeys is cut only from ground all of them have,
+  and the rooms above divide what is left. The result is a `Layout`, so M25's measure, M26's kernel check and
+  M27's readings apply unchanged; with a path, each storey's rooms then line it as in M27.
+- **Free cells (a sketch).** A three-dimensional power diagram of the same bodies, cut to each block's convex
+  hull, weights moved until a room's pieces hold its share of the volume; built in topologic at full
+  precision. A room that crosses a block is in several pieces, each a named cell. Walls slope, so the storey
+  measures do not apply; the sketch reports the volume error and how many faces are level, upright or sloping.
+
+**Measured** (stepped void, 22 rooms, four storeys, five kinds × four seeds). 19 of 20 solves pass every
+kernel-free check (the miss is `hex` and its short walls); a solve takes 0.35 s (median), an inflation
+answered from the current state 0.19 s; no storey is asked more than 6 % over its ground, and a small storey
+can stay a room short (up to 30 % under); a room's area is within 0.17 (`power`) to 0.39 (`voronoi`) of its
+share. The sketch: 43 pieces for 22 rooms, volume within 3 % of the shares, 39 % of faces sloping, computed
+in 0.3 s and built in about 5 s.
+
+**Gate** (`tests/gates/test_m29.py`): the void round-trips and a bad one is named; bodies are lenses and fill
+the void; storeys balance (none over by a tenth, none under by more than 0.30) and hard wishes fix theirs;
+every solve is whole, free of overlaps and inside the void on every storey; a tall room stands through two
+storeys and nothing above overlaps it; same seed, same contraption; an inflated body gains ground in under a
+second; a moved body is pinned on its storey; wall-node springs put a body east of, south of and over
+another; a box option yields its springs; with a path the storeys' rooms line it and the stair joins them;
+three kinds verify in the kernel; the sketch fills the void and every piece is a cell.
+
+**Canvas.** A `volume` mode: the void's storeys in outline, lens bodies, springs, and the storey cells
+extruded in the browser from the solve (no kernel). A body is selected by a click, moved with its handle
+(then pinned), sent up or down a storey, and inflated with a slider.
+
+**Limits.** A free-cell block is cut to its convex hull. The storey search is greedy and can stop one move
+short on a tightly tied schedule. Springs from a box option are available to `relax` but there is no control
+for them on the canvas yet. The void is a stack of outlines; a general mesh is not accepted.
+
 **Limits, stated up front.**
 - A single path gives a double-loaded plan: every room lines it. A second row needs a branch, which the
   architect draws; the engine does not invent one.
@@ -885,6 +946,7 @@ with a GLB meshed from the built cells; an option is shown in plan or in 3D.
 | 2026-11-15 | **M21 designed from measurements; margin proposed.** A `site` block (north angle, hemisphere), `facade: sun` as the equator-facing side, and a generator-agnostic pass that picks the best envelope-fitting symmetry of each finished option. Floors for the gate are the measured best-of-symmetries figures (school 0.80, hospital 0.59, house 0.97, clinic 0.59, against 0.19, 0.44, 0.52, 0.51 as generated). No search term in the beam and no room-swap pass in M21 | The outline is unknown mid-search, so the beam cannot judge a facade; a finished plan can be turned for free, and 95 placements × 8 symmetries changed no check but the envelope under quarter turns. The school's as-generated score equals its worst symmetry on all 24 options, so most of its gain undoes a fixed side bias in the beam, and the margin is reported against the worst as well as the as-generated figure. `sun` is orientation only and is named so, since a cosine or "insolation" credit would be a proxy passed off as a sun study. |
 | 2026-11-15 | **M21 built and gated (34 tests, all six lines).** `site` on the brief, the compass resolved from it, `facade: sun` measured as the equator-facing side, `spacetope/orient.py` and the pass in `pipeline.generate`. Facade score, beam seeds 0–2, as generated → after the pass (floor): school 0.194 → 0.806 (0.80), hospital 0.439 → 0.596 (0.59), house 0.817 → 0.974 (0.97), clinic 0.506 → 0.595 (0.59); no option ends worse; verified counts per seed equal with and without the pass on all 12 rows; pass time 2.1 % of beam `t_gen` on the school (limit 5 %). Distinct signatures lost: 2, both on the house, seed 0 (7 → 5). **Notes:** (1) the floors hold on the mean over seeds, as the gate says; single seeds fall under them (school seed 0 0.794, hospital seed 2 0.579), so the headroom is thin. (2) The house fixture is the mirror image of the brief the floor was measured on, so its as-generated figure is 0.82, not 0.52; its best is unchanged. (3) The school's as-generated score equals its worst symmetry on every seed. (4) The chosen symmetries are almost all the half turn; a mirror or quarter turn is chosen four times, all on the house. (5) `facade: sun` with no `site` now measures as S, where M19 and M20 reported it unmeasured; one M19 unit test was rewritten to say so. (6) The pass also runs on placements that later fail `preverify`. (7) No north arrow in the 3D viewer, only on the option card | The margin was set from measurements before the build and met without loosening. (1)–(4) are recorded so the size of the result is not overstated: on corridor plans this is a choice of side, and the room-swap pass is the next step if more is wanted. (7) The viewer's plan-to-screen mapping was not verified, and a wrong arrow is worse than none. |
 | 2026-11-23 | Field programme M25–M28 built on `m25-field`. A space is a plan polygon between two heights (`layout.Prism`); boxes and tessellated cells share one measure, one verifier route and one option tradition. Five tessellations behind one call. The canvas talks to a stateless, kernel-free solve; the kernel builds only the options that were chosen | The measure had to be provably the same on boxes (76 placements, reports equal as dictionaries) before anything new was read with it. Planar-faced prisms merge in the pinned kernel (0.9.71) with no curved-contact work. A solve is 0.07–0.35 s and a build 4–10 s, so the kernel cannot be in the drag loop. `deviation` and `stacking` stay box readings. `site.boundary`, `paths` and `area` are additive keys |
+| 2026-11-23 | M29: the wall-node graph floats as lens bodies on springs in a void of stacked blocks; storeys emerge and are cut into cells with M26; free polyhedral cells are a sketch mode | Measured in a spike first: spheres are two storeys tall, bodies leave the void a third empty and cannot pass each other, and sloping faces lose planarity when rounded. So bodies are lenses, cells do the filling, storeys are balanced by moving tied units, and free cells stay at full precision outside the storey measure |
 
 ## 6. Open questions (answer as they become blocking)
 
