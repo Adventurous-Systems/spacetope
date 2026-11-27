@@ -1,0 +1,117 @@
+mode,generator,fixture,seed,runs,options,identical,same_set,jaccard_min
+deterministic,beam,apartments_four_levels,0,2,8 8,True,True,1.0
+deterministic,beam,apartments_four_levels,1,2,8 8,True,True,1.0
+deterministic,beam,clinic,0,2,8 8,True,True,1.0
+deterministic,beam,clinic,1,2,8 8,True,True,1.0
+deterministic,beam,eight_rooms_corridor,0,2,8 8,True,True,1.0
+deterministic,beam,eight_rooms_corridor,1,2,8 8,True,True,1.0
+deterministic,beam,gallery_rich,0,2,8 8,True,True,1.0
+deterministic,beam,gallery_rich,1,2,8 8,True,True,1.0
+deterministic,beam,hotel_floor,0,2,8 8,True,True,1.0
+deterministic,beam,hotel_floor,1,2,8 8,True,True,1.0
+deterministic,beam,house_ground,0,2,8 8,True,True,1.0
+deterministic,beam,house_ground,1,2,8 8,True,True,1.0
+deterministic,beam,office_30,0,2,8 8,True,True,1.0
+deterministic,beam,office_30,1,2,8 8,True,True,1.0
+deterministic,beam,school_l_corridor,0,2,8 8,True,True,1.0
+deterministic,beam,school_l_corridor,1,2,8 8,True,True,1.0
+deterministic,beam,school_three_levels,0,2,8 8,True,True,1.0
+deterministic,beam,school_three_levels,1,2,8 8,True,True,1.0
+deterministic,beam,school_wing,0,2,8 8,True,True,1.0
+deterministic,beam,school_wing,1,2,8 8,True,True,1.0
+deterministic,beam,small_hospital,0,2,8 8,True,True,1.0
+deterministic,beam,small_hospital,1,2,8 8,True,True,1.0
+deterministic,beam,three_levels_core,0,2,8 8,True,True,1.0
+deterministic,beam,three_levels_core,1,2,8 8,True,True,1.0
+deterministic,beam,three_rooms,0,2,8 8,True,True,1.0
+deterministic,beam,three_rooms,1,2,8 8,True,True,1.0
+deterministic,beam,two_levels_stair,0,2,8 8,True,True,1.0
+deterministic,beam,two_levels_stair,1,2,8 8,True,True,1.0
+deterministic,cpsat,apartments_four_levels,0,2,8 8,True,True,1.0
+deterministic,cpsat,apartments_four_levels,1,2,8 8,True,True,1.0
+deterministic,cpsat,clinic,0,2,5 5,True,True,1.0
+deterministic,cpsat,clinic,1,2,8 8,True,True,1.0
+deterministic,cpsat,eight_rooms_corridor,0,2,8 8,True,True,1.0
+deterministic,cpsat,eight_rooms_corridor,1,2,8 8,True,True,1.0
+deterministic,cpsat,gallery_rich,0,2,8 8,True,True,1.0
+deterministic,cpsat,gallery_rich,1,2,8 8,True,True,1.0
+deterministic,cpsat,hotel_floor,0,2,8 8,True,True,1.0
+deterministic,cpsat,hotel_floor,1,2,3 3,True,True,1.0
+deterministic,cpsat,house_ground,0,2,8 8,True,True,1.0
+deterministic,cpsat,house_ground,1,2,8 8,True,True,1.0
+deterministic,cpsat,school_l_corridor,0,2,5 5,True,True,1.0
+deterministic,cpsat,school_l_corridor,1,2,1 1,True,True,1.0
+deterministic,cpsat,school_three_levels,0,2,1 1,True,True,1.0
+deterministic,cpsat,school_three_levels,1,2,1 1,True,True,1.0
+deterministic,cpsat,school_wing,0,2,8 8,True,True,1.0
+deterministic,cpsat,school_wing,1,2,8 8,True,True,1.0
+deterministic,cpsat,small_hospital,1,2,1 1,True,True,1.0
+deterministic,cpsat,three_levels_core,0,2,8 8,True,True,1.0
+deterministic,cpsat,three_levels_core,1,2,8 8,True,True,1.0
+deterministic,cpsat,three_rooms,0,2,8 8,True,True,1.0
+deterministic,cpsat,three_rooms,1,2,8 8,True,True,1.0
+deterministic,cpsat,two_levels_stair,0,2,8 8,True,True,1.0
+deterministic,cpsat,two_levels_stair,1,2,8 8,True,True,1.0
+deterministic,dual,clinic,0,2,1 1,True,True,1.0
+deterministic,dual,eight_rooms_corridor,0,2,6 6,False,False,0.2
+deterministic,dual,eight_rooms_corridor,1,2,6 6,False,False,0.3333
+deterministic,dual,hotel_floor,0,2,2 2,False,False,0.3333
+deterministic,dual,hotel_floor,1,2,2 2,False,False,0.0
+deterministic,dual,three_rooms,0,2,1 1,True,True,1.0
+deterministic,dual,three_rooms,1,2,1 1,True,True,1.0
+deterministic,treemap,clinic,0,2,1 1,True,True,1.0
+deterministic,treemap,clinic,1,2,1 1,True,True,1.0
+deterministic,treemap,eight_rooms_corridor,0,2,1 1,True,True,1.0
+deterministic,treemap,eight_rooms_corridor,1,2,1 1,True,True,1.0
+deterministic,treemap,gallery_rich,0,2,1 1,True,True,1.0
+deterministic,treemap,gallery_rich,1,2,1 1,True,True,1.0
+deterministic,treemap,hotel_floor,0,2,1 1,True,True,1.0
+deterministic,treemap,hotel_floor,1,2,1 1,True,True,1.0
+deterministic,treemap,house_ground,0,2,1 1,True,True,1.0
+deterministic,treemap,house_ground,1,2,1 1,True,True,1.0
+deterministic,treemap,office_30,0,2,1 1,True,True,1.0
+deterministic,treemap,office_30,1,2,1 1,True,True,1.0
+deterministic,treemap,school_l_corridor,0,2,1 1,True,True,1.0
+deterministic,treemap,school_l_corridor,1,2,1 1,True,True,1.0
+deterministic,treemap,three_rooms,0,2,1 1,True,True,1.0
+deterministic,treemap,three_rooms,1,2,1 1,True,True,1.0
+default,beam,apartments_four_levels,0,3,8 8 8,True,True,1.0
+default,beam,clinic,0,3,8 8 8,True,True,1.0
+default,beam,eight_rooms_corridor,0,3,8 8 8,True,True,1.0
+default,beam,gallery_rich,0,3,8 8 8,True,True,1.0
+default,beam,hotel_floor,0,3,8 8 8,True,True,1.0
+default,beam,house_ground,0,3,8 8 8,True,True,1.0
+default,beam,office_30,0,3,8 8 8,True,True,1.0
+default,beam,school_l_corridor,0,3,8 8 8,True,True,1.0
+default,beam,school_three_levels,0,3,8 8 8,True,True,1.0
+default,beam,school_wing,0,3,8 8 8,True,True,1.0
+default,beam,small_hospital,0,3,8 8 8,True,True,1.0
+default,beam,three_levels_core,0,3,8 8 8,True,True,1.0
+default,beam,three_rooms,0,3,8 8 8,True,True,1.0
+default,beam,two_levels_stair,0,3,8 8 8,True,True,1.0
+default,cpsat,apartments_four_levels,0,3,8 8 8,False,False,0.1429
+default,cpsat,clinic,0,3,7 7 7,False,False,0.0
+default,cpsat,eight_rooms_corridor,0,3,8 8 8,False,False,0.0
+default,cpsat,gallery_rich,0,3,7 7 7,False,False,0.0769
+default,cpsat,hotel_floor,0,3,7 7 7,False,False,0.0
+default,cpsat,house_ground,0,3,8 8 8,False,False,0.0667
+default,cpsat,office_30,0,3,5 6 6,False,False,0.0
+default,cpsat,school_l_corridor,0,3,6 6 6,False,False,0.0
+default,cpsat,school_three_levels,0,3,6 6 6,False,False,0.0
+default,cpsat,school_wing,0,3,8 8 8,False,False,0.0
+default,cpsat,small_hospital,0,3,6 6 6,False,False,0.0
+default,cpsat,three_levels_core,0,3,8 8 8,False,False,0.0
+default,cpsat,three_rooms,0,3,8 8 8,False,False,0.7778
+default,cpsat,two_levels_stair,0,3,8 8 8,False,False,0.0
+default,dual,clinic,0,3,1 1 1,True,True,1.0
+default,dual,eight_rooms_corridor,0,3,6 6 6,False,False,0.3333
+default,dual,hotel_floor,0,3,2 2 2,False,False,0.0
+default,dual,three_rooms,0,3,1 1 1,True,True,1.0
+default,treemap,clinic,0,3,1 1 1,True,True,1.0
+default,treemap,eight_rooms_corridor,0,3,1 1 1,True,True,1.0
+default,treemap,gallery_rich,0,3,1 1 1,True,True,1.0
+default,treemap,hotel_floor,0,3,1 1 1,True,True,1.0
+default,treemap,house_ground,0,3,1 1 1,True,True,1.0
+default,treemap,office_30,0,3,1 1 1,True,True,1.0
+default,treemap,school_l_corridor,0,3,1 1 1,True,True,1.0
+default,treemap,three_rooms,0,3,1 1 1,True,True,1.0

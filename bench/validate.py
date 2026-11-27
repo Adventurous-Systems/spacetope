@@ -85,8 +85,11 @@ def m_gap(brief, pl, rng, want_required: bool):
         if not overlaps(new):
             if want_required:
                 return new, f"{mover} moved 1 mm off {c if mover == a else a}"
-            from spacetope.preverify import check_required_contacts
-            if check_required_contacts(brief, new)[0]:   # the control must only open an incidental joint
+            # The control must open an incidental joint and do nothing else. A 1 mm move can also push the
+            # room out of the envelope, leave a door wall 1 mm short, or (where access is by the door rule and
+            # not a required pair) take the room off its only corridor: those are faults, so try another joint.
+            from spacetope.preverify import preverify
+            if preverify(brief, new)[0]:
                 return new, f"{mover} moved 1 mm off {c if mover == a else a}"
     return None, "no candidate"
 
@@ -212,16 +215,26 @@ def t_shuffle(brief, pl, rng):
 
 
 def t_swap_identical(brief, pl, rng):
-    """Swap the boxes of two spaces with the same programme, nominal size, tolerance and level wish."""
+    """Swap the boxes of two spaces the brief cannot tell apart: the same programme, nominal size, tolerance,
+    wishes and height mode, and the same required contacts and marked doors (to the same other spaces, or to
+    each other). Two equal-sized rooms of which only one must touch a third are not identical: swapping them
+    breaks that contact, which is a fault, not a relation."""
     def key(s):
-        return (s.program, s.w, s.l, s.h, str(s.tol), s.wishes.get("level"))
+        return (s.program, s.w, s.l, s.h, str(s.tol), str(sorted(s.wishes.items())), s.height_mode, s.serves)
+
+    def links(n, other):
+        """What n must touch and what it has a marked door to, with its would-be twin written as '*'."""
+        return tuple(frozenset("*" if m == other else m for pair in pairs if n in pair for m in pair if m != n)
+                     for pairs in (brief.required_pairs(), brief.marked_door_pairs()))
+
     groups: dict = {}
     for n in sorted(pl):
         groups.setdefault(key(brief.space(n)), []).append(n)
-    twins = [g for g in groups.values() if len(g) >= 2]
+    twins = [(a, b) for g in groups.values() for i, a in enumerate(g) for b in g[i + 1:]
+             if links(a, b) == links(b, a)]
     if not twins:
         return None, "no identical pair"
-    a, b = rng.choice(twins)[:2]
+    a, b = rng.choice(twins)
     new = dict(pl)
     new[a], new[b] = pl[b], pl[a]
     return new, f"swap {a} and {b}"
@@ -339,25 +352,29 @@ def main() -> None:
             mw.writeheader()
         t0 = time.time()
         n = 0
-        # max_tasks_per_child: NOTES §12 — the kernel degrades after hundreds of builds in one process
-        with ProcessPoolExecutor(max_workers=args.workers, max_tasks_per_child=8) as ex:
-            futs = {ex.submit(work, fx, meta, path): path for fx, meta, path in jobs}
-            for fut in as_completed(futs):
-                try:
-                    rows = fut.result()
-                except Exception as e:
+        # NOTES §12: the kernel degrades after hundreds of builds in one process, so workers are short-lived.
+        # A fresh pool per batch does that; `max_tasks_per_child` does not, on Python 3.11.9: once every
+        # worker has served its tasks the pool replaces none of them and the run hangs with work queued.
+        batch = args.workers * 8
+        for start in range(0, len(jobs), batch):
+            with ProcessPoolExecutor(max_workers=args.workers) as ex:
+                futs = {ex.submit(work, fx, meta, path): path for fx, meta, path in jobs[start:start + batch]}
+                for fut in as_completed(futs):
+                    try:
+                        rows = fut.result()
+                    except Exception as e:
+                        n += 1
+                        print(f"{n}/{len(jobs)} {futs[fut]} WORKER FAILED, not recorded, "
+                              f"a later --resume retries it: {type(e).__name__}: {e}", flush=True)
+                        continue
+                    for row in rows:
+                        if row["kind"] == "metamorphic":
+                            mw.writerow({k: row.get(k, "") for k in cols_m})
+                        else:
+                            fw.writerow({k: row.get(k, "") for k in COLUMNS})
+                    ff.flush(); mf.flush()
                     n += 1
-                    print(f"{n}/{len(jobs)} {futs[fut]} WORKER FAILED, not recorded, "
-                          f"a later --resume retries it: {type(e).__name__}: {e}", flush=True)
-                    continue
-                for row in rows:
-                    if row["kind"] == "metamorphic":
-                        mw.writerow({k: row.get(k, "") for k in cols_m})
-                    else:
-                        fw.writerow({k: row.get(k, "") for k in COLUMNS})
-                ff.flush(); mf.flush()
-                n += 1
-                print(f"{n}/{len(jobs)} {futs[fut]} ({time.time() - t0:.0f}s)", flush=True)
+                    print(f"{n}/{len(jobs)} {futs[fut]} ({time.time() - t0:.0f}s)", flush=True)
     print(f"done: {n} placements in {time.time() - t0:.0f}s -> {f_path}, {m_path}")
 
 

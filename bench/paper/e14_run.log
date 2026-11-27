@@ -1,0 +1,398 @@
+  treemap  apartments_four_levels seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  apartments_four_levels seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.638s
+  treemap  clinic                 seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.595s
+  treemap  eight_rooms_corridor   seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.379s
+  treemap  eight_rooms_corridor   seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.377s
+  treemap  gallery_rich           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.475s
+  treemap  gallery_rich           seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.456s
+  treemap  hotel_floor            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.857s
+  treemap  hotel_floor            seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.855s
+  treemap  house_ground           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.337s
+  treemap  house_ground           seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.337s
+  treemap  office_30              seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.405s
+  treemap  office_30              seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.387s
+  treemap  school_l_corridor      seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.829s
+  treemap  school_l_corridor      seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.83s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_three_levels    seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.096s
+  treemap  three_rooms            seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.096s
+  treemap  two_levels_stair       seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  two_levels_stair       seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.179+8.084s
+  beam     apartments_four_levels seed 1: verified 1/8 distinct 1 adj 1.0 dev 0.0714 t 1.611+8.045s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.568+5.385s
+  beam     clinic                 seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.501+5.475s
+  beam     eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0023 t 0.338+3.228s
+  beam     eight_rooms_corridor   seed 1: verified 8/8 distinct 7 adj 1.0 dev 0.0015 t 0.338+3.19s
+  beam     gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 0.395+4.43s
+  beam     gallery_rich           seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.433+4.42s
+  beam     hotel_floor            seed 0: verified 8/8 distinct 6 adj 1.0 dev 0.0 t 0.917+8.004s
+  beam     hotel_floor            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0005 t 0.966+8.044s
+  beam     house_ground           seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0144 t 0.187+3.168s
+  beam     house_ground           seed 1: verified 7/8 distinct 6 adj 1.0 dev 0.0147 t 0.203+3.164s
+  beam     office_30              seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0184 t 3.424+20.216s
+  beam     office_30              seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0188 t 3.429+19.973s
+  beam     school_l_corridor      seed 0: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 2.003+7.058s
+  beam     school_l_corridor      seed 1: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 1.986+7.146s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 24.065+101.196s
+  beam     school_three_levels    seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 24.892+100.594s
+  beam     school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.144+7.919s
+  beam     school_wing            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.997+7.86s
+  beam     small_hospital         seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 5.876+64.781s
+  beam     small_hospital         seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 5.952+67.832s
+  beam     three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.624+9.039s
+  beam     three_levels_core      seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.654+9.042s
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.08+0.809s
+  beam     three_rooms            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.034+0.863s
+  beam     two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.662+6.509s
+  beam     two_levels_stair       seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.74+7.455s
+  cpsat    apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 5.374+11.041s
+  cpsat    apartments_four_levels seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0046 t 88.606+10.906s
+  cpsat    clinic                 seed 0: verified 5/5 distinct 5 adj 1.0 dev 0.0256 t 29.824+4.552s
+  cpsat    clinic                 seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 56.615+8.137s
+  cpsat    eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 64.875+4.201s
+  cpsat    eight_rooms_corridor   seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0041 t 71.02+4.174s
+  cpsat    gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0008 t 57.161+4.5s
+  cpsat    gallery_rich           seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0042 t 49.723+4.486s
+  cpsat    hotel_floor            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0192 t 45.948+8.454s
+  cpsat    hotel_floor            seed 1: verified 3/3 distinct 3 adj 1.0 dev 0.0313 t 18.884+3.036s
+  cpsat    house_ground           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0001 t 14.768+3.283s
+  cpsat    house_ground           seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 11.811+3.24s
+  cpsat    office_30              seed 0: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 29.91+0.0s
+  cpsat    office_30              seed 1: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 35.517+0.0s
+  cpsat    school_l_corridor      seed 0: verified 5/5 distinct 5 adj 1.0 dev 0.0432 t 63.367+4.739s
+  cpsat    school_l_corridor      seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0475 t 12.35+0.953s
+  cpsat    school_three_levels    seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0054 t 17.917+12.604s
+  cpsat    school_three_levels    seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0054 t 21.103+7.938s
+  cpsat    school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0003 t 69.422+10.586s
+  cpsat    school_wing            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0004 t 67.243+7.748s
+  cpsat    small_hospital         seed 0: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 51.742+0.0s
+  cpsat    small_hospital         seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0062 t 12.42+4.439s
+  cpsat    three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 70.807+8.988s
+  cpsat    three_levels_core      seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0015 t 65.427+9.28s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.312+0.815s
+  cpsat    three_rooms            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.472+0.801s
+  cpsat    two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0001 t 58.234+6.396s
+  cpsat    two_levels_stair       seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 53.46+6.299s
+  dual     apartments_four_levels seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     apartments_four_levels seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 6.477+0.686s
+  dual     clinic                 seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     eight_rooms_corridor   seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0104 t 20.004+2.459s
+  dual     eight_rooms_corridor   seed 1: verified 6/6 distinct 6 adj 1.0 dev 0.0129 t 20.004+2.447s
+  dual     gallery_rich           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     gallery_rich           seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     hotel_floor            seed 0: verified 2/2 distinct 2 adj 1.0 dev 0.0078 t 20.429+2.064s
+  dual     hotel_floor            seed 1: verified 2/2 distinct 2 adj 1.0 dev 0.0059 t 20.783+2.084s
+  dual     house_ground           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     house_ground           seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     school_l_corridor      seed 0: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_l_corridor      seed 1: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_three_levels    seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.091+0.106s
+  dual     three_rooms            seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.068+0.103s
+  dual     two_levels_stair       seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     two_levels_stair       seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 79 rows to bench/paper/e14/det_a_scoreboard.csv in 2105.7s
+  treemap  apartments_four_levels seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  apartments_four_levels seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.635s
+  treemap  clinic                 seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.558s
+  treemap  eight_rooms_corridor   seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.376s
+  treemap  eight_rooms_corridor   seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.379s
+  treemap  gallery_rich           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.47s
+  treemap  gallery_rich           seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.452s
+  treemap  hotel_floor            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.852s
+  treemap  hotel_floor            seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.851s
+  treemap  house_ground           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.333s
+  treemap  house_ground           seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.333s
+  treemap  office_30              seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.394s
+  treemap  office_30              seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.381s
+  treemap  school_l_corridor      seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.827s
+  treemap  school_l_corridor      seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.825s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_three_levels    seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.096s
+  treemap  three_rooms            seed 1: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.096s
+  treemap  two_levels_stair       seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  two_levels_stair       seed 1: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.164+8.065s
+  beam     apartments_four_levels seed 1: verified 1/8 distinct 1 adj 1.0 dev 0.0714 t 1.662+8.022s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.509+5.322s
+  beam     clinic                 seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.501+5.442s
+  beam     eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0023 t 0.331+3.201s
+  beam     eight_rooms_corridor   seed 1: verified 8/8 distinct 7 adj 1.0 dev 0.0015 t 0.325+3.16s
+  beam     gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 0.392+4.406s
+  beam     gallery_rich           seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.431+4.392s
+  beam     hotel_floor            seed 0: verified 8/8 distinct 6 adj 1.0 dev 0.0 t 0.909+7.962s
+  beam     hotel_floor            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0005 t 0.956+7.966s
+  beam     house_ground           seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0144 t 0.186+3.142s
+  beam     house_ground           seed 1: verified 7/8 distinct 6 adj 1.0 dev 0.0147 t 0.202+3.163s
+  beam     office_30              seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0184 t 3.4+19.974s
+  beam     office_30              seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0188 t 3.413+19.977s
+  beam     school_l_corridor      seed 0: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 1.988+7.009s
+  beam     school_l_corridor      seed 1: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 2.03+7.115s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 24.004+101.13s
+  beam     school_three_levels    seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 28.794+117.071s
+  beam     school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.4+10.161s
+  beam     school_wing            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.201+10.028s
+  beam     small_hospital         seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 7.189+82.632s
+  beam     small_hospital         seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 7.305+80.085s
+  beam     three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.588+8.705s
+  beam     three_levels_core      seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.607+9.816s
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.045+1.012s
+  beam     three_rooms            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.045+1.023s
+  beam     two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.803+7.496s
+  beam     two_levels_stair       seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.713+6.767s
+  cpsat    apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 4.951+9.07s
+  cpsat    apartments_four_levels seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0046 t 73.021+10.152s
+  cpsat    clinic                 seed 0: verified 5/5 distinct 5 adj 1.0 dev 0.0256 t 23.952+3.444s
+  cpsat    clinic                 seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 50.612+6.83s
+  cpsat    eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 55.67+3.255s
+  cpsat    eight_rooms_corridor   seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0041 t 62.662+3.251s
+  cpsat    gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0008 t 50.559+4.514s
+  cpsat    gallery_rich           seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0042 t 48.431+4.464s
+  cpsat    hotel_floor            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0192 t 46.939+8.339s
+  cpsat    hotel_floor            seed 1: verified 3/3 distinct 3 adj 1.0 dev 0.0313 t 18.687+3.28s
+  cpsat    house_ground           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0001 t 14.648+3.163s
+  cpsat    house_ground           seed 1: verified 7/8 distinct 7 adj 1.0 dev 0.0 t 11.839+3.16s
+  cpsat    office_30              seed 0: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 29.795+0.0s
+  cpsat    office_30              seed 1: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 34.8+0.0s
+  cpsat    school_l_corridor      seed 0: verified 5/5 distinct 5 adj 1.0 dev 0.0432 t 63.461+4.702s
+  cpsat    school_l_corridor      seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0475 t 12.378+0.939s
+  cpsat    school_three_levels    seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0054 t 17.88+12.616s
+  cpsat    school_three_levels    seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0054 t 17.06+12.097s
+  cpsat    school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0003 t 53.439+7.974s
+  cpsat    school_wing            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0004 t 58.619+8.158s
+  cpsat    small_hospital         seed 0: verified 0/0 distinct 0 adj 0.0 dev 0.0 t 51.719+0.0s
+  cpsat    small_hospital         seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0062 t 12.487+8.19s
+  cpsat    three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 70.837+8.911s
+  cpsat    three_levels_core      seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0015 t 66.308+9.168s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.373+0.824s
+  cpsat    three_rooms            seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.443+0.827s
+  cpsat    two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0001 t 58.626+6.655s
+  cpsat    two_levels_stair       seed 1: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 53.512+6.319s
+  dual     apartments_four_levels seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     apartments_four_levels seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 6.441+0.68s
+  dual     clinic                 seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     eight_rooms_corridor   seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0104 t 20.003+2.338s
+  dual     eight_rooms_corridor   seed 1: verified 6/6 distinct 6 adj 1.0 dev 0.0127 t 20.052+2.419s
+  dual     gallery_rich           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     gallery_rich           seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     hotel_floor            seed 0: verified 2/2 distinct 2 adj 1.0 dev 0.0076 t 20.303+1.764s
+  dual     hotel_floor            seed 1: verified 2/2 distinct 2 adj 1.0 dev 0.004 t 20.486+2.062s
+  dual     house_ground           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     house_ground           seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 1: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     school_l_corridor      seed 0: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_l_corridor      seed 1: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_three_levels    seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.169+0.104s
+  dual     three_rooms            seed 1: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.066+0.101s
+  dual     two_levels_stair       seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     two_levels_stair       seed 1: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 79 rows to bench/paper/e14/det_b_scoreboard.csv in 2080.5s
+  treemap  apartments_four_levels seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.642s
+  treemap  eight_rooms_corridor   seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.377s
+  treemap  gallery_rich           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.469s
+  treemap  hotel_floor            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.877s
+  treemap  house_ground           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.333s
+  treemap  office_30              seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.373s
+  treemap  school_l_corridor      seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.83s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.097s
+  treemap  two_levels_stair       seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.16+8.032s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.513+5.321s
+  beam     eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0023 t 0.335+3.199s
+  beam     gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 0.396+4.387s
+  beam     hotel_floor            seed 0: verified 8/8 distinct 6 adj 1.0 dev 0.0 t 0.924+8.012s
+  beam     house_ground           seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0144 t 0.189+3.134s
+  beam     office_30              seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0184 t 3.38+19.951s
+  beam     school_l_corridor      seed 0: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 2.004+6.993s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 23.962+95.864s
+  beam     school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.142+7.935s
+  beam     small_hospital         seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 5.93+64.554s
+  beam     three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.647+8.841s
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.037+0.798s
+  beam     two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.661+6.275s
+  cpsat    apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.215+7.9s
+  cpsat    clinic                 seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.308+4.749s
+  cpsat    eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 18.842+3.178s
+  cpsat    gallery_rich           seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0003 t 21.241+3.881s
+  cpsat    hotel_floor            seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.51+7.131s
+  cpsat    house_ground           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.365+3.179s
+  cpsat    office_30              seed 0: verified 5/5 distinct 5 adj 1.0 dev 0.0383 t 19.7+12.946s
+  cpsat    school_l_corridor      seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0004 t 19.049+5.793s
+  cpsat    school_three_levels    seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0021 t 21.297+77.846s
+  cpsat    school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 17.59+7.807s
+  cpsat    small_hospital         seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0032 t 19.558+50.439s
+  cpsat    three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 11.602+8.909s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.203+0.799s
+  cpsat    two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 13.895+6.297s
+  dual     apartments_four_levels seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 6.623+0.674s
+  dual     eight_rooms_corridor   seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0091 t 20.001+2.425s
+  dual     gallery_rich           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     hotel_floor            seed 0: verified 2/2 distinct 2 adj 1.0 dev 0.0089 t 20.68+2.061s
+  dual     house_ground           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     school_l_corridor      seed 0: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.316+0.124s
+  dual     two_levels_stair       seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 40 rows to bench/paper/e14/def_a_scoreboard.csv in 803.4s
+  treemap  apartments_four_levels seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.621s
+  treemap  eight_rooms_corridor   seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.375s
+  treemap  gallery_rich           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.469s
+  treemap  hotel_floor            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.853s
+  treemap  house_ground           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.33s
+  treemap  office_30              seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.376s
+  treemap  school_l_corridor      seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.83s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.095s
+  treemap  two_levels_stair       seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.153+8.68s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.509+5.287s
+  beam     eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0023 t 0.336+3.163s
+  beam     gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 0.395+4.39s
+  beam     hotel_floor            seed 0: verified 8/8 distinct 6 adj 1.0 dev 0.0 t 0.919+7.942s
+  beam     house_ground           seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0144 t 0.189+3.138s
+  beam     office_30              seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0184 t 3.446+20.035s
+  beam     school_l_corridor      seed 0: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 2.004+7.16s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 23.915+95.784s
+  beam     school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.127+7.809s
+  beam     small_hospital         seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 5.869+63.886s
+  beam     three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.594+8.824s
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.036+0.797s
+  beam     two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.662+6.258s
+  cpsat    apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.97+7.88s
+  cpsat    clinic                 seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.33+4.694s
+  cpsat    eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 12.392+3.154s
+  cpsat    gallery_rich           seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0003 t 21.239+3.925s
+  cpsat    hotel_floor            seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.509+7.13s
+  cpsat    house_ground           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.32+3.136s
+  cpsat    office_30              seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0276 t 19.688+21.121s
+  cpsat    school_l_corridor      seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0004 t 19.13+6.531s
+  cpsat    school_three_levels    seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0022 t 21.304+79.162s
+  cpsat    school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 19.129+8.046s
+  cpsat    small_hospital         seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0029 t 19.562+45.638s
+  cpsat    three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 14.303+9.179s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.19+0.846s
+  cpsat    two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 13.442+6.304s
+  dual     apartments_four_levels seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 6.568+0.689s
+  dual     eight_rooms_corridor   seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0091 t 20.004+2.436s
+  dual     gallery_rich           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     hotel_floor            seed 0: verified 2/2 distinct 2 adj 1.0 dev 0.0082 t 20.903+1.85s
+  dual     house_ground           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     school_l_corridor      seed 0: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.328+0.102s
+  dual     two_levels_stair       seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 40 rows to bench/paper/e14/def_b_scoreboard.csv in 807.6s
+  treemap  apartments_four_levels seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  clinic                 seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.621s
+  treemap  eight_rooms_corridor   seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.376s
+  treemap  gallery_rich           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.471s
+  treemap  hotel_floor            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.851s
+  treemap  house_ground           seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.331s
+  treemap  office_30              seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+2.404s
+  treemap  school_l_corridor      seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.827s
+  treemap  school_three_levels    seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  school_wing            seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  small_hospital         seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_levels_core      seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  treemap  three_rooms            seed 0: verified 0/1 distinct 0 adj 0.0 dev 0.0 t 0.0+0.095s
+  treemap  two_levels_stair       seed 0: skipped (GeneratorUnsupported: treemap is single-level only)
+  beam     apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.154+8.199s
+  beam     clinic                 seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0 t 0.51+5.455s
+  beam     eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0023 t 0.335+3.249s
+  beam     gallery_rich           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0007 t 0.401+4.468s
+  beam     hotel_floor            seed 0: verified 8/8 distinct 6 adj 1.0 dev 0.0 t 0.925+8.253s
+  beam     house_ground           seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0144 t 0.189+3.323s
+  beam     office_30              seed 0: verified 8/8 distinct 7 adj 1.0 dev 0.0184 t 3.461+20.257s
+  beam     school_l_corridor      seed 0: verified 0/8 distinct 0 adj 0.0 dev 0.0 t 2.026+7.17s
+  beam     school_three_levels    seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0054 t 24.548+97.473s
+  beam     school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.15+7.936s
+  beam     small_hospital         seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0047 t 5.882+64.845s
+  beam     three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 1.595+8.82s
+  beam     three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.036+0.792s
+  beam     two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.662+6.272s
+  cpsat    apartments_four_levels seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 3.674+7.977s
+  cpsat    clinic                 seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.302+4.845s
+  cpsat    eight_rooms_corridor   seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 13.574+3.192s
+  cpsat    gallery_rich           seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0003 t 21.248+3.939s
+  cpsat    hotel_floor            seed 0: verified 7/7 distinct 7 adj 1.0 dev 0.0 t 21.51+7.788s
+  cpsat    house_ground           seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 2.456+3.219s
+  cpsat    office_30              seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0284 t 19.695+15.633s
+  cpsat    school_l_corridor      seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0005 t 19.073+5.743s
+  cpsat    school_three_levels    seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0022 t 21.304+77.186s
+  cpsat    school_wing            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 16.797+7.785s
+  cpsat    small_hospital         seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.003 t 19.567+45.688s
+  cpsat    three_levels_core      seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 11.845+8.33s
+  cpsat    three_rooms            seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 0.195+0.843s
+  cpsat    two_levels_stair       seed 0: verified 8/8 distinct 8 adj 1.0 dev 0.0 t 13.449+6.232s
+  dual     apartments_four_levels seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     clinic                 seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0384 t 6.517+0.673s
+  dual     eight_rooms_corridor   seed 0: verified 6/6 distinct 6 adj 1.0 dev 0.0095 t 20.014+2.394s
+  dual     gallery_rich           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     hotel_floor            seed 0: verified 2/2 distinct 2 adj 1.0 dev 0.0079 t 20.744+2.066s
+  dual     house_ground           seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     office_30              seed 0: skipped (GeneratorUnsupported: dual: these rooms cannot tile a rectangle within their toler)
+  dual     school_l_corridor      seed 0: skipped (GeneratorUnsupported: dual: the wished contacts leave a room enclosed by three oth)
+  dual     school_three_levels    seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     school_wing            seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     small_hospital         seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_levels_core      seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+  dual     three_rooms            seed 0: verified 1/1 distinct 1 adj 1.0 dev 0.0311 t 20.195+0.103s
+  dual     two_levels_stair       seed 0: skipped (GeneratorUnsupported: dual is single-level only)
+wrote 40 rows to bench/paper/e14/def_c_scoreboard.csv in 799.2s
+CHAIN_DONE

@@ -1,0 +1,15 @@
+wrote 116 rows to bench/paper/e14_repro.csv
+
+cells (generator, fixture, seed) identical across runs
+  default        beam     identical  14/14   same set  14/14
+  default        cpsat    identical   0/14   same set   0/14
+  default        dual     identical   2/4    same set   2/4
+  default        treemap  identical   8/8    same set   8/8
+  deterministic  beam     identical  28/28   same set  28/28
+  deterministic  cpsat    identical  25/25   same set  25/25
+  deterministic  dual     identical   3/7    same set   3/7
+  deterministic  treemap  identical  16/16   same set  16/16
+  not identical: dual eight_rooms_corridor seed 0 options 6 6 jaccard 0.2
+  not identical: dual eight_rooms_corridor seed 1 options 6 6 jaccard 0.3333
+  not identical: dual hotel_floor seed 0 options 2 2 jaccard 0.3333
+  not identical: dual hotel_floor seed 1 options 2 2 jaccard 0.0
