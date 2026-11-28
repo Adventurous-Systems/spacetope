@@ -208,18 +208,18 @@ def snap(pl: dict[str, Box], wanted: list[tuple[str, str, int]], env: dict[str, 
 def cost(brief: Brief, pl: dict[str, Box], p: SeqPairParams, env: dict[str, int] | None,
          required: list[tuple[str, str, int]], rooms: list[str], corridors: list[str]) -> float:
     missing = sum(apart(pl[a], pl[b], need) for a, b, need in required) / 1000
-    stranded = 0.0
+    unreached = 0.0
     for r in rooms:
         if r in corridors:
             continue
-        stranded += min((apart(pl[r], pl[c], required_overlap_mm(brief, r, c, p.door_mm)) for c in corridors),
+        unreached += min((apart(pl[r], pl[c], required_overlap_mm(brief, r, c, p.door_mm)) for c in corridors),
                         default=0) / 1000
     bb = bounds(pl.values())
     over = 0
     if env is not None:
         over = max(0, bb.w - env["w"]) + max(0, bb.l - env["l"])
     dead = (bb.w * bb.l - sum(b.w * b.l for b in pl.values())) / 1e6
-    return (p.w_contact * missing + p.w_access * stranded + p.w_envelope * over / 1000
+    return (p.w_contact * missing + p.w_access * unreached + p.w_envelope * over / 1000
             + p.w_perimeter * (bb.w + bb.l) / 1000 + p.w_dead * dead)
 
 

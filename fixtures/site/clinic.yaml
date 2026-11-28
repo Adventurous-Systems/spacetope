@@ -1,0 +1,129 @@
+# A single-level clinic: a waiting room and four consulting rooms on one corridor, with reception
+# opening into the waiting room and the treatment room linked to the first consulting room.
+# Orientation wishes added for M21: true north is 30 degrees clockwise from plan +y, which still puts S on the plan's
+# -y side; waiting and consulting rooms face south, treatment north, the store keeps off the south side.
+name: clinic
+levels: 1
+level_height: 3.2
+envelope:
+  w: 20
+  l: 12
+  h: 3.2
+circulation:
+  corridor:
+    w: 2
+    l: 14
+spaces:
+- name: waiting
+  w: 6
+  l: 5
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: reception
+  w: 3
+  l: 3
+  h: 3.2
+  program: room
+- name: consult_1
+  w: 3.5
+  l: 3
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_2
+  w: 3.5
+  l: 3
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_3
+  w: 3.5
+  l: 3
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: consult_4
+  w: 3.5
+  l: 3
+  h: 3.2
+  program: room
+  wishes:
+    exterior: true
+  affinities:
+  - facade: S
+    strength: should
+- name: treatment
+  w: 4
+  l: 3.5
+  h: 3.2
+  program: room
+  affinities:
+  - facade: N
+    strength: should
+- name: wc_public
+  w: 2
+  l: 2.5
+  h: 3.2
+  program: room
+- name: wc_staff
+  w: 2
+  l: 2
+  h: 3.2
+  program: room
+- name: store
+  w: 2
+  l: 2
+  h: 3.2
+  program: room
+  affinities:
+  - facade: S
+    strength: avoid
+contacts:
+- - corridor_0
+  - waiting
+- - corridor_0
+  - reception
+- - corridor_0
+  - consult_1
+- - corridor_0
+  - consult_2
+- - corridor_0
+  - consult_3
+- - corridor_0
+  - consult_4
+- - corridor_0
+  - treatment
+- - corridor_0
+  - wc_public
+- - corridor_0
+  - wc_staff
+- - corridor_0
+  - store
+- - reception
+  - waiting
+  - door: true
+- - treatment
+  - consult_1
+  - door: true
+- - waiting
+  - wc_public
+site:
+  north: 30
+  hemisphere: N

@@ -54,7 +54,9 @@ def beam_multilevel(brief: Brief, params: BeamParams | None = None, seed: int = 
                         pb = partial[prev[0]]
                         fixed[cur[0]] = Box(pb.x, pb.y, k * H, pb.w, pb.l, H)
                 todo = [s for s in by_level[k] if s.name not in fixed]
-                outs = beam_search(brief, p, seed + 100 * k, spaces=todo, fixed=fixed,
+                # the finished level underneath, by name: lets `stack` be judged when an upper room is placed (M20)
+                below = {n: b for n, b in partial.items() if b.z1 == k * H and not brief.space(n).is_shaft}
+                outs = beam_search(brief, p, seed + 100 * k, spaces=todo, fixed=fixed, below=below,
                                    context=list(partial.values()), ref_planes=planes(lower),
                                    envelope=env, height=H, z0=k * H, normalise_output=False, redim=False,
                                    scorer=scorer, batch_scorer=batch_scorer, trace=trace)

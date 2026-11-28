@@ -11,14 +11,14 @@ circulation:
   lifts:
     - {name: lift, w: 2.4, l: 2.4}
 spaces:
-  - {name: flat_a0, w: 7, l: 6, h: 3, program: room, wishes: {level: 0, exterior: true}}
-  - {name: flat_b0, w: 7, l: 6, h: 3, program: room, wishes: {level: 0, exterior: true}}
-  - {name: flat_a1, w: 7, l: 6, h: 3, program: room, wishes: {level: 1, exterior: true}}
-  - {name: flat_b1, w: 7, l: 6, h: 3, program: room, wishes: {level: 1, exterior: true}}
-  - {name: flat_a2, w: 7, l: 6, h: 3, program: room, wishes: {level: 2, exterior: true}}
-  - {name: flat_b2, w: 7, l: 6, h: 3, program: room, wishes: {level: 2, exterior: true}}
-  - {name: flat_a3, w: 7, l: 6, h: 3, program: room, wishes: {level: 3, exterior: true}}
-  - {name: flat_b3, w: 7, l: 6, h: 3, program: room, wishes: {level: 3, exterior: true}}
+  - {name: flat_a0, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 0, exterior: true}}
+  - {name: flat_b0, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 0, exterior: true}}
+  - {name: flat_a1, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 1, exterior: true}}
+  - {name: flat_b1, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 1, exterior: true}}
+  - {name: flat_a2, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 2, exterior: true}}
+  - {name: flat_b2, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 2, exterior: true}}
+  - {name: flat_a3, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 3, exterior: true}}
+  - {name: flat_b3, tags: [wet], w: 7, l: 6, h: 3, program: room, wishes: {level: 3, exterior: true}}
 contacts:
   - [corridor_0, flat_a0]
   - [corridor_0, flat_b0]
@@ -28,3 +28,5 @@ contacts:
   - [corridor_2, flat_b2]
   - [corridor_3, flat_a3]
   - [corridor_3, flat_b3]
+affinities:
+  - {tag: wet, rule: stack, strength: should}

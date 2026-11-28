@@ -20,6 +20,7 @@ from typing import Any
 
 import yaml
 
+from .affinity import refs
 from .brief import Brief, BriefError
 
 PROGRAMMES = Path(__file__).resolve().parent.parent / "programmes"
@@ -303,6 +304,16 @@ def _variation(brief: Brief, kind: str, rng: random.Random) -> Brief | None:
         gone = rng.choice(rooms)["name"]
         d["spaces"] = [s for s in d["spaces"] if s["name"] != gone]
         d["contacts"] = [c for c in d["contacts"] if gone not in (c[0], c[1])]
+        keep = lambda e: gone not in refs(e)
+        for s in d["spaces"]:
+            if s.get("affinities"):
+                s["affinities"] = [e for e in s["affinities"] if keep(e)]
+                if not s["affinities"]:
+                    del s["affinities"]
+        if d.get("affinities"):
+            d["affinities"] = [e for e in d["affinities"] if keep(e)]
+            if not d["affinities"]:
+                del d["affinities"]
     elif kind == "duplicate":
         if not rooms:
             return None

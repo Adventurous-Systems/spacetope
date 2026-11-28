@@ -10,7 +10,7 @@ from spacetope.solve.registry import GENERATORS
 from spacetope.verify import preverify, verify
 
 pytestmark = [pytest.mark.gate_m10, pytest.mark.slow]
-PRE_FIXTURES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair", "three_levels_core", "house_ground", "gallery_rich")
+PRE_FIXTURES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair", "three_levels_core", "house_ground", "gallery_rich", "eight_rooms_hard")
 
 
 @pytest.mark.parametrize("fx", PRE_FIXTURES)

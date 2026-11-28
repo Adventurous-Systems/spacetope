@@ -393,6 +393,7 @@ def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> l
     out: list[dict[str, Box]] = []
     graphs = labellings_found = 0
     probes: list[tuple] = []            # drawings kept aside, to explain a failure with
+    by_affinity: list[str] = []         # layouts that passed every check but a hard affinity (PLAN M20)
     for i in range(p.max_seeds):
         if len(out) >= p.k or time.perf_counter() - t0 > p.time_limit:
             break
@@ -426,13 +427,20 @@ def dual_generator(brief: Brief, params: dict | None = None, seed: int = 0) -> l
             rooms = {v: xywl for v, xywl in dim.items() if v not in voids}
             x0 = min(x for x, _, _, _ in rooms.values()); y0 = min(y for _, y, _, _ in rooms.values())
             pl = {v: Box(x - x0, y - y0, 0, w, l, H) for v, (x, y, w, l) in rooms.items()}
-            if not preverify(brief, pl)[0]:
+            ok, checks = preverify(brief, pl)
+            if not ok:
+                if not checks["affinities"][0] and all(v[0] for k, v in checks.items() if k != "affinities"):
+                    by_affinity.append(checks["affinities"][1])    # sized and walkable; only a hard wish stops it
                 continue
             if out and len(set(topology_classes(brief, out + [pl]))) == len(out):
                 continue                                   # same topology class as one already kept (out holds one per class)
             out.append(pl)
     if out:
         return out
+    if by_affinity:
+        raise WillNotTile(f"{len(by_affinity)} layouts were found and sized, and each breaks a hard wish ({by_affinity[0]}). "
+                          f"`dual` does not search on affinities; relax the wish to should/avoid, or use `beam` or `cpsat`, "
+                          f"which do.")
     # Nothing came back. Say which wall it hit, rather than hand the architect an empty gallery (PLAN M12, §6.0).
     if graphs == 0:
         raise WillNotTile("the wished contacts leave a room enclosed by three others that all touch each other, "

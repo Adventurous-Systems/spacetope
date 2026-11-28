@@ -11,7 +11,7 @@ import time
 from pathlib import Path
 
 COLUMNS = ["generator", "fixture", "seed", "options", "verified", "distinct", "distinct_topologies", "adjacency", "deviation",
-           "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight", "t_gen", "t_realise"]
+           "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight", "affinity", "t_gen", "t_realise"]
 SEEDS = (0, 1, 2, 3, 4)
 FIXTURES = ("three_rooms", "eight_rooms_corridor", "two_levels_stair")
 

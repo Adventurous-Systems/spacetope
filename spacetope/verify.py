@@ -1,4 +1,4 @@
-"""The six checks every option must pass before it is shown."""
+"""The eight checks every option must pass before it is shown."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -12,12 +12,12 @@ from topologicpy.Vertex import Vertex
 from .brief import Brief
 from .levels import level_height_mm
 from .placement import Placement, diagnose_contact, overlaps
-from .preverify import check_constraints, preverify  # noqa: F401 (pure checks live in preverify.py; re-exported)
+from .preverify import check_affinities, check_constraints, preverify  # noqa: F401 (pure checks live in preverify.py; re-exported)
 from .realise import Realised, RealiseError, realise
 from .spacegraph import AssemblyGraph, Contact
 from .units import to_m
 
-CHECKS = ("built", "cell_count", "no_slivers", "contacts", "dictionaries", "constraints", "doors")
+CHECKS = ("built", "cell_count", "no_slivers", "contacts", "dictionaries", "constraints", "doors", "affinities")
 REQUIRED_KEYS = ("name", "program", "w", "l", "h")
 
 
@@ -141,5 +141,6 @@ def verify(brief: Brief, placement: Placement, intent: AssemblyGraph | None = No
 
     checks["constraints"] = check_constraints(brief, placement)
     checks["doors"] = check_doors(brief, r)
+    checks["affinities"] = check_affinities(brief, placement)
     ok = all(p for p, _ in checks.values())
     return VerifyReport(ok, checks, fails, r)

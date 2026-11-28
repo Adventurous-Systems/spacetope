@@ -1,0 +1,24 @@
+name: eight_rooms_hard
+spaces:
+  - {name: corridor, w: 1.8, l: 12, h: 3, program: corridor}
+  - {name: office_a, w: 4, l: 3, h: 3, program: room, wishes: {exterior: true}}
+  - {name: office_b, w: 4, l: 3, h: 3, program: room, wishes: {exterior: true}}
+  - {name: office_c, w: 4, l: 3, h: 3, program: room, wishes: {exterior: true}}
+  - {name: office_d, w: 4, l: 3, h: 3, program: room, wishes: {exterior: true}}
+  - {name: meeting, w: 5, l: 4, h: 3, program: room}
+  - {name: kitchen, w: 3, l: 3, h: 3, program: room}
+  - {name: wc, w: 2, l: 3, h: 3, program: room}
+  - {name: storage, w: 2, l: 2, h: 3, program: room}
+contacts:
+  - [corridor, office_a]
+  - [corridor, office_b]
+  - [corridor, office_c]
+  - [corridor, office_d]
+  - [corridor, meeting]
+  - [corridor, kitchen]
+  - [corridor, wc]
+  - [corridor, storage]
+  - [kitchen, meeting]
+affinities:
+  - {between: [storage, wc], kind: touch, strength: must}
+  - {between: [wc, meeting], kind: apart, strength: must}

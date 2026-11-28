@@ -6,13 +6,15 @@ import math
 import networkx as nx
 from topologicpy.Face import Face
 
+from . import affinity as _affinity
 from .brief import Brief, CIRCULATION
+from .doors import access_graph  # noqa: F401 (re-exported; lives in doors so affinity stays kernel-free)
 from .placement import Placement
 from .realise import Realised
 from .solve.grid import overlap_len, touches
 from .units import to_mm
 
-METRICS = ("adjacency", "deviation", "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight")
+METRICS = ("adjacency", "deviation", "compactness", "circulation", "stacking", "vertical", "envelope_fit", "daylight", "affinity")
 DOOR_MM = 900
 HSIDES = ("+x", "-x", "+y", "-y")
 
@@ -69,26 +71,6 @@ def stacking(placement: Placement) -> float:
             tot += len(planes[hi][i])
             hits += len(planes[hi][i] & planes[lo][i])
     return hits / tot if tot else 0.0
-
-
-def access_graph(brief: Brief, placement: Placement) -> nx.Graph:
-    """Walkable adjacency: horizontal contacts with door-width overlap, plus vertical contacts
-    between two cores of the same program (a stair stack, a lift stack). Floors are not doors."""
-    g = nx.Graph()
-    g.add_nodes_from(placement)
-    names = list(placement)
-    for i, a in enumerate(names):
-        for b in names[i + 1:]:
-            sa, sb = brief.space(a), brief.space(b)
-            for side in HSIDES:
-                u, v = touches(placement[a], placement[b], side)
-                if u >= DOOR_MM and v >= 2000:
-                    g.add_edge(a, b)
-            if sa.is_vertical and sa.program == sb.program:
-                for side in ("ceiling", "floor"):
-                    if touches(placement[a], placement[b], side)[0] > 0:
-                        g.add_edge(a, b)
-    return g
 
 
 def vertical(brief: Brief, placement: Placement, doors: list | None = None) -> float:
@@ -148,6 +130,7 @@ def score(r: Realised) -> dict[str, float]:
         "vertical": round(vertical(r.brief, r.placement, r.doors), 6),
         "envelope_fit": round(envelope_fit(r.brief, r.placement), 6),
         "daylight": round(daylight(r.brief, r.placement), 6),
+        "affinity": round(_affinity.measure(r.brief, r.placement)["score"], 6),
     }
 
 
@@ -193,7 +176,7 @@ def compactness_boxes(placement: Placement) -> float:
 
 
 def cheap_scores(brief: Brief, placement: Placement) -> dict[str, float]:
-    """The eight metrics from boxes alone, for ranking before realisation (PLAN M10)."""
+    """The nine metrics from boxes alone, for ranking before realisation (PLAN M10)."""
     from .doors import plan_doors
     from .solve.grid import contact_area
     names = list(placement)
@@ -209,6 +192,7 @@ def cheap_scores(brief: Brief, placement: Placement) -> dict[str, float]:
         "vertical": round(vertical(brief, placement, doors), 6),
         "envelope_fit": round(envelope_fit(brief, placement), 6),
         "daylight": round(daylight(brief, placement), 6),
+        "affinity": round(_affinity.measure(brief, placement)["score"], 6),
     }
 
 

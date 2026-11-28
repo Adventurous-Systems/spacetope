@@ -43,6 +43,7 @@ spaces:
   wishes:
     level: 0
 - name: head_office
+  tags: [quiet]
   w: 4
   l: 3.5
   h: 3.5
@@ -67,6 +68,7 @@ spaces:
     level: 0
     exterior: true
 - name: sick_room
+  tags: [quiet]
   w: 3
   l: 3
   h: 3.5
@@ -74,6 +76,7 @@ spaces:
   wishes:
     level: 0
 - name: library
+  tags: [quiet]
   w: 10
   l: 7
   h: 3.5
@@ -82,6 +85,7 @@ spaces:
     level: 0
     exterior: true
 - name: canteen
+  tags: [noisy]
   w: 12
   l: 8
   h: 3.5
@@ -152,6 +156,7 @@ spaces:
     level: 0
     exterior: true
 - name: wc_boys_0
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -159,6 +164,7 @@ spaces:
   wishes:
     level: 0
 - name: wc_girls_0
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -166,6 +172,7 @@ spaces:
   wishes:
     level: 0
 - name: wc_staff_0
+  tags: [wet]
   w: 2.5
   l: 2.5
   h: 3.5
@@ -180,6 +187,7 @@ spaces:
   wishes:
     level: 0
 - name: cleaners_0
+  tags: [wet]
   w: 2
   l: 2.5
   h: 3.5
@@ -290,6 +298,7 @@ spaces:
   wishes:
     level: 1
 - name: wc_boys_1
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -297,6 +306,7 @@ spaces:
   wishes:
     level: 1
 - name: wc_girls_1
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -304,6 +314,7 @@ spaces:
   wishes:
     level: 1
 - name: wc_staff_1
+  tags: [wet]
   w: 2.5
   l: 2.5
   h: 3.5
@@ -318,6 +329,7 @@ spaces:
   wishes:
     level: 1
 - name: cleaners_1
+  tags: [wet]
   w: 2
   l: 2.5
   h: 3.5
@@ -404,6 +416,7 @@ spaces:
   wishes:
     level: 2
 - name: music_room
+  tags: [noisy]
   w: 9
   l: 7
   h: 3.5
@@ -412,6 +425,7 @@ spaces:
     level: 2
     exterior: true
 - name: practice_room
+  tags: [noisy]
   w: 3
   l: 3
   h: 3.5
@@ -434,6 +448,7 @@ spaces:
   wishes:
     level: 2
 - name: wc_boys_2
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -441,6 +456,7 @@ spaces:
   wishes:
     level: 2
 - name: wc_girls_2
+  tags: [wet]
   w: 4
   l: 4
   h: 3.5
@@ -448,6 +464,7 @@ spaces:
   wishes:
     level: 2
 - name: wc_staff_2
+  tags: [wet]
   w: 2.5
   l: 2.5
   h: 3.5
@@ -462,6 +479,7 @@ spaces:
   wishes:
     level: 2
 - name: cleaners_2
+  tags: [wet]
   w: 2
   l: 2.5
   h: 3.5
@@ -609,3 +627,7 @@ contacts:
   - store_2
 - - corridor_2
   - cleaners_2
+affinities:
+- {tag: wet, rule: stack, strength: should}
+- {tag: wet, rule: cluster, strength: should}
+- {tags: [quiet, noisy], rule: apart, strength: must}

@@ -29,7 +29,7 @@ spacetope works on the topology of the building, not on a drawing of it:
 - **Options, not answers.** Each generator returns several distinct candidates with scores, and every
   generator takes a seed, so any result can be reproduced.
 - **Nothing unverified reaches the architect.** Every option is rebuilt in the geometry kernel and has to
-  pass seven checks first (see [What you get](#what-you-get)).
+  pass eight checks first (see [What you get](#what-you-get)).
 - **Exact geometry.** The solvers work on an integer millimetre grid, so walls meet exactly and never
   "almost". Geometry is never nudged to make it merge.
 
@@ -58,7 +58,7 @@ flowchart LR
   B --> C[Generate<br/>integer-mm placements]
   C --> D[Pre-verify<br/>cheap checks, no kernel]
   D --> E[Realise<br/>topologicpy CellComplex]
-  E --> F[Verify<br/>7 checks]
+  E --> F[Verify<br/>8 checks]
   F --> G[Score + rank]
   G --> H[Options]
 ```
@@ -93,7 +93,7 @@ flowchart LR
 
 ## What you get
 
-**Seven checks**, all of which must pass:
+**Eight checks**, all of which must pass:
 
 | Check | Meaning |
 |---|---|
@@ -104,6 +104,7 @@ flowchart LR
 | `dictionaries` | Every cell carries its data (name, use, level, …). |
 | `constraints` | Inside the envelope, on the stated number of levels, and every stair and lift spanning the levels it serves. |
 | `doors` | Every door is where access needs it and connects the two spaces it should. |
+| `affinities` | Every `must` and `never` affinity that can be judged holds; the detail names the wish that does not. |
 
 **Scores**, used to rank options and shown on each option card:
 
@@ -117,6 +118,7 @@ flowchart LR
 | `vertical` | Share of spaces reachable from one another through doors (1 = everything reachable). |
 | `envelope_fit` | Built volume ÷ envelope volume, when the brief gives an envelope. |
 | `daylight` | Share of rooms with at least one outside wall. |
+| `affinity` | Weighted share of the brief's soft affinities that are met (1 when it has none). |
 
 **Export formats:** GLB (one node per cell), BREP with a selector sidecar (to restore the per-cell data),
 OBJ + JSON, Plotly HTML, and topologicpy's TPY archive, which keeps the cell data and the doors in one file.
@@ -125,7 +127,7 @@ OBJ + JSON, Plotly HTML, and topologicpy's TPY archive, which keeps the cell dat
 
 | Generator | Good for | Not for |
 |---|---|---|
-| `beam` | Any brief first; multi-level buildings with stairs and lifts; fast. Builds the building attachment by attachment, a wall against a wall, keeping the best partial layouts. | Guaranteeing a wish (wishes are scored, not enforced). |
+| `beam` | Any brief first; multi-level buildings with stairs and lifts; fast. Builds the building attachment by attachment, a wall against a wall, keeping the best partial layouts. | Guaranteeing a soft wish (it is steered towards and scored, not enforced). |
 | `cpsat` | Rich room-to-room wishes, chained corridors, and proving a brief is impossible. An exact constraint model on OR-Tools CP-SAT. | Short time budgets on very large single levels. Not seed-deterministic. |
 | `dual` | Listing genuinely different plan topologies for a rich adjacency wish list (rectangular duals). | Multi-level briefs; briefs whose rooms cannot tile within tolerance. It reports the tolerance that would work. |
 | `treemap` | A sub-second baseline and a starting point for the others. | Wishes, tolerance bands, more than one level. |
@@ -207,6 +209,7 @@ Small briefs return options in seconds. The 64-space three-level school takes ab
 |---|---|
 | `spacetope generate BRIEF --generator G --seed N --out DIR [--html] [--save]` | Generate, verify, score and rank options. `--params '{"k": 4}'` sets how many. |
 | `spacetope realise BRIEF PLACEMENT [--html F] [--save F]` | Build and verify a hand-made placement (integer-mm boxes). |
+| `spacetope affinity BRIEF PLACEMENT` | Measure the brief's affinities on a placement. |
 | `spacetope floors BRIEF [--generator beam\|cpsat]` | Find how many floors a brief needs within its envelope. |
 | `spacetope export --stem STEM --obj F.obj --json F.json` | Write OBJ and JSON of an option saved with `--save`. |
 | `spacetope programme NAME --seeds 0-99 --out DIR` | Draw briefs from a building programme (see below). `--dataset rows.jsonl` writes training rows instead. |
@@ -254,6 +257,56 @@ Doors are placed between each corridor and every stair and lift on the levels th
 room and a corridor on its level. Room-to-room doors are added only where a contact asks for one. A corridor
 can also be a chain of segments (`corridor: {…, segments: 2}`) when one straight corridor cannot give every
 room a frontage.
+
+**Affinities** are wishes beside the required contacts: these rooms stack, these stay apart, this one has an
+outside wall on the south. Write `tags:` on spaces and `affinities:` on the brief or on a space. All optional;
+a brief without them is unchanged.
+
+```yaml
+spaces:
+  - {name: bath_1, w: 2.4, l: 2.0, h: 3.0, tags: [wet]}
+  - {name: bed_1,  w: 3.6, l: 3.2, h: 3.0, tags: [quiet],
+     affinities: [{facade: S, strength: should}, {apart: plant, strength: must}]}
+affinities:
+  - {between: [ward_1, nurse_station], kind: near, depth: 2, strength: should, weight: 4}
+  - {tag: wet, rule: stack, strength: should}             # every wet room over or under another wet room
+  - {tags: [quiet, noisy], rule: apart, strength: must}   # every quiet-noisy pair
+```
+
+| Kind | Met when |
+|---|---|
+| `touch` | the two share a vertical wall at least `min` long (0.9 m, a door) |
+| `near` | at most `depth` doors apart (2) |
+| `apart` | no shared wall, floor or ceiling |
+| `stack` | on adjacent levels, plan overlap at least `overlap` of the smaller footprint (0.5) |
+| `same_level` | on the same level |
+| `facade` | an uncovered wall of at least `min` (1 m) on side `N`, `E`, `S`, `W` or `sun` |
+| `exterior` | an uncovered wall of at least `min` on any side |
+| `ground`, `top` | on the lowest / highest occupied level |
+
+Strength says how much it matters: `must` and `never` are hard, `should` and `avoid` are soft and take a
+`weight` (default 1). `must` and `should` want the kind met; `never` and `avoid` want it not met.
+
+A brief may say where the site is:
+
+```yaml
+site: {north: 30, hemisphere: N}   # north: degrees clockwise from plan +y (default 0); hemisphere: N or S (default N)
+```
+
+With `north: 0` the compass is N = +y, E = +x, S = -y, W = -x. A compass side means the wall within 45° of
+it. `facade: sun` means the wall facing the equator (south in the northern hemisphere, north in the southern).
+It is orientation only: no altitude, season or shading, so it is met or not and gets no partial credit.
+
+`must` and `never` are enforced: they are the eighth check, so an option that breaks one is not shown.
+`should` and `avoid` steer the `beam` and `cpsat` generators for `touch`, `apart`, `stack` and `same_level`.
+`exterior` and `near` are measured and ranked but not searched on, and so is `facade`: the generators do not
+act on it, but after generation each option is turned or mirrored to the symmetry that best meets its facade
+wishes, when the envelope allows (on corridor plans that only chooses the side of the corridor). The option card
+says when it was turned. `treemap` and `dual` do not search on affinities at all.
+
+Each option reports a score (the weighted share of soft wishes met, ranked with the other scores) and the
+wishes it missed, hard ones first. `spacetope affinity BRIEF PLACEMENT` prints the same report for a hand-made
+placement.
 
 **Example briefs** in `fixtures/`, from small to large:
 
@@ -321,7 +374,7 @@ spacetope/              the engine (pure Python + networkx + OR-Tools; topologic
   solve/                generators: beam, cpsat, dual, treemap (+ grid, multilevel, seqpair)
   preverify.py          checks on integer boxes, no kernel
   realise.py            boxes -> topologicpy CellComplex with doors        (topologicpy)
-  verify.py  score.py   the seven checks; the scores                       (topologicpy)
+  verify.py  score.py   the eight checks; the scores                       (topologicpy)
   io/                   GLB, BREP + selectors, OBJ/JSON, TPY, graph JSON   (topologicpy)
   programme.py          building programmes -> briefs
   cli.py                the spacetope command

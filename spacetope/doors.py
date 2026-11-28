@@ -241,6 +241,26 @@ def door_graph(brief: Brief, doors: list[Door], placement: dict[str, Box] | None
     return g
 
 
+def access_graph(brief: Brief, placement: dict[str, Box]) -> nx.Graph:
+    """Walkable adjacency: horizontal contacts with door-width overlap, plus vertical contacts
+    between two cores of the same program (a stair stack, a lift stack). Floors are not doors."""
+    g = nx.Graph()
+    g.add_nodes_from(placement)
+    names = list(placement)
+    for i, a in enumerate(names):
+        for b in names[i + 1:]:
+            sa, sb = brief.space(a), brief.space(b)
+            for side in HSIDES:
+                u, v = touches(placement[a], placement[b], side)
+                if u >= LEGACY_DOOR_MM and v >= 2000:
+                    g.add_edge(a, b)
+            if sa.is_vertical and sa.program == sb.program:
+                for side in ("ceiling", "floor"):
+                    if touches(placement[a], placement[b], side)[0] > 0:
+                        g.add_edge(a, b)
+    return g
+
+
 def access_problems(brief: Brief, placement: dict[str, Box], doors: list[Door]) -> list[Problem]:
     """Every room reaches a stair through doors (or a corridor, when the brief has no stairs);
     with more than one level, every level has a stair door."""

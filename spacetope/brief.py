@@ -39,6 +39,8 @@ class Space:
     tol: float | dict[str, tuple[float, float]] | None = None
     wishes: dict[str, Any] = field(default_factory=dict)
     serves: tuple[int, int] | None = None   # stairs and lifts: inclusive range of levels the shaft spans (M7)
+    tags: tuple[str, ...] = ()               # free labels that affinity rules select by (M19)
+    affinities: tuple[dict, ...] = ()        # wishes about this space, as written (M19); read by `affinity.expand`
 
     def __post_init__(self) -> None:
         if self.program not in PROGRAMS:
@@ -91,6 +93,10 @@ class Space:
             d["wishes"] = dict(self.wishes)
         if self.serves is not None:
             d["serves"] = [int(self.serves[0]), int(self.serves[1])]
+        if self.tags:
+            d["tags"] = list(self.tags)
+        if self.affinities:
+            d["affinities"] = [dict(a) if isinstance(a, dict) else a for a in self.affinities]
         return d
 
     @property
@@ -108,6 +114,8 @@ class Brief:
     level_height: float | None = None
     circulation: dict[str, Any] | None = None  # compact corridor/stairs/lifts/doors section (M7)
     door_pairs: list[tuple[str, str]] = field(default_factory=list)  # contacts explicitly marked {door: true}
+    affinities: list[dict] = field(default_factory=list)  # brief-level affinities as written (M19)
+    site: dict | None = None  # {north: degrees clockwise from plan +y, hemisphere: N|S}, as written (M21)
     expanded: bool = False  # True once circulation has been expanded into concrete spaces
 
     def __post_init__(self) -> None:
@@ -144,7 +152,13 @@ class Brief:
 
     @property
     def by_name(self) -> dict[str, Space]:
-        return {s.name: s for s in self.spaces}
+        # built once per spaces list: `space()` runs a million times in a beam search (PLAN M20, time ceiling).
+        # Nothing edits `spaces` in place; `dataclasses.replace` gives a new list and so a new index.
+        key = (id(self.spaces), len(self.spaces))
+        cached = self.__dict__.get("_by_name")
+        if cached is None or cached[0] != key:
+            cached = self.__dict__["_by_name"] = (key, {s.name: s for s in self.spaces})
+        return cached[1]
 
     def space(self, name: str) -> Space:
         return self.by_name[name]
@@ -165,9 +179,13 @@ class Brief:
             if isinstance(tol, dict):
                 tol = {k: (float(v[0]), float(v[1])) for k, v in tol.items()}
             serves = s.get("serves")
+            tags = s.get("tags") or ()
+            tags = (str(tags),) if isinstance(tags, str) else tuple(str(t) for t in tags)
+            affs = tuple(dict(a) if isinstance(a, dict) else a for a in (s.get("affinities") or ()))
             spaces.append(Space(name=str(s["name"]), w=float(s["w"]), l=float(s["l"]), h=float(s["h"]),
                                 program=s.get("program", "room"), tol=tol, wishes=dict(s.get("wishes", {}) or {}),
-                                serves=(int(serves[0]), int(serves[1])) if serves is not None else None))
+                                serves=(int(serves[0]), int(serves[1])) if serves is not None else None,
+                                tags=tags, affinities=affs))
         contacts, door_pairs = [], []
         for c in d.get("contacts", []):
             if len(c) not in (2, 3):
@@ -178,7 +196,9 @@ class Brief:
                 door_pairs.append((a, b))
         return cls(name=str(d.get("name", "brief")), spaces=spaces, contacts=contacts,
                    envelope=d.get("envelope"), levels=d.get("levels"), level_height=d.get("level_height"),
-                   circulation=d.get("circulation"), door_pairs=door_pairs, expanded=bool(d.get("expanded", False)))
+                   circulation=d.get("circulation"), door_pairs=door_pairs, expanded=bool(d.get("expanded", False)),
+                   affinities=[dict(a) if isinstance(a, dict) else a for a in (d.get("affinities") or [])],
+                   site=dict(d["site"]) if isinstance(d.get("site"), dict) else d.get("site"))
 
     @classmethod
     def from_path(cls, path: str | Path) -> "Brief":
@@ -199,6 +219,10 @@ class Brief:
             d["level_height"] = self.level_height
         if self.circulation is not None:
             d["circulation"] = self.circulation
+        if self.affinities:
+            d["affinities"] = [dict(a) if isinstance(a, dict) else a for a in self.affinities]
+        if self.site is not None:
+            d["site"] = dict(self.site) if isinstance(self.site, dict) else self.site
         if self.expanded:
             d["expanded"] = True
         return d

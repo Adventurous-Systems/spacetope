@@ -4,6 +4,7 @@ from __future__ import annotations
 import time
 from dataclasses import dataclass, field
 
+from . import affinity, orient
 from .brief import Brief
 from .placement import Placement, assembly_from_placement, space_graph, topology_classes  # noqa: F401 (re-exported)
 from .realise import Realised
@@ -43,22 +44,24 @@ def evaluate_placements(brief: Brief, placements: list[Placement], generator: st
         rep = verify(brief, pl, intent)
         sc = score(rep.realised) if rep.ok and rep.realised else {}
         an = analysis(rep.realised) if rep.ok and rep.realised else {}
+        if rep.ok and rep.realised and affinity.expand(rep.realised.brief):
+            an["affinity"] = affinity.measure(rep.realised.brief, pl)  # reported, not ranked (M19)
         opts.append(Option(pl, intent.signature(), rep, sc, generator, seed, an))
     return opts
 
 
+# the one table `rank` and `evaluate_top` both read; `affinity` is 1.0 on a brief without affinities (PLAN M20)
+RANK_WEIGHTS = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
+                "vertical": 10, "envelope_fit": 0, "daylight": 2, "affinity": 5}
+
+
 def rank(options: list[Option], weights: dict[str, float] | None = None) -> list[Option]:
-    w = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
-         "vertical": 10, "envelope_fit": 0, "daylight": 2}
+    w = dict(RANK_WEIGHTS)
     if weights:
         w.update(weights)
     def key(o: Option) -> float:
         return sum(w[m] * o.scores.get(m, 0.0) for m in METRICS) if o.ok else -1e9
     return sorted(options, key=key, reverse=True)
-
-
-RANK_WEIGHTS = {"adjacency": 10, "deviation": -5, "compactness": 3, "circulation": -1, "stacking": 1,
-                "vertical": 10, "envelope_fit": 0, "daylight": 2}
 
 
 def evaluate_top(brief: Brief, placements: list[Placement], generator: str = "", seed: int = 0, keep: int = 3) -> tuple[list[Option], dict]:
@@ -100,10 +103,21 @@ def generate(gen, brief: Brief, seed: int = 0, params: dict | None = None, name:
     placements = gen(brief, params, seed)
     t_gen = time.perf_counter() - t0
     t1 = time.perf_counter()
+    records: dict[int, dict] = {}
+    if orient.wants_facade(brief):  # M21: turn or mirror each finished plan for its facade wishes, before de-duplication
+        turned = []
+        for pl in placements:
+            q, rec = orient.best(brief, pl)
+            records[id(q)] = rec
+            turned.append(q)
+        placements = turned
     if build == "top":
         options, _info = evaluate_top(brief, placements, name, seed, keep)
     else:
         options = evaluate_placements(brief, placements, name, seed)
+    for o in options:
+        if id(o.placement) in records:
+            o.analysis["orientation"] = records[id(o.placement)]
     t_real = time.perf_counter() - t1
     return options, t_gen, t_real
 

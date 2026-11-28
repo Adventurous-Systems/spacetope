@@ -1,0 +1,61 @@
+{
+ "seed": 0,
+ "fixtures": {
+  "apartments_four_levels": {
+   "sha256": "5c4d82fd34e29222545d8758bb6a00794a537c4f644fede74d862836892ef2df",
+   "placements": 8
+  },
+  "clinic": {
+   "sha256": "af58e7618fd1c07b2e66af50c4f4ce3d416f04207163ce57d2b7e7f790fd3fc0",
+   "placements": 8
+  },
+  "eight_rooms_corridor": {
+   "sha256": "2bb8ef96ac7f01ea3d61adbae6266446d6478b81ec9304983c7a6798cf57471a",
+   "placements": 8
+  },
+  "gallery_rich": {
+   "sha256": "6bf5a848d5a54407eae1cd5b1f1b0dd4d5617c91d6b35d930c89f32d053fec9f",
+   "placements": 8
+  },
+  "hotel_floor": {
+   "sha256": "70ddee31e1a55ad29b38a60f26e35a0bf3d3979a10102501845abdc07968735c",
+   "placements": 8
+  },
+  "house_ground": {
+   "sha256": "9aa9e3e978fedc8cd07ce65bd5367a287703c20278eaba7b84ff037c8f45898f",
+   "placements": 8
+  },
+  "office_30": {
+   "sha256": "fa576b5287800b6e31ec234850ab162907d88a1c6e9731f2751d0cfcb6dc8f64",
+   "placements": 8
+  },
+  "school_l_corridor": {
+   "sha256": "5d07c5b996dcccbe7a32260444f1003da8f75fb80d0190419d3244839124a60e",
+   "placements": 8
+  },
+  "school_three_levels": {
+   "sha256": "1814604019272e52199de44f55605ca2416e04dfff329fc09312da3e2a575178",
+   "placements": 8
+  },
+  "school_wing": {
+   "sha256": "ed5a756db365201f90011190cd5bc039ee57379fba855379a3133b7ce43c0936",
+   "placements": 8
+  },
+  "small_hospital": {
+   "sha256": "eebea19d677ccdeeeeeccf1bbd4ccdd7af812098d72a056be5d75b88061ef0db",
+   "placements": 8
+  },
+  "three_levels_core": {
+   "sha256": "f84b392a9c7d1229b64eaa19ca3d723d8d1a28c24cccd7494984a52c68e43188",
+   "placements": 8
+  },
+  "three_rooms": {
+   "sha256": "2f099c2fb24027ec66c8cfb8804da92b4b346d6edbb2d861bcae3839ab43f6e0",
+   "placements": 8
+  },
+  "two_levels_stair": {
+   "sha256": "63e4e2b6936eb14bdf19a20a4094ed79af8e8bf0b3cf3e1dd5e328b256c745c7",
+   "placements": 8
+  }
+ }
+}
